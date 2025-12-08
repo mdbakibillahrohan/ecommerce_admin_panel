@@ -6,8 +6,8 @@ import { RouterView } from 'vue-router'
   <a-config-provider
     :theme="{
       token: {
-        colorPrimary: '#667eea',
-        borderRadius: 8,
+        colorPrimary: '#1dd1a1',
+        borderRadius: 0,
         fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
       },
     }"

@@ -37,10 +37,10 @@ async function handleSubmit(e: Event) {
   // e.preventDefault()
   try {
     await formRef.value?.validate()
-    const success = await authStore.login({
-      username: formState.value.email,
-      password: formState.value.password,
-    })
+    // const success = await authStore.login({
+    //   username: formState.value.email,
+    //   password: formState.value.password,
+    // })
 
     if (success) {
       router.push('/dashboard')

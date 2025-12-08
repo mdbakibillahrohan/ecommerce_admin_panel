@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { authApi, type LoginRequest, type LoginResponse } from '@/api/auth'
 
 export interface User {
@@ -10,9 +11,12 @@ export interface User {
 }
 
 export const useAuthStore = defineStore('auth', () => {
+    const router = useRouter()
+
     // State
     const token = ref<string | null>(localStorage.getItem('admin_token'))
     const user = ref<User | null>(JSON.parse(localStorage.getItem('admin_user') || 'null'))
+    const activeStore = ref<any | null>(JSON.parse(localStorage.getItem('activeStore') || 'null'))
     const loading = ref(false)
     const error = ref<string | null>(null)
 
@@ -43,11 +47,19 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    function setActiveStore(store: any) {
+        activeStore.value = store
+        localStorage.setItem('activeStore', JSON.stringify(store))
+    }
+
     function logout() {
         token.value = null
         user.value = null
+        activeStore.value = null
         localStorage.removeItem('admin_token')
         localStorage.removeItem('admin_user')
+        localStorage.removeItem('activeStore')
+        router.push('/login')
     }
 
     function clearError() {
@@ -58,6 +70,7 @@ export const useAuthStore = defineStore('auth', () => {
         // State
         token,
         user,
+        activeStore,
         loading,
         error,
         // Getters
@@ -65,6 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
         fullName,
         // Actions
         login,
+        setActiveStore,
         logout,
         clearError,
     }

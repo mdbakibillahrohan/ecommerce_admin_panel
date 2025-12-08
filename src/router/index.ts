@@ -109,6 +109,60 @@ const router = createRouter({
           component: () => import('@/views/reviews/ReviewListView.vue'),
           meta: { title: 'Reviews' },
         },
+        {
+          path: 'stores',
+          name: 'stores',
+          component: () => import('@/views/stores/StoreListView.vue'),
+          meta: { title: 'My Stores' },
+        },
+        {
+          path: 'stores/create',
+          name: 'stores-create',
+          component: () => import('@/views/stores/StoreFormView.vue'),
+          meta: { title: 'Create Store' },
+        },
+        {
+          path: 'stores/:id/edit',
+          name: 'stores-edit',
+          component: () => import('@/views/stores/StoreFormView.vue'),
+          meta: { title: 'Edit Store' },
+        },
+        {
+          path: 'content/pages',
+          name: 'content-pages',
+          component: () => import('@/views/content/PageListView.vue'),
+          meta: { title: 'Pages' },
+        },
+        {
+          path: 'content/pages/create',
+          name: 'content-pages-create',
+          component: () => import('@/views/content/PageFormView.vue'),
+          meta: { title: 'Create Page' },
+        },
+        {
+          path: 'content/pages/:id/edit',
+          name: 'content-pages-edit',
+          component: () => import('@/views/content/PageFormView.vue'),
+          meta: { title: 'Edit Page' },
+        },
+        // {
+        //   path: 'content/menus',
+        //   name: 'content-menus',
+        //   component: () => import('@/views/content/MenuListView.vue'),
+        //   meta: { title: 'Menus' },
+        // },
+        {
+          path: 'themes',
+          name: 'themes',
+          component: () => import('@/views/themes/ThemeGalleryView.vue'),
+          meta: { title: 'Themes' },
+        },
+        {
+          path: 'billing/subscription',
+          name: 'billing-subscription',
+          component: () => import('@/views/billing/SubscriptionView.vue'),
+          meta: { title: 'Subscription' },
+        },
       ],
     },
     {
@@ -121,7 +175,7 @@ const router = createRouter({
 // Navigation guard
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth !== false)
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth !== false)
 
   if (requiresAuth && !authStore.isAuthenticated) {
     next('login')
