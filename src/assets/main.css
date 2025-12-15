@@ -3,6 +3,8 @@
    ===================================================== */
 
 /* CSS Variables */
+@import 'tailwindcss';
+
 :root {
   /* Primary Colors */
   --color-primary: #667eea;

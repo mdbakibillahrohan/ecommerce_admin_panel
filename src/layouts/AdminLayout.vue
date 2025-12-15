@@ -1,8 +1,7 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
   DashboardOutlined,
   ShoppingOutlined,
   ShoppingCartOutlined,
@@ -23,7 +22,9 @@ import {
   WarningOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
+  RightOutlined,
 } from '@ant-design/icons-vue'
+import type StoreSwitcherVue from '@/components/layout/StoreSwitcher.vue'
 
 // State
 const collapsed = ref(false)
@@ -32,51 +33,73 @@ const openKeys = ref(['products', 'billing', 'content'])
 
 // Store Switcher State
 const stores = ref([
-  { id: 1, name: 'Main Store', domain: 'mainstore.com', active: true },
-  { id: 2, name: 'Fashion Hub', domain: 'fashionhub.com', active: false },
-  { id: 3, name: 'Tech World', domain: 'techworld.com', active: false },
+  {
+    id: 1,
+    name: 'Main Store',
+    domain: 'main.example.com',
+    active: true,
+    logo: 'https://static.vecteezy.com/system/resources/previews/048/843/259/non_2x/shopping-store-logo-for-mobile-e-comerce-and-local-market-branding-online-shop-icon-simple-minimalist-sign-for-payments-shipping-and-sale-illustration-vector.jpg',
+  },
+  {
+    id: 2,
+    name: 'Europe Store',
+    domain: 'eu.example.com',
+    active: false,
+    logo: 'https://static.vecteezy.com/system/resources/previews/041/641/848/non_2x/shop-store-icon-storefront-building-supermarket-shopping-symbol-flat-illustration-vector.jpg',
+  },
+  {
+    id: 3,
+    name: 'Asia Store',
+    domain: 'asia.example.com',
+    active: false,
+    logo: 'https://static.vecteezy.com/system/resources/previews/023/628/680/non_2x/shop-building-icon-set-online-store-flat-line-icon-set-illustration-included-symbols-online-shopping-store-icon-free-vector.jpg',
+  },
+  {
+    id: 4,
+    name: 'Asia Store',
+    domain: 'asia.example.com',
+    active: false,
+    logo: 'https://static.vecteezy.com/system/resources/previews/023/628/680/non_2x/shop-building-icon-set-online-store-flat-line-icon-set-illustration-included-symbols-online-shopping-store-icon-free-vector.jpg',
+  },
+  {
+    id: 4,
+    name: 'Asia Store',
+    domain: 'asia.example.com',
+    active: false,
+    logo: 'https://static.vecteezy.com/system/resources/previews/023/628/680/non_2x/shop-building-icon-set-online-store-flat-line-icon-set-illustration-included-symbols-online-shopping-store-icon-free-vector.jpg',
+  },
+  {
+    id: 4,
+    name: 'Asia Store',
+    domain: 'asia.example.com',
+    active: false,
+    logo: 'https://static.vecteezy.com/system/resources/previews/023/628/680/non_2x/shop-building-icon-set-online-store-flat-line-icon-set-illustration-included-symbols-online-shopping-store-icon-free-vector.jpg',
+  },
+  {
+    id: 4,
+    name: 'Asia Store',
+    domain: 'asia.example.com',
+    active: false,
+    logo: 'https://static.vecteezy.com/system/resources/previews/023/628/680/non_2x/shop-building-icon-set-online-store-flat-line-icon-set-illustration-included-symbols-online-shopping-store-icon-free-vector.jpg',
+  },
+  {
+    id: 4,
+    name: 'Asia Store',
+    domain: 'asia.example.com',
+    active: false,
+    logo: 'https://static.vecteezy.com/system/resources/previews/023/628/680/non_2x/shop-building-icon-set-online-store-flat-line-icon-set-illustration-included-symbols-online-shopping-store-icon-free-vector.jpg',
+  },
+  {
+    id: 4,
+    name: 'Asia Store',
+    domain: 'asia.example.com',
+    active: false,
+    logo: 'https://static.vecteezy.com/system/resources/previews/023/628/680/non_2x/shop-building-icon-set-online-store-flat-line-icon-set-illustration-included-symbols-online-shopping-store-icon-free-vector.jpg',
+  },
+  // Add more stores as needed
 ])
 const currentStore = computed(() => stores.value.find((s) => s.active))
 const storePopoverVisible = ref(false)
-
-function selectStore(store) {
-  stores.value.forEach((s) => (s.active = false))
-  store.active = true
-  storePopoverVisible.value = false
-}
-
-// Menu Search State
-const menuSearchQuery = ref('')
-const menuItems = [
-  { key: 'dashboard', label: 'Dashboard', icon: 'DashboardOutlined' },
-  { key: 'products-list', label: 'Products', icon: 'ShoppingOutlined', parent: 'Catalog' },
-  { key: 'categories-list', label: 'Categories', icon: 'ShoppingOutlined', parent: 'Catalog' },
-  { key: 'inventory-list', label: 'Inventory', icon: 'ShoppingOutlined', parent: 'Catalog' },
-  { key: 'orders-list', label: 'Orders', icon: 'ShoppingCartOutlined' },
-  { key: 'customers-list', label: 'Customers', icon: 'UserOutlined' },
-  { key: 'reviews-list', label: 'Reviews', icon: 'StarOutlined' },
-  { key: 'coupons-list', label: 'Coupons', icon: 'GiftOutlined' },
-  { key: 'stores-list', label: 'My Stores', icon: 'ShopOutlined' },
-  { key: 'pages-list', label: 'Pages', icon: 'FileTextOutlined', parent: 'Content' },
-  { key: 'menus-list', label: 'Menus', icon: 'FileTextOutlined', parent: 'Content' },
-  { key: 'themes-list', label: 'Themes', icon: 'SkinOutlined' },
-  { key: 'subscription', label: 'Subscription', icon: 'CreditCardOutlined', parent: 'Billing' },
-  { key: 'payments-list', label: 'Transactions', icon: 'CreditCardOutlined', parent: 'Billing' },
-]
-const filteredMenuItems = computed(() => {
-  if (!menuSearchQuery.value) return []
-  const query = menuSearchQuery.value.toLowerCase()
-  return menuItems.filter(
-    (item) =>
-      item.label.toLowerCase().includes(query) ||
-      (item.parent && item.parent.toLowerCase().includes(query)),
-  )
-})
-
-function selectMenuItem(item) {
-  selectedKeys.value = [item.key]
-  menuSearchQuery.value = ''
-}
 
 // Global Search State
 const globalSearchQuery = ref('')
@@ -155,7 +178,7 @@ const notifications = ref([
 ])
 const unreadCount = computed(() => notifications.value.filter((n) => !n.read).length)
 
-function markAsRead(notification) {
+function markAsRead(notification: any) {
   notification.read = true
 }
 
@@ -163,12 +186,12 @@ function markAllAsRead() {
   notifications.value.forEach((n) => (n.read = true))
 }
 
-function removeNotification(id) {
+function removeNotification(id: any) {
   const index = notifications.value.findIndex((n) => n.id === id)
   if (index > -1) notifications.value.splice(index, 1)
 }
 
-function getNotificationIcon(type) {
+function getNotificationIcon(type: any) {
   switch (type) {
     case 'success':
       return CheckCircleOutlined
@@ -183,7 +206,7 @@ function getNotificationIcon(type) {
 
 // User data (mock)
 const user = ref({
-  name: 'John Admin',
+  name: 'Md Baki Billah',
   email: 'john@admin.com',
   avatar: null,
 })
@@ -193,7 +216,11 @@ function handleLogout() {
 }
 
 // Sidebar width
-const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
+const unCollapsedSidebarWidth = 220
+const collapsedSidebarWidth = 80
+const sidebarWidth = computed(() =>
+  collapsed.value ? collapsedSidebarWidth : unCollapsedSidebarWidth,
+)
 </script>
 
 <template>
@@ -203,31 +230,24 @@ const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
       v-model:collapsed="collapsed"
       :trigger="null"
       collapsible
-      :width="260"
-      :collapsed-width="80"
+      :width="unCollapsedSidebarWidth"
+      :collapsed-width="collapsedSidebarWidth"
       class="sidebar"
-      theme="dark"
+      :theme="'light'"
     >
       <!-- Logo -->
-      <div class="logo">
-        <div class="logo-icon">
-          <ShopOutlined />
-        </div>
-        <transition name="fade">
-          <span v-if="!collapsed" class="logo-text">Admin Panel</span>
-        </transition>
-      </div>
+      <div class="flex justify-center items-center h-[60px]">
+        <!-- <a-image :preview="false" :width="100" src="/images/logo.png" /> -->
 
-      <!-- Menu Search -->
-      <div class="menu-search" v-if="!collapsed">
-        <a-input placeholder="Search Menu" />
+        <transition name="fade">
+          <span v-if="!collapsed" class="logo-text">Adaptix Innovate</span>
+        </transition>
       </div>
 
       <!-- Navigation Menu -->
       <a-menu
         v-model:selectedKeys="selectedKeys"
         v-model:openKeys="openKeys"
-        theme="dark"
         mode="inline"
         class="nav-menu"
       >
@@ -296,18 +316,60 @@ const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
       </a-menu>
 
       <!-- Collapse Toggle -->
-      <div class="sidebar-footer">
-        <a-button type="text" class="collapse-btn" @click="collapsed = !collapsed">
+      <div class="sidebar-footer" style="width: 100%">
+        <!-- <a-button type="text" class="collapse-btn" @click="collapsed = !collapsed">
           <MenuUnfoldOutlined v-if="collapsed" />
           <MenuFoldOutlined v-else />
-        </a-button>
+        </a-button> -->
+        <!-- User Profile Dropdown -->
+        <a-dropdown class="!h-[50px] cursor-pointer" trigger="click" placement="topRight">
+          <!-- <a-button type="text" class="w-full flex justify-between h-[100px]"> </a-button> -->
+          <div class="w-full h-full flex justify-between items-center">
+            <div class="flex items-center">
+              <a-avatar :size="32">
+                <template #icon><UserOutlined /></template>
+              </a-avatar>
+              <h2 class="!text-[#000] !ml-2 !text-sm !leading-none">{{ user.name }}</h2>
+            </div>
+            <div>
+              <RightOutlined />
+            </div>
+          </div>
+          <template #overlay>
+            <a-menu>
+              <div class="user-menu-header">
+                <a-avatar :size="48" class="user-avatar-large">
+                  <template #icon><UserOutlined /></template>
+                </a-avatar>
+                <div class="user-menu-info">
+                  <div class="user-menu-name">{{ user.name }}</div>
+                  <div class="user-menu-email">{{ user.email }}</div>
+                </div>
+              </div>
+              <a-menu-divider />
+              <a-menu-item key="profile">
+                <UserOutlined />
+                <span class="ml-2">My Profile</span>
+              </a-menu-item>
+              <a-menu-item key="settings">
+                <SettingOutlined />
+                <span>Settings</span>
+              </a-menu-item>
+              <a-menu-divider />
+              <a-menu-item key="logout" @click="handleLogout" danger>
+                <LogoutOutlined />
+                <span>Logout</span>
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
       </div>
     </a-layout-sider>
 
     <!-- Main Layout -->
     <a-layout class="main-layout" :style="{ marginLeft: sidebarWidth + 'px' }">
       <!-- Header -->
-      <a-layout-header class="header">
+      <a-layout-header :style="{ background: '#fff' }" class="header">
         <div class="header-left">
           <!-- Global Search -->
           <a-popover
@@ -408,37 +470,6 @@ const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
         </div>
 
         <div class="header-right">
-          <!-- Store Switcher -->
-          <a-popover v-model:open="storePopoverVisible" placement="bottomRight" trigger="click">
-            <template #content>
-              <div class="store-switcher-content">
-                <div class="store-switcher-title">Switch Store</div>
-                <div
-                  v-for="store in stores"
-                  :key="store.id"
-                  class="store-item"
-                  :class="{ active: store.active }"
-                  @click="selectStore(store)"
-                >
-                  <div class="store-info">
-                    <div class="store-name">{{ store.name }}</div>
-                    <div class="store-domain">{{ store.domain }}</div>
-                  </div>
-                  <CheckOutlined v-if="store.active" class="check-icon" />
-                </div>
-                <a-divider style="margin: 12px 0" />
-                <a-button type="dashed" block size="small">
-                  <template #icon><ShopOutlined /></template>
-                  Add New Store
-                </a-button>
-              </div>
-            </template>
-            <a-button type="text" class="store-btn">
-              <ShopOutlined />
-              <span class="store-name-text">{{ currentStore?.name }}</span>
-            </a-button>
-          </a-popover>
-
           <!-- Notifications -->
           <a-popover
             v-model:open="notificationVisible"
@@ -500,48 +531,88 @@ const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
               </div>
             </template>
             <a-badge :count="unreadCount" :offset="[-4, 4]">
-              <a-button type="text" class="icon-btn">
+              <a-button type="text" class="">
                 <BellOutlined style="font-size: 18px" />
               </a-button>
             </a-badge>
           </a-popover>
 
-          <!-- User Profile Dropdown -->
-          <a-dropdown placement="bottomRight">
-            <a-button type="text" class="user-dropdown">
-              <a-avatar :size="32" class="user-avatar">
-                <template #icon><UserOutlined /></template>
-              </a-avatar>
-              <span class="user-name">{{ user.name }}</span>
-            </a-button>
-            <template #overlay>
-              <a-menu>
-                <div class="user-menu-header">
-                  <a-avatar :size="48" class="user-avatar-large">
-                    <template #icon><UserOutlined /></template>
-                  </a-avatar>
-                  <div class="user-menu-info">
-                    <div class="user-menu-name">{{ user.name }}</div>
-                    <div class="user-menu-email">{{ user.email }}</div>
+          <StoreSwitcher />
+          <!-- Store Switcher -->
+          <a-popover v-model:open="storePopoverVisible" placement="bottomRight" trigger="click">
+            <template #content>
+              <div class="">
+                <!-- Optional title -->
+
+                <a-input placeholder="Search for store" class="!my-5">
+                  <template #suffix> <SearchOutlined /> </template>
+                </a-input>
+
+                <div class="grid grid-cols-3 gap-4 !p-2 max-h-[450px] overflow-auto">
+                  <div
+                    v-for="store in stores"
+                    :key="store.id"
+                    @click="selectStore(store)"
+                    class="relative flex cursor-pointer flex-col items-center !p-4 text-center transition-all hover:bg-gray-50"
+                    :class="{ 'bg-blue-50 ring-2 ring-[#8447ff]': store.active }"
+                  >
+                    <img
+                      :src="store.logo"
+                      :alt="`${store.name} logo`"
+                      class="mb-3 h-16 w-16 rounded-full border-2 border-gray-200 object-cover shadow-sm"
+                    />
+                    <div class="flex-1">
+                      <div class="text-sm font-medium text-gray-900">{{ store.name }}</div>
+                      <div class="mt-1 text-xs text-gray-500">{{ store.domain }}</div>
+                    </div>
+                    <svg
+                      v-if="store.active"
+                      class="absolute right-2 top-2 h-5 w-5 text-[#8447ff]"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
                   </div>
                 </div>
-                <a-menu-divider />
-                <a-menu-item key="profile">
-                  <UserOutlined />
-                  <span>My Profile</span>
-                </a-menu-item>
-                <a-menu-item key="settings">
-                  <SettingOutlined />
-                  <span>Settings</span>
-                </a-menu-item>
-                <a-menu-divider />
-                <a-menu-item key="logout" @click="handleLogout" danger>
-                  <LogoutOutlined />
-                  <span>Logout</span>
-                </a-menu-item>
-              </a-menu>
+
+                <hr class="!my-5 border-gray-200" />
+
+                <button
+                  class="flex w-full items-center justify-center !gap-2 border border-dashed border-gray-300 bg-transparent !py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900"
+                >
+                  <svg
+                    class="!h-5 !w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h-4m-10 0H5m17 0h-2m-14 0H5"
+                    />
+                  </svg>
+                  Add New Store
+                </button>
+              </div>
             </template>
-          </a-dropdown>
+            <div class="flex h-full items-center cursor-pointer">
+              <a-avatar :size="30">
+                <template #icon><a-image :preview="false" :src="currentStore?.logo" /></template>
+              </a-avatar>
+              <span class="!ml-[10px]">{{ currentStore?.name }}</span>
+            </div>
+          </a-popover>
         </div>
       </a-layout-header>
 
@@ -575,7 +646,7 @@ const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
   height: 100vh;
   z-index: 100;
   /* background: linear-gradient(180deg, #001529 0%, #002140 100%); */
-  background-color: #10ac84;
+  /* background-color: #10ac84; */
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
@@ -599,51 +670,12 @@ const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
   gap: 10px;
 }
 
-.logo-icon {
-  font-size: 24px;
-  color: #fff;
-}
-
 .logo-text {
   font-size: 18px;
   font-weight: 600;
   color: #001529;
   white-space: nowrap;
-  color: #fff;
-}
-
-/* Menu Search */
-.menu-search {
-  padding: 12px 16px;
-}
-
-.menu-search :deep(.ant-input) {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
-}
-
-.menu-search :deep(.ant-input::placeholder) {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.menu-search-results {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.menu-search-item {
-  padding: 8px 12px;
-  cursor: pointer;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: background 0.2s;
-}
-
-.menu-search-item:hover {
-  background: #f5f5f5;
+  /* color: #fff; */
 }
 
 /* Navigation Menu */
@@ -652,7 +684,6 @@ const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
   overflow-y: auto;
   background: transparent !important;
   border-right: none;
-  padding: 0 8px;
 }
 
 .nav-menu :deep(.ant-menu-item) {
@@ -700,7 +731,7 @@ const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
 
 /* Header */
 .header {
-  background: #10ac84;
+  /* background: #10ac84; */
   padding: 0 24px;
   display: flex;
   align-items: center;
@@ -724,67 +755,6 @@ const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
 }
 
 /* Store Switcher */
-.store-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 12px;
-  /* border-radius: 8px; */
-  color: #fff;
-}
-
-.store-btn:hover {
-  background: #f5f5f5;
-}
-
-.store-name-text {
-  font-weight: 500;
-}
-
-.store-switcher-content {
-  width: 260px;
-}
-
-.store-switcher-title {
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: #262626;
-}
-
-.store-item {
-  padding: 10px 12px;
-  /* border-radius: 8px; */
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: background 0.2s;
-  margin-bottom: 4px;
-}
-
-.store-item:hover {
-  background: #f5f5f5;
-}
-
-.store-item.active {
-  background: #e6f7ff;
-  border: 1px solid #91d5ff;
-}
-
-.store-info .store-name {
-  font-weight: 500;
-  color: #262626;
-}
-
-.store-info .store-domain {
-  font-size: 12px;
-  color: #8c8c8c;
-}
-
-.check-icon {
-  color: #1890ff;
-}
 
 /* Icon Button */
 .icon-btn {
@@ -905,7 +875,7 @@ const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
 }
 
 /* User Dropdown */
-.user-dropdown {
+/* .user-dropdown {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -936,9 +906,9 @@ const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
 
 .user-avatar-large {
   background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-}
+} */
 
-.user-menu-name {
+/* .user-menu-name {
   font-weight: 600;
   color: #262626;
 }
@@ -946,7 +916,7 @@ const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
 .user-menu-email {
   font-size: 12px;
   color: #8c8c8c;
-}
+} */
 
 /* Global Search Results */
 .global-search-results {
@@ -1016,7 +986,7 @@ const sidebarWidth = computed(() => (collapsed.value ? 80 : 260))
 }
 
 .content-wrapper {
-  max-width: 1200px;
+  /* max-width: 1200px; */
   margin: 0 auto;
 }
 

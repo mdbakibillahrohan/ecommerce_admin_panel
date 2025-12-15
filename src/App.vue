@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import { theme } from 'ant-design-vue'
 import { RouterView } from 'vue-router'
 </script>
 
 <template>
   <a-config-provider
     :theme="{
+      algorithm: theme.defaultAlgorithm,
       token: {
-        colorPrimary: '#1dd1a1',
+        colorPrimary: '#8447ff',
         borderRadius: 0,
         fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
       },

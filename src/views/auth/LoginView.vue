@@ -34,13 +34,13 @@ onMounted(() => {
 })
 
 async function handleSubmit(e: Event) {
-  // e.preventDefault()
+  e.preventDefault()
   try {
     await formRef.value?.validate()
-    // const success = await authStore.login({
-    //   username: formState.value.email,
-    //   password: formState.value.password,
-    // })
+    const success = await authStore.login({
+      username: formState.value.email,
+      password: formState.value.password,
+    })
 
     if (success) {
       router.push('/dashboard')
@@ -62,7 +62,7 @@ async function handleSubmit(e: Event) {
             <h1>E-Commerce Admin</h1>
           </div>
           <p class="tagline">Manage your store with ease</p>
-          
+
           <div class="features">
             <div class="feature">
               <span class="feature-icon">📊</span>
@@ -82,10 +82,13 @@ async function handleSubmit(e: Event) {
             </div>
           </div>
         </div>
-        
+
         <div class="wave-decoration">
           <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
-            <path fill="rgba(255,255,255,0.1)" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,218.7C672,235,768,245,864,234.7C960,224,1056,192,1152,181.3C1248,171,1344,181,1392,186.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            <path
+              fill="rgba(255,255,255,0.1)"
+              d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,218.7C672,235,768,245,864,234.7C960,224,1056,192,1152,181.3C1248,171,1344,181,1392,186.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            ></path>
           </svg>
         </div>
       </div>
@@ -117,11 +120,7 @@ async function handleSubmit(e: Event) {
             @finish="handleSubmit"
           >
             <a-form-item name="email" label="Email Address">
-              <a-input
-                v-model:value="formState.email"
-                size="large"
-                placeholder="admin@example.com"
-              >
+              <a-input v-model:value="formState.email" size="large" placeholder="admin@example.com">
                 <template #prefix>
                   <UserOutlined class="input-icon" />
                 </template>
@@ -142,9 +141,7 @@ async function handleSubmit(e: Event) {
 
             <a-form-item>
               <div class="form-options">
-                <a-checkbox v-model:checked="formState.remember">
-                  Remember me
-                </a-checkbox>
+                <a-checkbox v-model:checked="formState.remember"> Remember me </a-checkbox>
                 <a class="forgot-link">Forgot password?</a>
               </div>
             </a-form-item>
