@@ -2,7 +2,15 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { UserOutlined, LockOutlined } from '@ant-design/icons-vue'
+import {
+  MailOutlined,
+  LockOutlined,
+  SafetyCertificateOutlined,
+  DashboardOutlined,
+  ShoppingCartOutlined,
+  BarChartOutlined,
+  TeamOutlined,
+} from '@ant-design/icons-vue'
 import type { FormInstance } from 'ant-design-vue'
 
 const router = useRouter()
@@ -26,15 +34,36 @@ const rules = {
   ],
 }
 
+const features = [
+  {
+    icon: DashboardOutlined,
+    title: 'Real-time Dashboard',
+    description: 'Monitor your store performance with live analytics',
+  },
+  {
+    icon: ShoppingCartOutlined,
+    title: 'Order Management',
+    description: 'Process and track orders efficiently',
+  },
+  {
+    icon: BarChartOutlined,
+    title: 'Advanced Analytics',
+    description: 'Gain insights with detailed reports',
+  },
+  {
+    icon: TeamOutlined,
+    title: 'Team Collaboration',
+    description: 'Manage roles and permissions easily',
+  },
+]
+
 onMounted(() => {
-  // Redirect if already logged in
   if (authStore.isAuthenticated) {
     router.push('/dashboard')
   }
 })
 
-async function handleSubmit(e: Event) {
-  e.preventDefault()
+async function handleSubmit() {
   try {
     await formRef.value?.validate()
     const success = await authStore.login({
@@ -56,51 +85,76 @@ async function handleSubmit(e: Event) {
     <div class="login-container">
       <!-- Left Side - Branding -->
       <div class="login-branding">
+        <div class="branding-overlay"></div>
         <div class="branding-content">
-          <div class="logo">
-            <div class="logo-icon">🛒</div>
-            <h1>E-Commerce Admin</h1>
+          <!-- Logo -->
+          <div class="brand-logo">
+            <div class="logo-icon">
+              <SafetyCertificateOutlined />
+            </div>
+            <div class="logo-text">
+              <span class="logo-name">Adaptix</span>
+              <span class="logo-tagline">E-Commerce Admin</span>
+            </div>
           </div>
-          <p class="tagline">Manage your store with ease</p>
 
-          <div class="features">
-            <div class="feature">
-              <span class="feature-icon">📊</span>
-              <span>Real-time Analytics</span>
+          <!-- Hero Text -->
+          <div class="hero-section">
+            <h1 class="hero-title">Manage Your Store with Confidence</h1>
+            <p class="hero-description">
+              Powerful tools to grow your e-commerce business. Track orders, manage inventory,
+              and analyze performance all in one place.
+            </p>
+          </div>
+
+          <!-- Feature Grid -->
+          <div class="features-grid">
+            <div v-for="(feature, index) in features" :key="index" class="feature-card">
+              <div class="feature-icon">
+                <component :is="feature.icon" />
+              </div>
+              <div class="feature-content">
+                <h3 class="feature-title">{{ feature.title }}</h3>
+                <p class="feature-description">{{ feature.description }}</p>
+              </div>
             </div>
-            <div class="feature">
-              <span class="feature-icon">📦</span>
-              <span>Inventory Management</span>
-            </div>
-            <div class="feature">
-              <span class="feature-icon">🛍️</span>
-              <span>Order Processing</span>
-            </div>
-            <div class="feature">
-              <span class="feature-icon">💰</span>
-              <span>Payment Tracking</span>
+          </div>
+
+          <!-- Trust Badge -->
+          <div class="trust-section">
+            <div class="trust-badge">
+              <SafetyCertificateOutlined />
+              <span>Enterprise-grade security</span>
             </div>
           </div>
         </div>
 
-        <div class="wave-decoration">
-          <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
-            <path
-              fill="rgba(255,255,255,0.1)"
-              d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,218.7C672,235,768,245,864,234.7C960,224,1056,192,1152,181.3C1248,171,1344,181,1392,186.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-            ></path>
-          </svg>
+        <!-- Decorative Elements -->
+        <div class="decorative-circles">
+          <div class="circle circle-1"></div>
+          <div class="circle circle-2"></div>
+          <div class="circle circle-3"></div>
         </div>
       </div>
 
       <!-- Right Side - Login Form -->
       <div class="login-form-container">
         <div class="login-form-wrapper">
-          <div class="form-header">
-            <h2>Welcome Back!</h2>
-            <p>Sign in to your admin account</p>
+          <!-- Mobile Logo -->
+          <div class="mobile-logo">
+            <div class="logo-icon small">
+              <SafetyCertificateOutlined />
+            </div>
+            <span class="logo-name">Adaptix</span>
           </div>
 
+          <!-- Form Header -->
+          <div class="form-header">
+            <h2 class="form-title">Welcome back</h2>
+            <p class="form-subtitle">Enter your credentials to access your dashboard</p>
+          </div>
+
+          <!-- Error Alert -->
           <a-alert
             v-if="authStore.error"
             :message="authStore.error"
@@ -111,6 +165,7 @@ async function handleSubmit(e: Event) {
             @close="authStore.clearError"
           />
 
+          <!-- Login Form -->
           <a-form
             ref="formRef"
             :model="formState"
@@ -120,9 +175,14 @@ async function handleSubmit(e: Event) {
             @finish="handleSubmit"
           >
             <a-form-item name="email" label="Email Address">
-              <a-input v-model:value="formState.email" size="large" placeholder="admin@example.com">
+              <a-input
+                v-model:value="formState.email"
+                size="large"
+                placeholder="name@company.com"
+                class="form-input"
+              >
                 <template #prefix>
-                  <UserOutlined class="input-icon" />
+                  <MailOutlined class="input-icon" />
                 </template>
               </a-input>
             </a-form-item>
@@ -132,6 +192,7 @@ async function handleSubmit(e: Event) {
                 v-model:value="formState.password"
                 size="large"
                 placeholder="Enter your password"
+                class="form-input"
               >
                 <template #prefix>
                   <LockOutlined class="input-icon" />
@@ -141,8 +202,10 @@ async function handleSubmit(e: Event) {
 
             <a-form-item>
               <div class="form-options">
-                <a-checkbox v-model:checked="formState.remember"> Remember me </a-checkbox>
-                <a class="forgot-link">Forgot password?</a>
+                <a-checkbox v-model:checked="formState.remember" class="remember-checkbox">
+                  Remember me
+                </a-checkbox>
+                <a href="#" class="forgot-link">Forgot password?</a>
               </div>
             </a-form-item>
 
@@ -155,13 +218,16 @@ async function handleSubmit(e: Event) {
                 :loading="authStore.loading"
                 class="login-button"
               >
-                Sign In
+                Sign in to Dashboard
               </a-button>
             </a-form-item>
           </a-form>
 
+          <!-- Footer -->
           <div class="form-footer">
-            <p>Protected by enterprise-grade security</p>
+            <p class="footer-text">
+              Protected by enterprise-grade encryption
+            </p>
           </div>
         </div>
       </div>
@@ -172,7 +238,7 @@ async function handleSubmit(e: Event) {
 <style scoped>
 .login-page {
   min-height: 100vh;
-  background: #f0f2f5;
+  background: #f8fafc;
 }
 
 .login-container {
@@ -180,10 +246,11 @@ async function handleSubmit(e: Event) {
   min-height: 100vh;
 }
 
+/* Branding Side */
 .login-branding {
   flex: 1;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 60px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+  padding: 48px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -191,124 +258,272 @@ async function handleSubmit(e: Event) {
   overflow: hidden;
 }
 
+.branding-overlay {
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2H6zM6 34v-4H4v4H0v2h4v4h2V6h4V4H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
 .branding-content {
   position: relative;
   z-index: 1;
+  max-width: 540px;
 }
 
-.logo {
+.brand-logo {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 16px;
-}
-
-.logo-icon {
-  font-size: 48px;
-}
-
-.logo h1 {
-  color: #fff;
-  font-size: 32px;
-  font-weight: 700;
-  margin: 0;
-}
-
-.tagline {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 18px;
   margin-bottom: 48px;
 }
 
-.features {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.feature {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 16px;
-  padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-}
-
-.feature-icon {
-  font-size: 24px;
-}
-
-.wave-decoration {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 200px;
-}
-
-.wave-decoration svg {
-  width: 100%;
-  height: 100%;
-}
-
-.login-form-container {
-  flex: 1;
+.logo-icon {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
-  background: #fff;
+  color: #ffffff;
+  font-size: 28px;
+  backdrop-filter: blur(10px);
+}
+
+.logo-icon.small {
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-name {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+.logo-tagline {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.hero-section {
+  margin-bottom: 48px;
+}
+
+.hero-title {
+  font-size: 40px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  letter-spacing: -1px;
+}
+
+.hero-description {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 48px;
+}
+
+.feature-card {
+  display: flex;
+  gap: 14px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.feature-icon {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.feature-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.feature-description {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.trust-section {
+  display: flex;
+  align-items: center;
+}
+
+.trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 100px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+}
+
+/* Decorative Circles */
+.decorative-circles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.circle-1 {
+  width: 400px;
+  height: 400px;
+  top: -100px;
+  right: -100px;
+}
+
+.circle-2 {
+  width: 300px;
+  height: 300px;
+  bottom: -50px;
+  left: -50px;
+}
+
+.circle-3 {
+  width: 200px;
+  height: 200px;
+  top: 50%;
+  right: 20%;
+  transform: translateY(-50%);
+}
+
+/* Form Side */
+.login-form-container {
+  flex: 0 0 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background: #ffffff;
 }
 
 .login-form-wrapper {
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
+}
+
+.mobile-logo {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.mobile-logo .logo-icon {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+}
+
+.mobile-logo .logo-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
 }
 
 .form-header {
-  text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
-.form-header h2 {
+.form-title {
   font-size: 28px;
   font-weight: 700;
-  color: #262626;
-  margin-bottom: 8px;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
 }
 
-.form-header p {
-  color: #8c8c8c;
-  font-size: 16px;
+.form-subtitle {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
 }
 
 .login-error {
   margin-bottom: 24px;
-}
-
-.login-form :deep(.ant-form-item-label) {
-  padding-bottom: 4px;
+  border-radius: 12px;
 }
 
 .login-form :deep(.ant-form-item-label > label) {
   font-weight: 500;
-  color: #434343;
+  color: #374151;
+  font-size: 14px;
+}
+
+.form-input :deep(.ant-input),
+.form-input :deep(.ant-input-password) {
+  height: 48px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.form-input :deep(.ant-input-affix-wrapper) {
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.form-input :deep(.ant-input-affix-wrapper:hover) {
+  border-color: #6366f1;
+}
+
+.form-input :deep(.ant-input-affix-wrapper-focused) {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .input-icon {
-  color: #bfbfbf;
-}
-
-.login-form :deep(.ant-input-affix-wrapper) {
-  border-radius: 8px;
-}
-
-.login-form :deep(.ant-input-affix-wrapper-lg) {
-  padding: 12px 16px;
+  color: #9ca3af;
+  font-size: 18px;
 }
 
 .form-options {
@@ -317,46 +532,74 @@ async function handleSubmit(e: Event) {
   align-items: center;
 }
 
+.remember-checkbox {
+  color: #4b5563;
+}
+
 .forgot-link {
-  color: #667eea;
+  color: #6366f1;
   font-weight: 500;
+  font-size: 14px;
+  transition: color 0.2s ease;
 }
 
 .forgot-link:hover {
-  color: #764ba2;
+  color: #4f46e5;
 }
 
 .login-button {
-  height: 48px;
-  border-radius: 8px;
+  height: 52px;
+  border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   border: none;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  transition: all 0.2s ease;
 }
 
 .login-button:hover {
-  background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+  transform: translateY(-1px);
 }
 
 .form-footer {
   text-align: center;
   margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #f3f4f6;
 }
 
-.form-footer p {
-  color: #bfbfbf;
+.footer-text {
+  color: #9ca3af;
   font-size: 13px;
+  margin: 0;
 }
 
 /* Responsive */
-@media (max-width: 992px) {
+@media (max-width: 1024px) {
   .login-branding {
     display: none;
   }
 
   .login-form-container {
+    flex: 1;
     padding: 24px;
+  }
+
+  .mobile-logo {
+    display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-form-wrapper {
+    max-width: 100%;
+  }
+
+  .form-title {
+    font-size: 24px;
   }
 }
 </style>

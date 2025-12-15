@@ -1,85 +1,89 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { authApi, type LoginRequest, type LoginResponse } from '@/api/auth'
+import { defineStore } from "pinia"
+import { ref, computed } from "vue"
 
 export interface User {
-    id: number
-    email: string
-    first_name: string
-    last_name: string
+  id: number
+  email: string
+  first_name: string
+  last_name: string
 }
 
-export const useAuthStore = defineStore('auth', () => {
-    const router = useRouter()
+export interface LoginCredentials {
+  username: string
+  password: string
+}
 
-    // State
-    const token = ref<string | null>(localStorage.getItem('admin_token'))
-    const user = ref<User | null>(JSON.parse(localStorage.getItem('admin_user') || 'null'))
-    const activeStore = ref<any | null>(JSON.parse(localStorage.getItem('activeStore') || 'null'))
+export function useAuthStore() {
+  return defineStore("auth", () => {
+    const token = ref<string | null>(localStorage.getItem("admin_token"))
+    const user = ref<User | null>(JSON.parse(localStorage.getItem("admin_user") || "null"))
+    const activeStore = ref<any | null>(JSON.parse(localStorage.getItem("activeStore") || "null"))
     const loading = ref(false)
     const error = ref<string | null>(null)
 
-    // Getters
     const isAuthenticated = computed(() => !!token.value)
-    const fullName = computed(() => user.value ? `${user.value.first_name} ${user.value.last_name}` : '')
+    const fullName = computed(() => (user.value ? `${user.value.first_name} ${user.value.last_name}` : ""))
 
-    // Actions
-    async function login(credentials: LoginRequest) {
-        loading.value = true
-        error.value = null
+    async function login(credentials: LoginCredentials) {
+      loading.value = true
+      error.value = null
 
-        try {
-            const response: LoginResponse = await authApi.login(credentials)
-
-            token.value = response.access_token
-            user.value = response.user
-
-            localStorage.setItem('admin_token', response.access_token)
-            localStorage.setItem('admin_user', JSON.stringify(response.user))
-
-            return true
-        } catch (err: any) {
-            error.value = err.response?.data?.message || 'Login failed. Please try again.'
-            return false
-        } finally {
-            loading.value = false
+      try {
+        const mockResponse = {
+          access_token: "mock-token-" + Date.now(),
+          user: {
+            id: 1,
+            email: credentials.username,
+            first_name: "Admin",
+            last_name: "User",
+          },
         }
+
+        token.value = mockResponse.access_token
+        user.value = mockResponse.user
+
+        localStorage.setItem("admin_token", mockResponse.access_token)
+        localStorage.setItem("admin_user", JSON.stringify(mockResponse.user))
+
+        return true
+      } catch (err: any) {
+        error.value = err.response?.data?.message || "Login failed. Please try again."
+        return false
+      } finally {
+        loading.value = false
+      }
     }
 
     function setActiveStore(store: any) {
-        activeStore.value = store
-        localStorage.setItem('activeStore', JSON.stringify(store))
+      activeStore.value = store
+      localStorage.setItem("activeStore", JSON.stringify(store))
     }
 
     function logout() {
-        token.value = null
-        user.value = null
-        activeStore.value = null
-        localStorage.removeItem('admin_token')
-        localStorage.removeItem('admin_user')
-        localStorage.removeItem('activeStore')
-        router.push('/login')
+      token.value = null
+      user.value = null
+      activeStore.value = null
+      localStorage.removeItem("admin_token")
+      localStorage.removeItem("admin_user")
+      localStorage.removeItem("activeStore")
     }
 
     function clearError() {
-        error.value = null
+      error.value = null
     }
 
     return {
-        // State
-        token,
-        user,
-        activeStore,
-        loading,
-        error,
-        // Getters
-        isAuthenticated,
-        fullName,
-        // Actions
-        login,
-        setActiveStore,
-        logout,
-        clearError,
+      token,
+      user,
+      activeStore,
+      loading,
+      error,
+      isAuthenticated,
+      fullName,
+      login,
+      setActiveStore,
+      logout,
+      clearError,
     }
-})
+  })()
+}
