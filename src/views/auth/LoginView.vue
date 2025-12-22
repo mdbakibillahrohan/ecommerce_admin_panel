@@ -72,6 +72,7 @@ async function handleSubmit() {
     })
 
     if (success) {
+      console.log('Login successful, redirecting to dashboard')
       router.push('/dashboard')
     }
   } catch (error) {
@@ -155,32 +156,14 @@ async function handleSubmit() {
           </div>
 
           <!-- Error Alert -->
-          <a-alert
-            v-if="authStore.error"
-            :message="authStore.error"
-            type="error"
-            showIcon
-            closable
-            class="login-error"
-            @close="authStore.clearError"
-          />
+          <a-alert v-if="authStore.error" :message="authStore.error" type="error" showIcon closable class="login-error"
+            @close="authStore.clearError" />
 
           <!-- Login Form -->
-          <a-form
-            ref="formRef"
-            :model="formState"
-            :rules="rules"
-            layout="vertical"
-            class="login-form"
-            @finish="handleSubmit"
-          >
+          <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical" class="login-form"
+            @finish="handleSubmit">
             <a-form-item name="email" label="Email Address">
-              <a-input
-                v-model:value="formState.email"
-                size="large"
-                placeholder="name@company.com"
-                class="form-input"
-              >
+              <a-input v-model:value="formState.email" size="large" placeholder="name@company.com" class="form-input">
                 <template #prefix>
                   <MailOutlined class="input-icon" />
                 </template>
@@ -188,12 +171,8 @@ async function handleSubmit() {
             </a-form-item>
 
             <a-form-item name="password" label="Password">
-              <a-input-password
-                v-model:value="formState.password"
-                size="large"
-                placeholder="Enter your password"
-                class="form-input"
-              >
+              <a-input-password v-model:value="formState.password" size="large" placeholder="Enter your password"
+                class="form-input">
                 <template #prefix>
                   <LockOutlined class="input-icon" />
                 </template>
@@ -210,14 +189,8 @@ async function handleSubmit() {
             </a-form-item>
 
             <a-form-item>
-              <a-button
-                type="primary"
-                html-type="submit"
-                size="large"
-                block
-                :loading="authStore.loading"
-                class="login-button"
-              >
+              <a-button type="primary" html-type="submit" size="large" block :loading="authStore.loading"
+                class="login-button">
                 Sign in to Dashboard
               </a-button>
             </a-form-item>

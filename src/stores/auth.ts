@@ -1,5 +1,7 @@
-import { defineStore } from "pinia"
-import { ref, computed } from "vue"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import api from '@/config/http.config'
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
 
 export interface User {
   id: number
@@ -14,40 +16,31 @@ export interface LoginCredentials {
 }
 
 export function useAuthStore() {
-  return defineStore("auth", () => {
-    const token = ref<string | null>(localStorage.getItem("admin_token"))
-    const user = ref<User | null>(JSON.parse(localStorage.getItem("admin_user") || "null"))
-    const activeStore = ref<any | null>(JSON.parse(localStorage.getItem("activeStore") || "null"))
+  return defineStore('auth', () => {
+    const token = ref<string | null>(localStorage.getItem('admin_token'))
+    const user = ref<User | null>(JSON.parse(localStorage.getItem('admin_user') || 'null'))
+    const activeStore = ref<any | null>(JSON.parse(localStorage.getItem('activeStore') || 'null'))
     const loading = ref(false)
     const error = ref<string | null>(null)
 
     const isAuthenticated = computed(() => !!token.value)
-    const fullName = computed(() => (user.value ? `${user.value.first_name} ${user.value.last_name}` : ""))
+    const fullName = computed(() =>
+      user.value ? `${user.value.first_name} ${user.value.last_name}` : '',
+    )
 
     async function login(credentials: LoginCredentials) {
       loading.value = true
       error.value = null
 
       try {
-        const mockResponse = {
-          access_token: "mock-token-" + Date.now(),
-          user: {
-            id: 1,
-            email: credentials.username,
-            first_name: "Admin",
-            last_name: "User",
-          },
-        }
-
-        token.value = mockResponse.access_token
-        user.value = mockResponse.user
-
-        localStorage.setItem("admin_token", mockResponse.access_token)
-        localStorage.setItem("admin_user", JSON.stringify(mockResponse.user))
-
+        console.log('Logging in with credentials:', credentials)
+        const response = await api.post('/auth/login', credentials)
+        localStorage.setItem('admin_token', response.data.access_token)
+        console.log('Login response:', response.data)
+        token.value = response.data.access_token
         return true
       } catch (err: any) {
-        error.value = err.response?.data?.message || "Login failed. Please try again."
+        error.value = err.response?.data?.message || 'Login failed. Please try again.'
         return false
       } finally {
         loading.value = false
@@ -56,16 +49,16 @@ export function useAuthStore() {
 
     function setActiveStore(store: any) {
       activeStore.value = store
-      localStorage.setItem("activeStore", JSON.stringify(store))
+      localStorage.setItem('activeStore', JSON.stringify(store))
     }
 
     function logout() {
       token.value = null
       user.value = null
       activeStore.value = null
-      localStorage.removeItem("admin_token")
-      localStorage.removeItem("admin_user")
-      localStorage.removeItem("activeStore")
+      localStorage.removeItem('admin_token')
+      localStorage.removeItem('admin_user')
+      localStorage.removeItem('activeStore')
     }
 
     function clearError() {

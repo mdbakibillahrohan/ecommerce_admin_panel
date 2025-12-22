@@ -12,6 +12,7 @@ import {
   SkinOutlined,
   GiftOutlined,
   StarOutlined,
+  SearchOutlined,
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
@@ -27,6 +28,9 @@ defineEmits<{
 
 // Menu state
 const openKeys = ref(['catalog', 'content', 'billing'])
+
+// Search state
+const searchQuery = ref('')
 
 // Menu items configuration
 const menuItems = [
@@ -116,6 +120,34 @@ const selectedKeys = computed(() => {
   return ['dashboard']
 })
 
+// Filtered menu items based on search
+const filteredMenuItems = computed(() => {
+  const query = searchQuery.value.toLowerCase().trim()
+  if (!query) return menuItems
+
+  return menuItems
+    .map((item) => {
+      // Check if item label matches
+      const itemMatches = item.label.toLowerCase().includes(query)
+
+      // Check if any child matches
+      if (item.children) {
+        const matchingChildren = item.children.filter((child) =>
+          child.label.toLowerCase().includes(query),
+        )
+        if (matchingChildren.length > 0) {
+          return { ...item, children: matchingChildren }
+        }
+      }
+
+      // Return item if it matches (even if it has children that don't match)
+      if (itemMatches) return item
+
+      return null
+    })
+    .filter(Boolean) as typeof menuItems
+})
+
 function handleMenuClick({ key }: { key: string }) {
   const findPath = (items: typeof menuItems): string | null => {
     for (const item of items) {
@@ -145,6 +177,21 @@ function handleMenuClick({ key }: { key: string }) {
       </transition> -->
     </div>
 
+    <!-- Search Section -->
+    <div class="search-section" v-if="!collapsed">
+      <a-input
+        v-model:value="searchQuery"
+        placeholder="Search menu..."
+        allow-clear
+        size="small"
+        class="menu-search-input"
+      >
+        <template #prefix>
+          <SearchOutlined class="search-icon" />
+        </template>
+      </a-input>
+    </div>
+
     <!-- Navigation Menu -->
     <div class="menu-section">
       <a-menu
@@ -155,7 +202,7 @@ function handleMenuClick({ key }: { key: string }) {
         class="sidebar-menu"
         @click="handleMenuClick"
       >
-        <template v-for="item in menuItems" :key="item.key">
+        <template v-for="item in filteredMenuItems" :key="item.key">
           <!-- Menu Item with Children -->
           <a-sub-menu v-if="item.children" :key="item.key">
             <template #title>
@@ -231,6 +278,56 @@ function handleMenuClick({ key }: { key: string }) {
 
 :global(.dark) .logo-text {
   color: #f3f4f6;
+}
+
+/* Search Section */
+.search-section {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+  transition: border-color 0.3s ease;
+}
+
+:global(.dark) .search-section {
+  border-bottom-color: #374151;
+}
+
+.menu-search-input {
+  border-radius: 8px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+:global(.dark) .menu-search-input {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+:global(.dark) .menu-search-input :deep(.ant-input) {
+  background: transparent;
+  color: #f3f4f6;
+}
+
+:global(.dark) .menu-search-input :deep(.ant-input::placeholder) {
+  color: #9ca3af;
+}
+
+.menu-search-input:hover,
+.menu-search-input:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+:global(.dark) .menu-search-input:hover,
+:global(.dark) .menu-search-input:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.search-icon {
+  color: #9ca3af;
+  font-size: 14px;
 }
 
 .menu-section {

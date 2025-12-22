@@ -105,12 +105,7 @@ function removeNotification(id: number) {
       <div class="notification-panel">
         <div class="notification-header">
           <span class="notification-title">Notifications</span>
-          <a-button
-            type="link"
-            size="small"
-            @click="markAllAsRead"
-            :disabled="unreadCount === 0"
-          >
+          <a-button type="link" size="small" @click="markAllAsRead" :disabled="unreadCount === 0">
             Mark all as read
           </a-button>
         </div>
@@ -176,11 +171,21 @@ function removeNotification(id: number) {
   border-radius: 10px;
   color: #4b5563;
   font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+:global(.dark) .notification-btn {
+  color: #9ca3af;
 }
 
 .notification-btn:hover {
   background: #f3f4f6;
   color: #1f2937;
+}
+
+:global(.dark) .notification-btn:hover {
+  background: #374151;
+  color: #f3f4f6;
 }
 
 .notification-panel {
@@ -195,10 +200,18 @@ function removeNotification(id: number) {
   border-bottom: 1px solid #f0f0f0;
 }
 
+:global(.dark) .notification-header {
+  border-bottom-color: #374151;
+}
+
 .notification-title {
   font-weight: 600;
   font-size: 16px;
   color: #1f2937;
+}
+
+:global(.dark) .notification-title {
+  color: #f3f4f6;
 }
 
 .notification-list {
@@ -214,16 +227,32 @@ function removeNotification(id: number) {
   transition: background 0.15s ease;
 }
 
+:global(.dark) .notification-item {
+  border-bottom-color: #374151;
+}
+
 .notification-item:hover {
   background: #f9fafb;
+}
+
+:global(.dark) .notification-item:hover {
+  background: #374151;
 }
 
 .notification-item.unread {
   background: #f0f9ff;
 }
 
+:global(.dark) .notification-item.unread {
+  background: rgba(99, 102, 241, 0.15);
+}
+
 .notification-item.unread:hover {
   background: #e0f2fe;
+}
+
+:global(.dark) .notification-item.unread:hover {
+  background: rgba(99, 102, 241, 0.25);
 }
 
 .notification-icon {
@@ -269,10 +298,18 @@ function removeNotification(id: number) {
   font-size: 14px;
 }
 
+:global(.dark) .notification-item-title {
+  color: #f3f4f6;
+}
+
 .notification-message {
   font-size: 13px;
   color: #4b5563;
   line-height: 1.4;
+}
+
+:global(.dark) .notification-message {
+  color: #d1d5db;
 }
 
 .notification-time {
@@ -298,9 +335,18 @@ function removeNotification(id: number) {
   color: #6b7280;
 }
 
+:global(.dark) .action-btn {
+  color: #9ca3af;
+}
+
 .action-btn:hover {
   background: #e5e7eb;
   color: #1f2937;
+}
+
+:global(.dark) .action-btn:hover {
+  background: #4b5563;
+  color: #f3f4f6;
 }
 
 .action-btn.delete:hover {
@@ -308,8 +354,17 @@ function removeNotification(id: number) {
   color: #dc2626;
 }
 
+:global(.dark) .action-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
 .notification-footer {
   padding: 12px 20px;
   border-top: 1px solid #f0f0f0;
+}
+
+:global(.dark) .notification-footer {
+  border-top-color: #374151;
 }
 </style>

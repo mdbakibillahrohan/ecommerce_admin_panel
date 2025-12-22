@@ -55,11 +55,7 @@ const hasResults = computed(() => {
           <!-- Products -->
           <div v-if="searchResults.products.length" class="result-section">
             <div class="section-title">Products</div>
-            <div
-              v-for="product in searchResults.products"
-              :key="product.id"
-              class="result-item"
-            >
+            <div v-for="product in searchResults.products" :key="product.id" class="result-item">
               <div class="result-icon product">
                 <ShoppingOutlined />
               </div>
@@ -73,11 +69,7 @@ const hasResults = computed(() => {
           <!-- Orders -->
           <div v-if="searchResults.orders.length" class="result-section">
             <div class="section-title">Orders</div>
-            <div
-              v-for="order in searchResults.orders"
-              :key="order.id"
-              class="result-item"
-            >
+            <div v-for="order in searchResults.orders" :key="order.id" class="result-item">
               <div class="result-icon order">
                 <ShoppingCartOutlined />
               </div>
@@ -91,11 +83,7 @@ const hasResults = computed(() => {
           <!-- Customers -->
           <div v-if="searchResults.customers.length" class="result-section">
             <div class="section-title">Customers</div>
-            <div
-              v-for="customer in searchResults.customers"
-              :key="customer.id"
-              class="result-item"
-            >
+            <div v-for="customer in searchResults.customers" :key="customer.id" class="result-item">
               <div class="result-icon customer">
                 <UserOutlined />
               </div>
@@ -109,11 +97,7 @@ const hasResults = computed(() => {
           <!-- Pages -->
           <div v-if="searchResults.pages.length" class="result-section">
             <div class="section-title">Pages</div>
-            <div
-              v-for="page in searchResults.pages"
-              :key="page.id"
-              class="result-item"
-            >
+            <div v-for="page in searchResults.pages" :key="page.id" class="result-item">
               <div class="result-icon page">
                 <FileTextOutlined />
               </div>
@@ -173,11 +157,32 @@ const hasResults = computed(() => {
   transition: all 0.2s ease;
 }
 
+:global(.dark) .search-input {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+:global(.dark) .search-input :deep(.ant-input) {
+  background: transparent;
+  color: #f3f4f6;
+}
+
+:global(.dark) .search-input :deep(.ant-input::placeholder) {
+  color: #9ca3af;
+}
+
 .search-input:hover,
 .search-input:focus-within {
   background: #ffffff;
   border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+:global(.dark) .search-input:hover,
+:global(.dark) .search-input:focus-within {
+  background: #4b5563;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 .search-prefix-icon {
@@ -196,6 +201,11 @@ const hasResults = computed(() => {
   font-size: 11px;
   color: #6b7280;
   font-family: inherit;
+}
+
+:global(.dark) .search-shortcut kbd {
+  background: #4b5563;
+  color: #9ca3af;
 }
 
 .search-results {
@@ -236,6 +246,10 @@ const hasResults = computed(() => {
   background: #f3f4f6;
 }
 
+:global(.dark) .result-item:hover {
+  background: #374151;
+}
+
 .result-icon {
   width: 36px;
   height: 36px;
@@ -272,9 +286,17 @@ const hasResults = computed(() => {
   font-size: 14px;
 }
 
+:global(.dark) .result-name {
+  color: #f3f4f6;
+}
+
 .result-meta {
   font-size: 12px;
   color: #6b7280;
+}
+
+:global(.dark) .result-meta {
+  color: #9ca3af;
 }
 
 .no-results,
@@ -284,12 +306,22 @@ const hasResults = computed(() => {
   color: #6b7280;
 }
 
+:global(.dark) .no-results,
+:global(.dark) .search-hint {
+  color: #9ca3af;
+}
+
 .no-results-icon,
 .hint-icon {
   font-size: 32px;
   color: #d1d5db;
   margin-bottom: 12px;
   display: block;
+}
+
+:global(.dark) .no-results-icon,
+:global(.dark) .hint-icon {
+  color: #6b7280;
 }
 
 .hint-shortcuts {
@@ -310,5 +342,11 @@ const hasResults = computed(() => {
   font-size: 11px;
   color: #6b7280;
   font-family: inherit;
+}
+
+:global(.dark) .hint-shortcuts kbd {
+  background: #374151;
+  border-color: #4b5563;
+  color: #9ca3af;
 }
 </style>

@@ -1,23 +1,19 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import {
-  UserOutlined,
-  SettingOutlined,
-  LogoutOutlined,
-  RightOutlined,
-} from '@ant-design/icons-vue'
+import { UserOutlined, SettingOutlined, LogoutOutlined, RightOutlined } from '@ant-design/icons-vue'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const userStore = useUserStore()
 
-const user = ref({
-  name: 'Md Baki Billah',
-  email: 'baki@admin.com',
+const user = computed(() => ({
+  name: userStore.currentUserInfo?.first_name || 'Admin User',
+  email: userStore.currentUserInfo?.email || 'baki@admin.com',
   role: 'Administrator',
-})
-
+}))
 function handleLogout() {
   authStore.logout()
   router.push('/login')
@@ -28,7 +24,9 @@ function handleLogout() {
   <a-dropdown trigger="click" placement="bottomRight">
     <div class="user-trigger">
       <a-avatar :size="36" class="user-avatar">
-        <template #icon><UserOutlined /></template>
+        <template #icon>
+          <UserOutlined />
+        </template>
       </a-avatar>
       <div class="user-info">
         <div class="user-name">{{ user.name }}</div>
@@ -41,7 +39,9 @@ function handleLogout() {
       <div class="user-menu">
         <div class="user-menu-header">
           <a-avatar :size="48" class="menu-avatar">
-            <template #icon><UserOutlined /></template>
+            <template #icon>
+              <UserOutlined />
+            </template>
           </a-avatar>
           <div class="menu-user-info">
             <div class="menu-user-name">{{ user.name }}</div>
@@ -85,6 +85,10 @@ function handleLogout() {
   background: #f3f4f6;
 }
 
+:global(.dark) .user-trigger:hover {
+  background: #374151;
+}
+
 .user-avatar {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   flex-shrink: 0;
@@ -107,9 +111,17 @@ function handleLogout() {
   line-height: 1.2;
 }
 
+:global(.dark) .user-name {
+  color: #f3f4f6;
+}
+
 .user-role {
   font-size: 12px;
   color: #6b7280;
+}
+
+:global(.dark) .user-role {
+  color: #9ca3af;
 }
 
 .trigger-arrow {
@@ -130,6 +142,11 @@ function handleLogout() {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   min-width: 240px;
   overflow: hidden;
+}
+
+:global(.dark) .user-menu {
+  background: #1f2937;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .user-menu-header {
@@ -164,6 +181,10 @@ function handleLogout() {
   padding: 8px;
 }
 
+:global(.dark) .user-menu-items {
+  background: #1f2937;
+}
+
 .user-menu-items :deep(.ant-menu-item) {
   border-radius: 8px;
   margin: 2px 0;
@@ -171,7 +192,16 @@ function handleLogout() {
   line-height: 40px;
 }
 
+:global(.dark) .user-menu-items :deep(.ant-menu-item) {
+  color: #d1d5db;
+}
+
 .user-menu-items :deep(.ant-menu-item:hover) {
   background: #f3f4f6;
+}
+
+:global(.dark) .user-menu-items :deep(.ant-menu-item:hover) {
+  background: #374151;
+  color: #f3f4f6;
 }
 </style>

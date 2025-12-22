@@ -121,9 +121,18 @@ function getStoreColor(index: number): string {
   max-width: 400px;
 }
 
+:global(.dark) .store-dropdown {
+  background: #1f2937;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+}
+
 .store-header {
   padding: 16px 20px;
   border-bottom: 1px solid #f0f0f0;
+}
+
+:global(.dark) .store-header {
+  border-bottom-color: #374151;
 }
 
 .store-header h3 {
@@ -131,6 +140,10 @@ function getStoreColor(index: number): string {
   font-size: 16px;
   font-weight: 600;
   color: #262626;
+}
+
+:global(.dark) .store-header h3 {
+  color: #f3f4f6;
 }
 
 .store-grid {
@@ -159,8 +172,16 @@ function getStoreColor(index: number): string {
   transform: translateY(-2px);
 }
 
+:global(.dark) .store-item:hover {
+  background-color: #374151;
+}
+
 .store-item.active {
   background-color: #e6f7ff;
+}
+
+:global(.dark) .store-item.active {
+  background-color: rgba(99, 102, 241, 0.2);
 }
 
 .store-icon {
@@ -182,6 +203,11 @@ function getStoreColor(index: number): string {
   font-size: 24px;
 }
 
+:global(.dark) .add-icon {
+  background-color: #374151 !important;
+  color: #9ca3af !important;
+}
+
 .add-store:hover .add-icon {
   background-color: #1890ff !important;
   color: #ffffff !important;
@@ -198,12 +224,20 @@ function getStoreColor(index: number): string {
   width: 80px;
 }
 
+:global(.dark) .store-name {
+  color: #d1d5db;
+}
+
 .check-icon {
   position: absolute;
   top: 8px;
   right: 8px;
   font-size: 16px;
   color: #1890ff;
+}
+
+:global(.dark) .check-icon {
+  color: #6366f1;
 }
 
 /* Scrollbar Styling */
@@ -216,12 +250,24 @@ function getStoreColor(index: number): string {
   border-radius: 3px;
 }
 
+:global(.dark) .store-grid::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
 .store-grid::-webkit-scrollbar-thumb {
   background: #bfbfbf;
   border-radius: 3px;
 }
 
+:global(.dark) .store-grid::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
 .store-grid::-webkit-scrollbar-thumb:hover {
   background: #8c8c8c;
+}
+
+:global(.dark) .store-grid::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }
 </style>

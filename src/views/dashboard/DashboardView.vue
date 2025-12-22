@@ -109,7 +109,11 @@ const orderColumns = [
         <p>Welcome back! Here's what's happening with your store.</p>
       </div>
       <div class="header-right">
-        <a-radio-group v-model:value="selectedPeriod" button-style="solid" @change="handlePeriodChange(selectedPeriod)">
+        <a-radio-group
+          v-model:value="selectedPeriod"
+          button-style="solid"
+          @change="handlePeriodChange(selectedPeriod)"
+        >
           <a-radio-button value="today">Today</a-radio-button>
           <a-radio-button value="week">Week</a-radio-button>
           <a-radio-button value="month">Month</a-radio-button>
@@ -178,8 +182,15 @@ const orderColumns = [
                   <span class="stat-value">{{ formatCurrency(sales?.totalRevenue || 0) }}</span>
                 </div>
                 <a-divider type="vertical" />
-                <div class="stat-item" :class="{ 'positive': (sales?.comparison?.growthPercentage || 0) >= 0 }">
-                  <component :is="(sales?.comparison?.growthPercentage || 0) >= 0 ? RiseOutlined : FallOutlined" />
+                <div
+                  class="stat-item"
+                  :class="{ positive: (sales?.comparison?.growthPercentage || 0) >= 0 }"
+                >
+                  <component
+                    :is="
+                      (sales?.comparison?.growthPercentage || 0) >= 0 ? RiseOutlined : FallOutlined
+                    "
+                  />
                   <span>{{ Math.abs(sales?.comparison?.growthPercentage || 0).toFixed(1) }}%</span>
                 </div>
               </div>
@@ -237,18 +248,14 @@ const orderColumns = [
             <template #extra>
               <router-link to="/products">View All</router-link>
             </template>
-            <a-list
-              :data-source="topProducts"
-              item-layout="horizontal"
-              :split="false"
-            >
+            <a-list :data-source="topProducts" item-layout="horizontal" :split="false">
               <template #renderItem="{ item, index }">
                 <a-list-item>
                   <a-list-item-meta>
                     <template #avatar>
-                      <a-avatar 
-                        :style="{ 
-                          background: `linear-gradient(135deg, ${['#667eea', '#52c41a', '#fa8c16', '#eb2f96', '#722ed1'][index % 5]} 0%, ${['#764ba2', '#389e0d', '#d46b08', '#c41d7f', '#531dab'][index % 5]} 100%)` 
+                      <a-avatar
+                        :style="{
+                          background: `linear-gradient(135deg, ${['#667eea', '#52c41a', '#fa8c16', '#eb2f96', '#722ed1'][index % 5]} 0%, ${['#764ba2', '#389e0d', '#d46b08', '#c41d7f', '#531dab'][index % 5]} 100%)`,
                         }"
                       >
                         {{ index + 1 }}
@@ -265,7 +272,12 @@ const orderColumns = [
                         <a-divider type="vertical" />
                         <span>{{ formatCurrency(item.revenue) }}</span>
                         <a-divider type="vertical" />
-                        <a-rate :value="item.averageRating" disabled allow-half :style="{ fontSize: '12px' }" />
+                        <a-rate
+                          :value="item.averageRating"
+                          disabled
+                          allow-half
+                          :style="{ fontSize: '12px' }"
+                        />
                       </div>
                     </template>
                   </a-list-item-meta>
@@ -282,7 +294,10 @@ const orderColumns = [
         <a-col :xs="24" :lg="12">
           <a-card title="Low Stock Alerts" :bordered="false" class="alert-card">
             <template #extra>
-              <a-badge :count="lowStockAlerts.length" :number-style="{ backgroundColor: '#ff4d4f' }" />
+              <a-badge
+                :count="lowStockAlerts.length"
+                :number-style="{ backgroundColor: '#ff4d4f' }"
+              />
             </template>
             <a-list
               v-if="lowStockAlerts.length > 0"
@@ -294,7 +309,12 @@ const orderColumns = [
                 <a-list-item>
                   <a-list-item-meta>
                     <template #avatar>
-                      <WarningOutlined :style="{ fontSize: '20px', color: getStockStatusColor(item.status) === 'red' ? '#ff4d4f' : '#faad14' }" />
+                      <WarningOutlined
+                        :style="{
+                          fontSize: '20px',
+                          color: getStockStatusColor(item.status) === 'red' ? '#ff4d4f' : '#faad14',
+                        }"
+                      />
                     </template>
                     <template #title>
                       {{ item.productName }}
@@ -323,7 +343,13 @@ const orderColumns = [
               <a-timeline-item
                 v-for="activity in recentActivity.slice(0, 6)"
                 :key="activity.entityId + activity.timestamp"
-                :color="activity.type === 'order' ? 'green' : activity.type === 'payment' ? 'blue' : 'gray'"
+                :color="
+                  activity.type === 'order'
+                    ? 'green'
+                    : activity.type === 'payment'
+                      ? 'blue'
+                      : 'gray'
+                "
               >
                 <template #dot>
                   <component :is="getActivityIcon(activity.type)" style="font-size: 16px" />
@@ -361,9 +387,17 @@ const orderColumns = [
   margin: 0 0 4px 0;
 }
 
+:global(.dark) .header-left h1 {
+  color: #f3f4f6;
+}
+
 .header-left p {
   color: #8c8c8c;
   margin: 0;
+}
+
+:global(.dark) .header-left p {
+  color: #9ca3af;
 }
 
 .header-right {
@@ -405,9 +439,17 @@ const orderColumns = [
   font-size: 13px;
 }
 
+:global(.dark) .stat-label {
+  color: #9ca3af;
+}
+
 .stat-value {
   font-weight: 600;
   color: #262626;
+}
+
+:global(.dark) .stat-value {
+  color: #f3f4f6;
 }
 
 .stat-item.positive {
@@ -438,6 +480,10 @@ const orderColumns = [
   color: #8c8c8c;
 }
 
+:global(.dark) .product-stats {
+  color: #9ca3af;
+}
+
 .bottom-row :deep(.ant-card) {
   height: 100%;
 }
@@ -447,6 +493,10 @@ const orderColumns = [
   font-size: 13px;
 }
 
+:global(.dark) .variant-name {
+  color: #9ca3af;
+}
+
 .stock-status {
   margin-left: 8px;
   text-transform: capitalize;
@@ -454,15 +504,27 @@ const orderColumns = [
   font-size: 13px;
 }
 
+:global(.dark) .stock-status {
+  color: #9ca3af;
+}
+
 .activity-description {
   margin: 0;
   color: #262626;
+}
+
+:global(.dark) .activity-description {
+  color: #f3f4f6;
 }
 
 .activity-time {
   margin: 4px 0 0 0;
   font-size: 12px;
   color: #8c8c8c;
+}
+
+:global(.dark) .activity-time {
+  color: #9ca3af;
 }
 
 .alert-card :deep(.ant-list-item) {

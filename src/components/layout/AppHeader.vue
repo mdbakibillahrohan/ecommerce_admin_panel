@@ -19,7 +19,7 @@ const emit = defineEmits<{
   <header class="app-header">
     <div class="header-left">
       <a-button type="text" class="collapse-btn" @click="emit('toggle-sidebar')">
-        <MenuUnfoldOutlined v-if="collapsed" />
+        <MenuUnfoldOutlined v-if="props.collapsed" />
         <MenuFoldOutlined v-else />
       </a-button>
       <GlobalSearch />
