@@ -1,29 +1,31 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { storesApi, type Store } from '@/api/stores'
 import { PlusOutlined, EditOutlined, TeamOutlined, SettingOutlined } from '@ant-design/icons-vue'
-import { message } from 'ant-design-vue'
+import { useStoreStore } from '@/stores/store'
 
 const router = useRouter()
 const loading = ref(false)
-const stores = ref<Store[]>([])
 
-onMounted(() => {
-  fetchStores()
-})
+const storeStore = useStoreStore();
 
-async function fetchStores() {
-  loading.value = true
+const getUserStoreList = async () => {
+  loading.value = true;
   try {
-    stores.value = await storesApi.getAll()
-  } catch (error) {
-    message.error('Failed to fetch stores')
-    console.error(error)
+    await storeStore.fetchCurrentUserStores()
+  } catch (err: any) {
+    console.error(err)
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
+
+onMounted(async () => {
+  await getUserStoreList();
+})
+
+
 
 function handleCreate() {
   router.push('/stores/create')
@@ -49,7 +51,9 @@ function handleManage(id: number) {
       </div>
       <div class="header-right">
         <a-button type="primary" @click="handleCreate">
-          <template #icon><PlusOutlined /></template>
+          <template #icon>
+            <PlusOutlined />
+          </template>
           Create Store
         </a-button>
       </div>
@@ -57,7 +61,7 @@ function handleManage(id: number) {
 
     <a-spin :spinning="loading">
       <div class="stores-grid">
-        <a-card v-for="store in stores" :key="store.id" class="store-card" hoverable>
+        <a-card v-for="store in storeStore.stores" :key="store.id" class="store-card" hoverable>
           <template #actions>
             <a-tooltip title="Settings">
               <SettingOutlined key="setting" @click="handleEdit(store.id)" />
@@ -85,14 +89,11 @@ function handleManage(id: number) {
             </template>
           </a-card-meta>
         </a-card>
-        
+
         <!-- Empty State -->
-        <a-empty
-          v-if="!loading && stores.length === 0"
-          image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
-          :image-style="{ height: '60px' }"
-          description="You haven't created any stores yet"
-        >
+        <a-empty v-if="!loading && storeStore.stores.length === 0"
+          image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg" :image-style="{ height: '60px' }"
+          description="You haven't created any stores yet">
           <a-button type="primary" @click="handleCreate">Create Now</a-button>
         </a-empty>
       </div>

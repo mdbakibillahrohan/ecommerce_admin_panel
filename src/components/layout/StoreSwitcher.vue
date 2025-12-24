@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { storesApi, type Store } from '@/api/stores'
+import { type Store } from '@/api/stores'
 import { AppstoreOutlined, PlusOutlined, CheckCircleFilled } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
@@ -13,26 +13,6 @@ const loading = ref(false)
 
 const activeStoreName = computed(() => authStore.activeStore?.name || 'Select Store')
 
-onMounted(() => {
-  fetchStores()
-})
-
-async function fetchStores() {
-  loading.value = true
-  try {
-    const data = await storesApi.getAll()
-    stores.value = data
-
-    // Auto-select first store if none selected and stores exist
-    if (!authStore.activeStore && data.length > 0) {
-      authStore.setActiveStore(data[0])
-    }
-  } catch (error) {
-    console.error('Failed to fetch stores', error)
-  } finally {
-    loading.value = false
-  }
-}
 
 function handleStoreSelect(store: Store) {
   authStore.setActiveStore(store)
@@ -71,7 +51,9 @@ function getStoreColor(index: number): string {
 <template>
   <a-dropdown :trigger="['click']" placement="bottomRight">
     <a-button>
-      <template #icon><AppstoreOutlined /></template>
+      <template #icon>
+        <AppstoreOutlined />
+      </template>
       {{ activeStoreName }}
     </a-button>
 
@@ -84,13 +66,8 @@ function getStoreColor(index: number): string {
         <a-spin :spinning="loading">
           <div class="store-grid">
             <!-- Store Items -->
-            <div
-              v-for="(store, index) in stores"
-              :key="store.id"
-              class="store-item"
-              :class="{ active: authStore.activeStore?.id === store.id }"
-              @click="handleStoreSelect(store)"
-            >
+            <div v-for="(store, index) in stores" :key="store.id" class="store-item"
+              :class="{ active: authStore.activeStore?.id === store.id }" @click="handleStoreSelect(store)">
               <div class="store-icon" :style="{ backgroundColor: getStoreColor(index) }">
                 {{ getStoreInitials(store.name) }}
               </div>

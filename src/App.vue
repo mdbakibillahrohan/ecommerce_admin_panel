@@ -11,7 +11,7 @@ const themeConfig = computed(() => ({
   algorithm: themeStore.isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
   token: {
     colorPrimary: '#6366f1',
-    borderRadius: 8,
+    borderRadius: 5,
     fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
     // Dark mode specific tokens
     ...(themeStore.isDark && {

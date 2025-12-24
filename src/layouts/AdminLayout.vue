@@ -1,8 +1,11 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 // Sidebar state
 const collapsed = ref(false)
@@ -14,14 +17,28 @@ const SIDEBAR_COLLAPSED_WIDTH = 80
 const sidebarWidth = computed(() => (collapsed.value ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH))
 
 const userStore = useUserStore();
+const authStore = useAuthStore();
+
+const router = useRouter();
 
 function toggleSidebar() {
   collapsed.value = !collapsed.value
 }
 
-onMounted(async () => {
-  await userStore.fetchLoggedInUser();
+const getUserData = async () => {
+  try {
+    await userStore.fetchLoggedInUser();
+  } catch (error: any) {
+    if (error) {
+      authStore.logout();
+      router.push("/login");
 
+    }
+  }
+}
+
+onMounted(async () => {
+  await getUserData();
 });
 
 </script>

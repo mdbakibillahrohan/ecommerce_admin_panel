@@ -1,3 +1,5 @@
+<!-- eslint-disable vue/valid-v-for -->
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -5,6 +7,7 @@ import { storesApi, type CreateStoreDto } from '@/api/stores'
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import type { FormInstance } from 'ant-design-vue'
+import { useStoreStore } from '@/stores/store'
 
 const router = useRouter()
 const route = useRoute()
@@ -15,6 +18,8 @@ const storeId = computed(() => route.params.id ? Number(route.params.id) : null)
 const loading = ref(false)
 const saving = ref(false)
 const formRef = ref<FormInstance>()
+
+const storeStore = useStoreStore();
 
 const formState = ref<CreateStoreDto>({
   name: '',
@@ -41,6 +46,7 @@ onMounted(async () => {
   if (isEdit.value && storeId.value) {
     await fetchStore(storeId.value)
   }
+  await getCategoryStore();
 })
 
 async function fetchStore(id: number) {
@@ -79,7 +85,7 @@ async function handleSubmit() {
       await storesApi.create(formState.value)
       message.success('Store created successfully')
     }
-    
+
     router.push('/stores')
   } catch (error: any) {
     if (error.errorFields) {
@@ -100,6 +106,10 @@ function generateSlug() {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
+
+const getCategoryStore = async()=>{
+  await storeStore.fetStoreCategories();
+}
 </script>
 
 <template>
@@ -109,7 +119,9 @@ function generateSlug() {
       <div class="page-header">
         <div class="header-left">
           <a-button type="text" @click="router.push('/stores')">
-            <template #icon><ArrowLeftOutlined /></template>
+            <template #icon>
+              <ArrowLeftOutlined />
+            </template>
           </a-button>
           <div>
             <h1>{{ isEdit ? 'Edit Store' : 'Create New Store' }}</h1>
@@ -120,7 +132,9 @@ function generateSlug() {
           <a-space>
             <a-button @click="router.push('/stores')">Cancel</a-button>
             <a-button type="primary" :loading="saving" @click="handleSubmit">
-              <template #icon><SaveOutlined /></template>
+              <template #icon>
+                <SaveOutlined />
+              </template>
               {{ isEdit ? 'Update' : 'Create' }} Store
             </a-button>
           </a-space>
@@ -129,12 +143,7 @@ function generateSlug() {
 
       <!-- Form -->
       <a-card :bordered="false" class="form-card">
-        <a-form
-          ref="formRef"
-          :model="formState"
-          :rules="rules"
-          layout="vertical"
-        >
+        <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical">
           <a-row :gutter="24">
             <a-col :xs="24" :md="12">
               <a-form-item label="Store Name" name="name">
@@ -144,7 +153,7 @@ function generateSlug() {
             <a-col :xs="24" :md="12">
               <a-form-item label="URL Slug" name="slug" extra="This will be used in your store URL">
                 <a-input v-model:value="formState.slug">
-                  <template #addonBefore>store.com/</template>
+                  <template #addonAfter>adaptixinnovate.com</template>
                 </a-input>
               </a-form-item>
             </a-col>
@@ -152,9 +161,7 @@ function generateSlug() {
             <a-col :xs="24" :md="12">
               <a-form-item label="Category" name="store_category_id">
                 <a-select v-model:value="formState.store_category_id">
-                  <a-select-option :value="1">General</a-select-option>
-                  <a-select-option :value="2">Fashion</a-select-option>
-                  <a-select-option :value="3">Electronics</a-select-option>
+                  <a-select-option v-for="storeCategory in storeStore.storeCategories" :key="storeCategory.id" :value="storeCategory.id">{{ storeCategory.name }}</a-select-option>
                   <!-- Should ideally fetch from API -->
                 </a-select>
               </a-form-item>
