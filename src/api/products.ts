@@ -1,213 +1,227 @@
-import api from './index'
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+
+import api from '@/config/http.config'
 
 export interface Product {
-    id: number
-    product_type: 'PHYSICAL' | 'DIGITAL'
-    name: string
-    slug: string
-    description: string | null
-    short_description: string | null
-    base_price: number
-    sale_price: number | null
-    currency: string
-    sku: string | null
-    thumbnail_id: number | null
-    category_id: number | null
-    is_featured: boolean
-    is_published: boolean
-    stock_quantity: number
-    low_stock_threshold: number
-    track_inventory: boolean
-    average_rating: number
-    review_count: number
-    meta_title: string | null
-    meta_description: string | null
-    created_at: string
-    updated_at: string
-    category?: Category
-    thumbnail?: File
-    variants?: ProductVariant[]
-    images?: ProductImage[]
+  id: number
+  product_type: 'PHYSICAL' | 'DIGITAL'
+  name: string
+  slug: string
+  description: string | null
+  short_description: string | null
+  base_price: number
+  sale_price: number | null
+  currency: string
+  sku: string | null
+  thumbnail_id: number | null
+  category_id: number | null
+  is_featured: boolean
+  is_published: boolean
+  stock_quantity: number
+  low_stock_threshold: number
+  track_inventory: boolean
+  average_rating: number
+  review_count: number
+  meta_title: string | null
+  meta_description: string | null
+  created_at: string
+  updated_at: string
+  category?: Category
+  thumbnail?: File
+  variants?: ProductVariant[]
+  images?: ProductImage[]
 }
 
 export interface ProductVariant {
-    id: number
-    product_id: number
-    name: string
-    sku: string | null
-    price: number
-    stock_quantity: number
-    attributes: Record<string, string>
-    is_active: boolean
+  id: number
+  product_id: number
+  name: string
+  sku: string | null
+  price: number
+  stock_quantity: number
+  attributes: Record<string, string>
+  is_active: boolean
 }
 
 export interface ProductImage {
-    id: number
-    product_id: number
-    image_url: string
-    alt_text: string | null
-    sort_order: number
-    is_primary: boolean
+  id: number
+  product_id: number
+  image_url: string
+  alt_text: string | null
+  sort_order: number
+  is_primary: boolean
 }
 
 export interface Category {
-    id: number
-    category_name: string
-    slug: string
-    description: string | null
-    parent_id: number | null
-    image_id: number | null
-    sort_order: number
-    is_featured: boolean
-    children?: Category[]
+  id: number
+  category_name: string
+  slug: string
+  description: string | null
+  parent_id: number | null
+  image_id: number | null
+  sort_order: number
+  is_featured: boolean
+  children?: Category[]
 }
 
 export interface File {
-    id: number
-    url: string
-    filename: string
+  id: number
+  url: string
+  filename: string
 }
 
 export interface CreateProductDto {
-    product_type?: 'PHYSICAL' | 'DIGITAL'
-    name: string
-    slug?: string
-    description?: string
-    short_description?: string
-    base_price: number
-    sale_price?: number
-    currency?: string
-    sku?: string
-    thumbnail_id?: number
-    category_id?: number
-    is_featured?: boolean
-    is_published?: boolean
-    stock_quantity?: number
-    low_stock_threshold?: number
-    track_inventory?: boolean
-    meta_title?: string
-    meta_description?: string
+  product_type?: 'PHYSICAL' | 'DIGITAL'
+  name: string
+  slug?: string
+  description?: string
+  short_description?: string
+  base_price: number
+  sale_price?: number
+  currency?: string
+  sku?: string
+  thumbnail_id?: number
+  category_id?: number
+  is_featured?: boolean
+  is_published?: boolean
+  stock_quantity?: number
+  low_stock_threshold?: number
+  track_inventory?: boolean
+  meta_title?: string
+  meta_description?: string
 }
 
-export interface UpdateProductDto extends Partial<CreateProductDto> { }
+export interface UpdateProductDto extends Partial<CreateProductDto> {}
 
 export interface ProductQuery {
-    page?: number
-    limit?: number
-    search?: string
-    category_id?: number
-    is_featured?: boolean
-    is_published?: boolean
-    min_price?: number
-    max_price?: number
-    sort_by?: string
-    sort_order?: 'ASC' | 'DESC'
+  page?: number
+  limit?: number
+  search?: string
+  category_id?: number
+  is_featured?: boolean
+  is_published?: boolean
+  min_price?: number
+  max_price?: number
+  sort_by?: string
+  sort_order?: 'ASC' | 'DESC'
 }
 
 export interface PaginatedResponse<T> {
-    data: T[]
-    total: number
-    page: number
-    limit: number
-    totalPages: number
+  data: T[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
 }
 
 export interface CreateVariantDto {
-    name: string
-    sku?: string
-    price: number
-    stock_quantity?: number
-    attributes?: Record<string, string>
-    is_active?: boolean
+  name: string
+  sku?: string
+  price: number
+  stock_quantity?: number
+  attributes?: Record<string, string>
+  is_active?: boolean
 }
 
-export interface UpdateVariantDto extends Partial<CreateVariantDto> { }
+export interface UpdateVariantDto extends Partial<CreateVariantDto> {}
 
 export interface AddProductImageDto {
-    image_url: string
-    alt_text?: string
-    sort_order?: number
-    is_primary?: boolean
+  image_url: string
+  alt_text?: string
+  sort_order?: number
+  is_primary?: boolean
 }
 
 export const productsApi = {
-    // Product CRUD
-    getAll: async (query?: ProductQuery): Promise<PaginatedResponse<Product>> => {
-        const response = await api.get<PaginatedResponse<Product>>('/products', { params: query })
-        return response.data
-    },
+  // Product CRUD
+  getAll: async (query?: ProductQuery): Promise<PaginatedResponse<Product>> => {
+    const response = await api.get<PaginatedResponse<Product>>('/products', { params: query })
+    return response.data
+  },
 
-    getById: async (id: number): Promise<Product> => {
-        const response = await api.get<Product>(`/products/${id}`)
-        return response.data
-    },
+  getById: async (id: number): Promise<Product> => {
+    const response = await api.get<Product>(`/products/${id}`)
+    return response.data
+  },
 
-    getBySlug: async (slug: string): Promise<Product> => {
-        const response = await api.get<Product>(`/products/slug/${slug}`)
-        return response.data
-    },
+  getBySlug: async (slug: string): Promise<Product> => {
+    const response = await api.get<Product>(`/products/slug/${slug}`)
+    return response.data
+  },
 
-    create: async (data: CreateProductDto): Promise<Product> => {
-        const response = await api.post<Product>('/products', data)
-        return response.data
-    },
+  create: async (data: CreateProductDto): Promise<Product> => {
+    const response = await api.post<Product>('/products', data)
+    return response.data
+  },
 
-    update: async (id: number, data: UpdateProductDto): Promise<Product> => {
-        const response = await api.patch<Product>(`/products/${id}`, data)
-        return response.data
-    },
+  update: async (id: number, data: UpdateProductDto): Promise<Product> => {
+    const response = await api.patch<Product>(`/products/${id}`, data)
+    return response.data
+  },
 
-    delete: async (id: number): Promise<void> => {
-        await api.delete(`/products/${id}`)
-    },
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/products/${id}`)
+  },
 
-    getFeatured: async (limit?: number): Promise<Product[]> => {
-        const response = await api.get<Product[]>('/products/featured', { params: { limit } })
-        return response.data
-    },
+  getFeatured: async (limit?: number): Promise<Product[]> => {
+    const response = await api.get<Product[]>('/products/featured', { params: { limit } })
+    return response.data
+  },
 
-    getRelated: async (id: number, limit?: number): Promise<Product[]> => {
-        const response = await api.get<Product[]>(`/products/${id}/related`, { params: { limit } })
-        return response.data
-    },
+  getRelated: async (id: number, limit?: number): Promise<Product[]> => {
+    const response = await api.get<Product[]>(`/products/${id}/related`, { params: { limit } })
+    return response.data
+  },
 
-    // Variants
-    getVariants: async (productId: number): Promise<ProductVariant[]> => {
-        const response = await api.get<ProductVariant[]>(`/products/${productId}/variants`)
-        return response.data
-    },
+  // Variants
+  getVariants: async (productId: number): Promise<ProductVariant[]> => {
+    const response = await api.get<ProductVariant[]>(`/products/${productId}/variants`)
+    return response.data
+  },
 
-    addVariant: async (productId: number, data: CreateVariantDto): Promise<ProductVariant> => {
-        const response = await api.post<ProductVariant>(`/products/${productId}/variants`, data)
-        return response.data
-    },
+  addVariant: async (productId: number, data: CreateVariantDto): Promise<ProductVariant> => {
+    const response = await api.post<ProductVariant>(`/products/${productId}/variants`, data)
+    return response.data
+  },
 
-    updateVariant: async (productId: number, variantId: number, data: UpdateVariantDto): Promise<ProductVariant> => {
-        const response = await api.patch<ProductVariant>(`/products/${productId}/variants/${variantId}`, data)
-        return response.data
-    },
+  updateVariant: async (
+    productId: number,
+    variantId: number,
+    data: UpdateVariantDto,
+  ): Promise<ProductVariant> => {
+    const response = await api.patch<ProductVariant>(
+      `/products/${productId}/variants/${variantId}`,
+      data,
+    )
+    return response.data
+  },
 
-    deleteVariant: async (productId: number, variantId: number): Promise<void> => {
-        await api.delete(`/products/${productId}/variants/${variantId}`)
-    },
+  deleteVariant: async (productId: number, variantId: number): Promise<void> => {
+    await api.delete(`/products/${productId}/variants/${variantId}`)
+  },
 
-    // Images
-    getImages: async (productId: number): Promise<ProductImage[]> => {
-        const response = await api.get<ProductImage[]>(`/products/${productId}/images`)
-        return response.data
-    },
+  // Images
+  getImages: async (productId: number): Promise<ProductImage[]> => {
+    const response = await api.get<ProductImage[]>(`/products/${productId}/images`)
+    return response.data
+  },
 
-    addImage: async (productId: number, data: AddProductImageDto): Promise<ProductImage> => {
-        const response = await api.post<ProductImage>(`/products/${productId}/images`, data)
-        return response.data
-    },
+  addImage: async (productId: number, data: AddProductImageDto): Promise<ProductImage> => {
+    const response = await api.post<ProductImage>(`/products/${productId}/images`, data)
+    return response.data
+  },
 
-    addMultipleImages: async (productId: number, images: AddProductImageDto[]): Promise<ProductImage[]> => {
-        const response = await api.post<ProductImage[]>(`/products/${productId}/images/bulk`, { images })
-        return response.data
-    },
+  addMultipleImages: async (
+    productId: number,
+    images: AddProductImageDto[],
+  ): Promise<ProductImage[]> => {
+    const response = await api.post<ProductImage[]>(`/products/${productId}/images/bulk`, {
+      images,
+    })
+    return response.data
+  },
 
-    deleteImage: async (productId: number, imageId: number): Promise<void> => {
-        await api.delete(`/products/${productId}/images/${imageId}`)
-    },
+  deleteImage: async (productId: number, imageId: number): Promise<void> => {
+    await api.delete(`/products/${productId}/images/${imageId}`)
+  },
 }

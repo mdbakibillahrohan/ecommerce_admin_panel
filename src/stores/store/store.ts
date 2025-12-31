@@ -7,6 +7,7 @@ export function useStoreStore() {
   return defineStore('store', () => {
     const stores = ref<IStore[]>([])
     const storeCategories = ref<IStoreCategory[]>([])
+    const activeStore = ref<IStore | null>(null)
 
     const fetchCurrentUserStores = async () => {
       const storeListRes = await api.get<IStore[]>('/stores')
@@ -24,11 +25,17 @@ export function useStoreStore() {
       return storeCategoryListRes
     }
 
+    const setActiveStore = (active: IStore) => {
+      activeStore.value = active
+    }
+
     return {
       stores,
       storeCategories,
+      activeStore,
       fetchCurrentUserStores,
       fetStoreCategories,
+      setActiveStore,
     }
   })()
 }

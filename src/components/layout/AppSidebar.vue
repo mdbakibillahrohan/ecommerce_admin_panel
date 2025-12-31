@@ -16,6 +16,9 @@ import {
   SearchOutlined,
   DownOutlined,
   RightOutlined,
+  CodepenOutlined,
+  BookOutlined,
+  CloudOutlined,
   // MenuOutlined,
   // WalletOutlined,
   // TransactionOutlined,
@@ -101,6 +104,35 @@ const menuGroups: MenuGroup[] = [
         label: 'Coupons',
         path: '/coupons',
       },
+    ],
+  },
+  {
+    key: 'promotion',
+    label: 'Promotion Management',
+    items: [
+      {
+        key: 'campaigns',
+        icon: CodepenOutlined,
+        label: 'Campaigns',
+        path: '/campaigns',
+        children: [
+          { key: 'basic-campaigns', label: 'Basic Campaigns', path: '/campaigns' },
+          { key: 'item-campaigns', label: 'Item Campaigns', path: '/coupons' },
+          { key: 'coupon-campaigns', label: 'Coupon Campaigns', path: '/coupons' },
+        ],
+      },
+      {
+        key: 'banner',
+        icon: BookOutlined,
+        label: 'Banner',
+        path: '/banner',
+      },
+      {
+        key: 'advertisement',
+        icon: CloudOutlined,
+        label: 'Advertisement',
+        path: '/advertisement',
+      }
     ],
   },
   {

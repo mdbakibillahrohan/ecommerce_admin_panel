@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export interface OverviewStats {
   totalUsers: number
   totalOrders: number
@@ -86,10 +87,10 @@ export interface LowStockAlert {
   variantName: string | null
   currentStock: number
   threshold: number
-  status: "out_of_stock" | "critical" | "low"
+  status: 'out_of_stock' | 'critical' | 'low'
 }
 export interface RecentActivity {
-  type: "order" | "user" | "product" | "review" | "payment"
+  type: 'order' | 'user' | 'product' | 'review' | 'payment'
   description: string
   entityId: number
   timestamp: string
@@ -114,7 +115,7 @@ export interface DashboardResponse {
   lowStockAlerts: LowStockAlert[]
   recentActivity: RecentActivity[]
 }
-export type DashboardPeriod = "today" | "week" | "month" | "quarter" | "year" | "custom"
+export type DashboardPeriod = 'today' | 'week' | 'month' | 'quarter' | 'year' | 'custom'
 export interface DashboardQuery {
   period?: DashboardPeriod
   startDate?: string
@@ -123,7 +124,8 @@ export interface DashboardQuery {
 
 // Direct export of the API object
 export const dashboardApi = {
-  getFullDashboard: async (_query?: DashboardQuery): Promise<DashboardResponse> => ({}) as DashboardResponse,
+  getFullDashboard: async (_query?: DashboardQuery): Promise<DashboardResponse> =>
+    ({}) as DashboardResponse,
   getOverviewStats: async (): Promise<OverviewStats> => ({}) as OverviewStats,
   getOrderStats: async (): Promise<OrderStats> => ({}) as OrderStats,
   getSalesStats: async (_query?: DashboardQuery): Promise<SalesStats> => ({}) as SalesStats,

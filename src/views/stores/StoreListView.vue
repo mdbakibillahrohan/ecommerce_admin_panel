@@ -3,7 +3,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { PlusOutlined, EditOutlined, TeamOutlined, SettingOutlined } from '@ant-design/icons-vue'
-import { useStoreStore } from '@/stores/store'
+import { useStoreStore } from '@/stores/store/store'
 
 const router = useRouter()
 const loading = ref(false)

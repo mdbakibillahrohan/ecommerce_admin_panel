@@ -7,7 +7,7 @@ import { storesApi, type CreateStoreDto } from '@/api/stores'
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import type { FormInstance } from 'ant-design-vue'
-import { useStoreStore } from '@/stores/store'
+import { useStoreStore } from '@/stores/store/store'
 
 const router = useRouter()
 const route = useRoute()
@@ -107,7 +107,7 @@ function generateSlug() {
     .replace(/^-+|-+$/g, '')
 }
 
-const getCategoryStore = async()=>{
+const getCategoryStore = async () => {
   await storeStore.fetStoreCategories();
 }
 </script>
@@ -161,7 +161,8 @@ const getCategoryStore = async()=>{
             <a-col :xs="24" :md="12">
               <a-form-item label="Category" name="store_category_id">
                 <a-select v-model:value="formState.store_category_id">
-                  <a-select-option v-for="storeCategory in storeStore.storeCategories" :key="storeCategory.id" :value="storeCategory.id">{{ storeCategory.name }}</a-select-option>
+                  <a-select-option v-for="storeCategory in storeStore.storeCategories" :key="storeCategory.id"
+                    :value="storeCategory.id">{{ storeCategory.name }}</a-select-option>
                   <!-- Should ideally fetch from API -->
                 </a-select>
               </a-form-item>

@@ -1,23 +1,26 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { type Store } from '@/api/stores'
 import { AppstoreOutlined, PlusOutlined, CheckCircleFilled } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
+import { useStoreStore } from '@/stores/store/store'
+import type { IStore } from '@/intefaces/store/store.interface'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const stores = ref<Store[]>([])
 const loading = ref(false)
+
+const storeStore = useStoreStore();
 
 const activeStoreName = computed(() => authStore.activeStore?.name || 'Select Store')
 
 
-function handleStoreSelect(store: Store) {
+function handleStoreSelect(store: IStore) {
   authStore.setActiveStore(store)
   message.success(`Switched to ${store.name}`)
-  window.location.reload() // Reload to ensure all data is refreshed for new store context
+  storeStore.setActiveStore(store);
+  // window.location.reload() // Reload to ensure all data is refreshed for new store context
 }
 
 function handleCreateStore() {
@@ -66,7 +69,7 @@ function getStoreColor(index: number): string {
         <a-spin :spinning="loading">
           <div class="store-grid">
             <!-- Store Items -->
-            <div v-for="(store, index) in stores" :key="store.id" class="store-item"
+            <div v-for="(store, index) in storeStore.stores" :key="store.id" class="store-item"
               :class="{ active: authStore.activeStore?.id === store.id }" @click="handleStoreSelect(store)">
               <div class="store-icon" :style="{ backgroundColor: getStoreColor(index) }">
                 {{ getStoreInitials(store.name) }}

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Auth API types
 export interface LoginRequest {
   username: string
@@ -28,12 +30,12 @@ const authApiMethods = {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
-          access_token: "mock-token-" + Date.now(),
+          access_token: 'mock-token-' + Date.now(),
           user: {
             id: 1,
             email: data.username,
-            first_name: "Admin",
-            last_name: "User",
+            first_name: 'Admin',
+            last_name: 'User',
           },
         })
       }, 500)

@@ -6,6 +6,7 @@ import AppHeader from '@/components/layout/AppHeader.vue'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useStoreStore } from '@/stores/store/store'
 
 // Sidebar state
 const collapsed = ref(false)
@@ -18,6 +19,7 @@ const sidebarWidth = computed(() => (collapsed.value ? SIDEBAR_COLLAPSED_WIDTH :
 
 const userStore = useUserStore();
 const authStore = useAuthStore();
+const storeStore = useStoreStore();
 
 const router = useRouter();
 
@@ -39,6 +41,7 @@ const getUserData = async () => {
 
 onMounted(async () => {
   await getUserData();
+  await storeStore.fetchCurrentUserStores();
 });
 
 </script>
