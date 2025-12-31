@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { billingApi, type Plan, type StoreSubscription } from '@/api/billing'
-import { CheckOutlined, CrownOutlined, CheckCircleFilled } from '@ant-design/icons-vue'
+import { CheckOutlined, CheckCircleFilled } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 
 const authStore = useAuthStore()
@@ -92,12 +92,8 @@ function isCurrentPlan(planId: number) {
       <!-- Plans Grid -->
       <h2 class="section-title">Available Plans</h2>
       <div class="plans-grid">
-        <div 
-          v-for="plan in plans" 
-          :key="plan.id" 
-          class="plan-card"
-          :class="{ 'featured': plan.name === 'Pro', 'current': isCurrentPlan(plan.id) }"
-        >
+        <div v-for="plan in plans" :key="plan.id" class="plan-card"
+          :class="{ 'featured': plan.name === 'Pro', 'current': isCurrentPlan(plan.id) }">
           <div class="plan-header">
             <div class="plan-name">{{ plan.name }}</div>
             <div class="plan-price">
@@ -106,7 +102,7 @@ function isCurrentPlan(planId: number) {
               <span class="period">/mo</span>
             </div>
           </div>
-          
+
           <div class="plan-features">
             <div v-for="feature in plan.features" :key="feature" class="feature-item">
               <CheckOutlined class="check-icon" />
@@ -118,15 +114,8 @@ function isCurrentPlan(planId: number) {
             <div v-if="isCurrentPlan(plan.id)" class="current-badge">
               <CheckCircleFilled /> Current Plan
             </div>
-            <a-button 
-              v-else
-              type="primary" 
-              block 
-              size="large"
-              :class="{ 'featured-btn': plan.name === 'Pro' }"
-              :loading="processing"
-              @click="handleSubscribe(plan, 'monthly')"
-            >
+            <a-button v-else type="primary" block size="large" :class="{ 'featured-btn': plan.name === 'Pro' }"
+              :loading="processing" @click="handleSubscribe(plan, 'monthly')">
               {{ plan.monthly_price === 0 ? 'Start Free' : 'Upgrade' }}
             </a-button>
           </div>

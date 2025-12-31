@@ -19,9 +19,7 @@ import {
   CodepenOutlined,
   BookOutlined,
   CloudOutlined,
-  // MenuOutlined,
-  // WalletOutlined,
-  // TransactionOutlined,
+  ToolOutlined,
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
@@ -104,35 +102,12 @@ const menuGroups: MenuGroup[] = [
         label: 'Coupons',
         path: '/coupons',
       },
-    ],
-  },
-  {
-    key: 'promotion',
-    label: 'Promotion Management',
-    items: [
       {
-        key: 'campaigns',
+        key: 'promotions',
         icon: CodepenOutlined,
-        label: 'Campaigns',
-        path: '/campaigns',
-        children: [
-          { key: 'basic-campaigns', label: 'Basic Campaigns', path: '/campaigns' },
-          { key: 'item-campaigns', label: 'Item Campaigns', path: '/coupons' },
-          { key: 'coupon-campaigns', label: 'Coupon Campaigns', path: '/coupons' },
-        ],
+        label: 'Promotions',
+        path: '/promotions',
       },
-      {
-        key: 'banner',
-        icon: BookOutlined,
-        label: 'Banner',
-        path: '/banner',
-      },
-      {
-        key: 'advertisement',
-        icon: CloudOutlined,
-        label: 'Advertisement',
-        path: '/advertisement',
-      }
     ],
   },
   {
@@ -151,7 +126,37 @@ const menuGroups: MenuGroup[] = [
         label: 'Reviews',
         path: '/reviews',
       },
+      {
+        key: 'team',
+        icon: UserOutlined, // Reusing UserOutlined for staff
+        label: 'Team & Staff',
+        path: '/team',
+      },
     ],
+  },
+  {
+    key: 'content',
+    label: 'Content & Media',
+    items: [
+      {
+        key: 'media',
+        icon: CloudOutlined,
+        label: 'Media Library',
+        path: '/media',
+      },
+      {
+        key: 'pages',
+        icon: FileTextOutlined,
+        label: 'Pages',
+        path: '/content/pages',
+      },
+      {
+        key: 'sliders',
+        icon: BookOutlined,
+        label: 'Sliders',
+        path: '/content/sliders',
+      }
+    ]
   },
   {
     key: 'settings',
@@ -162,17 +167,6 @@ const menuGroups: MenuGroup[] = [
         icon: ShopOutlined,
         label: 'My Stores',
         path: '/stores',
-      },
-      {
-        key: 'content',
-        icon: FileTextOutlined,
-        label: 'Content',
-        path: '/content',
-        children: [
-          { key: 'pages', label: 'Pages', path: '/content/pages' },
-          { key: 'menus', label: 'Menus', path: '/content/menus' },
-          { key: 'blog', label: 'Blog Posts', path: '/content/blog' },
-        ],
       },
       {
         key: 'themes',
@@ -187,10 +181,22 @@ const menuGroups: MenuGroup[] = [
         path: '/billing',
         children: [
           { key: 'subscription', label: 'Subscription', path: '/billing/subscription' },
-          { key: 'payments', label: 'Transactions', path: '/billing/payments' },
+          { key: 'payments', label: 'Transactions', path: '/payments' },
           { key: 'invoices', label: 'Invoices', path: '/billing/invoices' },
         ],
       },
+      {
+        key: 'configuration',
+        icon: ToolOutlined,
+        label: 'Configuration',
+        path: '/settings',
+        children: [
+          { key: 'general', label: 'General', path: '/settings/general' },
+          { key: 'shipping', label: 'Shipping', path: '/settings/shipping' },
+          { key: 'tax', label: 'Tax', path: '/settings/tax' },
+          { key: 'payments-settings', label: 'Payment Methods', path: '/settings/payments' },
+        ]
+      }
     ],
   },
 ]
@@ -328,7 +334,6 @@ function isExpanded(key: string) {
   </div>
 </template>
 
-<!-- Your original <style scoped> remains 100% unchanged -->
 <style scoped>
 .sidebar-container {
   display: flex;

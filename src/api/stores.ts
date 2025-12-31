@@ -16,6 +16,10 @@ export interface Store {
   currency?: string
   timezone?: string
   owner_id: number
+  logo: string
+  favicon: string
+  custom_domain?: string
+  tagline?: string
   created_at: string
   updated_at: string
 }
@@ -30,6 +34,10 @@ export interface CreateStoreDto {
   address?: string
   currency?: string
   timezone?: string
+  custom_domain?: string
+  logo: string
+  favicon: string
+  tagline?: string
 }
 
 export interface UpdateStoreDto extends Partial<CreateStoreDto> {

@@ -1,81 +1,17 @@
-<script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import { contentApi, type Page } from '@/api/content'
-import { PlusOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons-vue'
-import { message } from 'ant-design-vue'
-import dayjs from 'dayjs'
-
-const router = useRouter()
-const authStore = useAuthStore()
-const loading = ref(false)
-const pages = ref<Page[]>([])
-
-const activeStoreId = computed(() => authStore.activeStore?.id)
-
-onMounted(() => {
-  if (activeStoreId.value) {
-    fetchPages()
-  }
-})
-
-async function fetchPages() {
-  if (!activeStoreId.value) return
-  loading.value = true
-  try {
-    pages.value = await contentApi.getPages(activeStoreId.value)
-  } catch (error) {
-    message.error('Failed to fetch pages')
-    console.error(error)
-  } finally {
-    loading.value = false
-  }
-}
-
-function handleCreate() {
-  router.push('/content/pages/create')
-}
-
-function handleEdit(id: number) {
-  router.push(`/content/pages/${id}/edit`)
-}
-
-const columns = [
-  { title: 'Title', dataIndex: 'title', key: 'title' },
-  { title: 'URL Slug', dataIndex: 'slug', key: 'slug' },
-  { title: 'Type', dataIndex: 'page_type', key: 'type', width: 120 },
-  { title: 'Status', key: 'status', width: 100, align: 'center' as const },
-  { title: 'Last Updated', key: 'date', width: 200 },
-  { title: 'Actions', key: 'actions', width: 120, align: 'center' as const },
-]
-</script>
-
 <template>
   <div class="page-list">
-    <div class="page-header">
-      <div class="header-left">
-        <h1>Pages</h1>
-        <p>Manage static pages and content</p>
-      </div>
-      <div class="header-right">
-        <a-button type="primary" @click="handleCreate">
-          <template #icon><PlusOutlined /></template>
-          Create Page
-        </a-button>
-      </div>
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">Pages</h1>
+      <a-button type="primary" @click="router.push('/content/pages/create')">
+        <PlusOutlined /> Create Page
+      </a-button>
     </div>
 
-    <a-card :bordered="false" class="table-card">
-      <a-table
-        :columns="columns"
-        :data-source="pages"
-        :loading="loading"
-        row-key="id"
-      >
+    <a-card :bordered="false" class="shadow-sm rounded-lg">
+      <a-table :columns="columns" :dataSource="pages" :loading="loading" rowKey="id">
         <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'slug'">
-            <code>/{{ record.slug }}</code>
+          <template v-if="column.key === 'title'">
+            <span class="font-medium">{{ record.title }}</span>
           </template>
 
           <template v-if="column.key === 'status'">
@@ -84,16 +20,17 @@ const columns = [
             </a-tag>
           </template>
 
-          <template v-if="column.key === 'date'">
-            {{ dayjs(record.updated_at).format('MMM D, YYYY h:mm A') }}
+          <template v-if="column.key === 'updated'">
+            {{ formatDate(record.updated_at) }}
           </template>
 
           <template v-if="column.key === 'actions'">
-            <a-space>
-              <a-button type="text" size="small" @click="handleEdit(record.id)">
-                <template #icon><EditOutlined /></template>
-              </a-button>
-            </a-space>
+            <div class="flex gap-2">
+              <a-button size="small" @click="router.push(`/content/pages/${record.id}/edit`)">Edit</a-button>
+              <a-popconfirm title="Delete page?" @confirm="handleDelete(record.id)">
+                <a-button size="small" danger type="text">Delete</a-button>
+              </a-popconfirm>
+            </div>
           </template>
         </template>
       </a-table>
@@ -101,30 +38,53 @@ const columns = [
   </div>
 </template>
 
-<style scoped>
-.page-list {
-  min-height: 100%;
+<script lang="ts" setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { message } from 'ant-design-vue'
+import { PlusOutlined } from '@ant-design/icons-vue'
+import { contentService, type Page } from '@/services/content.service'
+import dayjs from 'dayjs'
+
+const router = useRouter()
+const loading = ref(false)
+const pages = ref<Page[]>([])
+
+const columns = [
+  { title: 'Title', key: 'title' },
+  { title: 'Slug', dataIndex: 'slug', key: 'slug' },
+  { title: 'Status', key: 'status' },
+  { title: 'Last Updated', key: 'updated' },
+  { title: 'Actions', key: 'actions', width: 150 },
+]
+
+const fetchPages = async () => {
+  loading.value = true
+  try {
+    const data = await contentService.getPages()
+    pages.value = data
+  } catch (error) {
+    message.error('Failed to load pages')
+  } finally {
+    loading.value = false
+  }
 }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
+const handleDelete = async (id: number) => {
+  try {
+    await contentService.deletePage(id)
+    message.success('Page deleted')
+    fetchPages()
+  } catch (error) {
+    message.error('Failed to delete page')
+  }
 }
 
-.header-left h1 {
-  font-size: 28px;
-  font-weight: 700;
-  margin: 0;
+const formatDate = (date: string) => {
+  return dayjs(date).format('MMM D, YYYY')
 }
 
-.header-left p {
-  color: #8c8c8c;
-  margin: 0;
-}
-
-.table-card :deep(.ant-card-body) {
-  padding: 0;
-}
-</style>
+onMounted(() => {
+  fetchPages()
+})
+</script>

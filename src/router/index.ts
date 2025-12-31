@@ -25,6 +25,7 @@ const router = createRouter({
           component: () => import('@/views/dashboard/DashboardView.vue'),
           meta: { title: 'Dashboard' },
         },
+        // Sales Channels
         {
           path: 'products',
           name: 'products',
@@ -74,41 +75,77 @@ const router = createRouter({
           meta: { title: 'Order Details' },
         },
         {
+            path: 'coupons',
+            name: 'coupons',
+            component: () => import('@/views/coupons/CouponListView.vue'),
+            meta: { title: 'Coupons' },
+        },
+        {
+            path: 'coupons/create',
+            name: 'coupons-create',
+            component: () => import('@/views/coupons/CouponFormView.vue'),
+            meta: { title: 'Create Coupon' },
+        },
+        {
+            path: 'coupons/:id/edit',
+            name: 'coupons-edit',
+            component: () => import('@/views/coupons/CouponFormView.vue'),
+            meta: { title: 'Edit Coupon' },
+        },
+        {
           path: 'inventory',
           name: 'inventory',
           component: () => import('@/views/inventory/InventoryListView.vue'),
           meta: { title: 'Inventory' },
         },
+
+        // Promotions
         {
-          path: 'coupons',
-          name: 'coupons',
-          component: () => import('@/views/coupons/CouponListView.vue'),
-          meta: { title: 'Coupons' },
+            path: 'promotions',
+            name: 'promotions',
+            component: () => import('@/views/promotions/PromotionListView.vue'),
+            meta: { title: 'Promotions' },
         },
         {
-          path: 'coupons/create',
-          name: 'coupons-create',
-          component: () => import('@/views/coupons/CouponFormView.vue'),
-          meta: { title: 'Create Coupon' },
+            path: 'promotions/create',
+            name: 'promotions-create',
+            component: () => import('@/views/promotions/PromotionFormView.vue'),
+            meta: { title: 'Create Promotion' },
         },
         {
-          path: 'coupons/:id/edit',
-          name: 'coupons-edit',
-          component: () => import('@/views/coupons/CouponFormView.vue'),
-          meta: { title: 'Edit Coupon' },
+            path: 'promotions/:id/edit',
+            name: 'promotions-edit',
+            component: () => import('@/views/promotions/PromotionFormView.vue'),
+            meta: { title: 'Edit Promotion' },
+        },
+
+        // Customers & Staff
+        {
+            path: 'customers',
+            name: 'customers',
+            component: () => import('@/views/customers/CustomerListView.vue'),
+            meta: { title: 'Customers' },
         },
         {
-          path: 'payments',
-          name: 'payments',
-          component: () => import('@/views/payments/PaymentListView.vue'),
-          meta: { title: 'Payments' },
+            path: 'customers/:id',
+            name: 'customers-detail',
+            component: () => import('@/views/customers/CustomerDetailView.vue'),
+            meta: { title: 'Customer Details' },
         },
         {
-          path: 'reviews',
-          name: 'reviews',
-          component: () => import('@/views/reviews/ReviewListView.vue'),
-          meta: { title: 'Reviews' },
+            path: 'reviews',
+            name: 'reviews',
+            component: () => import('@/views/reviews/ReviewListView.vue'),
+            meta: { title: 'Reviews' },
         },
+        {
+            path: 'team',
+            name: 'team',
+            component: () => import('@/views/staff/StaffListView.vue'),
+            meta: { title: 'Team/Staff' },
+        },
+
+        // Settings & Content
         {
           path: 'stores',
           name: 'stores',
@@ -128,6 +165,12 @@ const router = createRouter({
           meta: { title: 'Edit Store' },
         },
         {
+            path: 'media',
+            name: 'media',
+            component: () => import('@/views/media/MediaLibraryView.vue'),
+            meta: { title: 'Media Library' },
+        },
+        {
           path: 'content/pages',
           name: 'content-pages',
           component: () => import('@/views/content/PageListView.vue'),
@@ -145,23 +188,75 @@ const router = createRouter({
           component: () => import('@/views/content/PageFormView.vue'),
           meta: { title: 'Edit Page' },
         },
-        // {
-        //   path: 'content/menus',
-        //   name: 'content-menus',
-        //   component: () => import('@/views/content/MenuListView.vue'),
-        //   meta: { title: 'Menus' },
-        // },
+        {
+            path: 'content/sliders',
+            name: 'content-sliders',
+            component: () => import('@/views/content/SliderListView.vue'),
+            meta: { title: 'Sliders' },
+        },
         {
           path: 'themes',
           name: 'themes',
           component: () => import('@/views/themes/ThemeGalleryView.vue'),
           meta: { title: 'Themes' },
         },
+
+        // Billing
         {
           path: 'billing/subscription',
           name: 'billing-subscription',
           component: () => import('@/views/billing/SubscriptionView.vue'),
           meta: { title: 'Subscription' },
+        },
+        {
+            path: 'payments', // Should be billing/payments ideally but keeping legacy
+            name: 'payments',
+            component: () => import('@/views/payments/PaymentListView.vue'),
+            meta: { title: 'Payments' },
+        },
+
+        // Settings Routes
+        {
+            path: 'settings/shipping',
+            name: 'settings-shipping',
+            component: () => import('@/views/settings/ShippingSettingsView.vue'),
+            meta: { title: 'Shipping Settings' },
+        },
+        {
+            path: 'settings/tax',
+            name: 'settings-tax',
+            component: () => import('@/views/settings/TaxSettingsView.vue'),
+            meta: { title: 'Tax Settings' },
+        },
+        {
+            path: 'settings/payments',
+            name: 'settings-payments',
+            component: () => import('@/views/settings/PaymentSettingsView.vue'),
+            meta: { title: 'Payment Settings' },
+        },
+        {
+            path: 'settings/general',
+            name: 'settings-general',
+            component: () => import('@/views/settings/GeneralSettingsView.vue'),
+            meta: { title: 'General Settings' },
+        },
+        {
+            path: 'settings/notifications',
+            name: 'settings-notifications',
+            component: () => import('@/views/settings/notifications/TemplateListView.vue'),
+            meta: { title: 'Notification Templates' },
+        },
+        {
+            path: 'settings/notifications/create',
+            name: 'settings-notifications-create',
+            component: () => import('@/views/settings/notifications/TemplateFormView.vue'),
+            meta: { title: 'Create Template' },
+        },
+        {
+            path: 'settings/notifications/:id/edit',
+            name: 'settings-notifications-edit',
+            component: () => import('@/views/settings/notifications/TemplateFormView.vue'),
+            meta: { title: 'Edit Template' },
         },
       ],
     },
