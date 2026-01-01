@@ -81,6 +81,7 @@ declare module 'vue' {
     IconEcosystem: typeof import('./src/components/icons/IconEcosystem.vue')['default']
     IconSupport: typeof import('./src/components/icons/IconSupport.vue')['default']
     IconTooling: typeof import('./src/components/icons/IconTooling.vue')['default']
+    MainMedia: typeof import('./src/components/media/MainMedia.vue')['default']
     NotificationDropdown: typeof import('./src/components/layout/NotificationDropdown.vue')['default']
     OrderStatusChart: typeof import('./src/components/dashboard/OrderStatusChart.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

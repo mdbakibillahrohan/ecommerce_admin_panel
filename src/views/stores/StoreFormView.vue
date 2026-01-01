@@ -21,6 +21,8 @@ const saving = ref(false)
 const formRef = ref<FormInstance>()
 const customDomain = ref('')
 
+const mediaModalVisible = ref(false);
+
 const apiBase = configuration.API_BASE_URL;
 const apiUpload = apiBase + '/media/upload';
 
@@ -56,6 +58,10 @@ const handleLogoUpload = (info: any) => {
   } else if (info.file.status === 'error') {
     message.error('Failed to upload logo')
   }
+}
+
+const openMediaLibrary = () => {
+  mediaModalVisible.value = true;
 }
 
 const handleFaviconUpload = (info: any) => {
@@ -153,6 +159,9 @@ onMounted(async () => {
 </script>
 
 <template>
+  <a-modal v-model:visible="mediaModalVisible" title="Media Library" width="80%">
+    <MainMedia :isSelectMode="true" />
+  </a-modal>
   <div class="store-form-container">
     <a-spin :spinning="loading" size="large">
       <div class="page-header">
@@ -193,16 +202,7 @@ onMounted(async () => {
             <a-row :gutter="[16, 0]">
               <a-col :xs="24" :sm="12">
                 <a-form-item label="Logo" name="logo">
-                  <a-upload list-type="picture-card" :show-upload-list="false" :action=apiUpload
-                    :before-upload="beforeUpload" @change="handleLogoUpload">
-                    <div v-if="formState.logo" class="upload-preview">
-                      <img :src="formState.logo" alt="logo" />
-                    </div>
-                    <div v-else class="upload-placeholder">
-                      <PictureOutlined class="upload-icon" />
-                      <div class="upload-text">Upload Logo</div>
-                    </div>
-                  </a-upload>
+                  <a-button type="primary" @click="openMediaLibrary()">Select Logo</a-button>
                   <div class="upload-hint">Recommended: 200x200px</div>
                 </a-form-item>
               </a-col>
