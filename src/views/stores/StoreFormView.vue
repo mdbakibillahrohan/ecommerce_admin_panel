@@ -7,6 +7,7 @@ import { SaveOutlined, ArrowLeftOutlined, ShopOutlined, MailOutlined, PhoneOutli
 import { message } from 'ant-design-vue'
 import type { FormInstance } from 'ant-design-vue'
 import { useStoreStore } from '@/stores/store/store'
+import type { MediaFile } from '@/services/media.service'
 import { configuration } from '@/config/configruation'
 
 const router = useRouter()
@@ -22,9 +23,22 @@ const formRef = ref<FormInstance>()
 const customDomain = ref('')
 
 const mediaModalVisible = ref(false);
+const mediaUsingFor = ref('');
+const logo = ref<MediaFile | null | undefined>(null);
+const favicon = ref<MediaFile | null | undefined>(null);
 
-const apiBase = configuration.API_BASE_URL;
-const apiUpload = apiBase + '/media/upload';
+const handleUseSelected = (files: { usingFor: string, files: MediaFile[] }) => {
+  console.log(files)
+  if (files.usingFor === 'logo') {
+    logo.value = files.files[0]
+    formState.value.logo_id = files.files[0]?.id
+  } else if (files.usingFor === 'favicon') {
+    favicon.value = files.files[0]
+    formState.value.favicon_id = files.files[0]?.id
+  }
+  mediaModalVisible.value = false;
+}
+
 
 const formState = ref<CreateStoreDto>({
   name: '',
@@ -37,8 +51,8 @@ const formState = ref<CreateStoreDto>({
   address: '',
   currency: 'BDT',
   timezone: 'Asia/Dhaka',
-  logo: '',
-  favicon: ''
+  logo_id: 0,
+  favicon_id: 0
 })
 
 const rules = {
@@ -51,39 +65,15 @@ const rules = {
   email: [{ type: 'email', message: 'Please enter a valid email', trigger: 'blur' }],
 }
 
-const handleLogoUpload = (info: any) => {
-  if (info.file.status === 'done') {
-    formState.value.logo = info.file.response.url
-    message.success('Logo uploaded successfully')
-  } else if (info.file.status === 'error') {
-    message.error('Failed to upload logo')
-  }
-}
 
-const openMediaLibrary = () => {
+
+const openMediaLibrary = (usingFor: string) => {
+  mediaUsingFor.value = usingFor;
   mediaModalVisible.value = true;
 }
 
-const handleFaviconUpload = (info: any) => {
-  if (info.file.status === 'done') {
-    formState.value.favicon = info.file.response.url
-    message.success('Favicon uploaded successfully')
-  } else if (info.file.status === 'error') {
-    message.error('Failed to upload favicon')
-  }
-}
 
-const beforeUpload = (file: File) => {
-  const isImage = file.type.startsWith('image/')
-  if (!isImage) {
-    message.error('You can only upload image files!')
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2
-  if (!isLt2M) {
-    message.error('Image must be smaller than 2MB!')
-  }
-  return isImage && isLt2M
-}
+
 
 async function fetchStore(id: number) {
   loading.value = true
@@ -100,8 +90,8 @@ async function fetchStore(id: number) {
       address: store.address || '',
       currency: store.currency || 'BDT',
       timezone: store.timezone || 'Asia/Dhaka',
-      logo: store.logo,
-      favicon: store.favicon
+      logo_id: 0,
+      favicon_id: 0
     }
   } catch (error) {
     message.error('Failed to fetch store details')
@@ -159,8 +149,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <a-modal v-model:visible="mediaModalVisible" title="Media Library" width="80%">
-    <MainMedia :isSelectMode="true" />
+  <a-modal v-model:visible="mediaModalVisible" width="80%">
+    <MainMedia @file-selected="handleUseSelected" :isSelectMode="true" :usingFor="mediaUsingFor" />
   </a-modal>
   <div class="store-form-container">
     <a-spin :spinning="loading" size="large">
@@ -202,23 +192,26 @@ onMounted(async () => {
             <a-row :gutter="[16, 0]">
               <a-col :xs="24" :sm="12">
                 <a-form-item label="Logo" name="logo">
-                  <a-button type="primary" @click="openMediaLibrary()">Select Logo</a-button>
+                  <a-button v-if="!logo" type="primary" @click="openMediaLibrary('logo')">Select
+                    Logo</a-button>
+                  <div v-else class="upload-preview">
+                    <a-image :width="100" :src="configuration.API_BASE_URL + logo?.file_path" alt="logo" />
+                    <a-button type="primary" @click="openMediaLibrary('logo')">Change Logo</a-button>
+                    <a-button type="danger" @click="logo = null">Remove Logo</a-button>
+                  </div>
                   <div class="upload-hint">Recommended: 200x200px</div>
                 </a-form-item>
               </a-col>
 
               <a-col :xs="24" :sm="12">
                 <a-form-item label="Favicon" name="favicon">
-                  <a-upload list-type="picture-card" :show-upload-list="false" action="/api/upload"
-                    :before-upload="beforeUpload" @change="handleFaviconUpload">
-                    <div v-if="formState.favicon" class="upload-preview">
-                      <img :src="formState.favicon" alt="favicon" />
-                    </div>
-                    <div v-else class="upload-placeholder">
-                      <PictureOutlined class="upload-icon" />
-                      <div class="upload-text">Upload Favicon</div>
-                    </div>
-                  </a-upload>
+                  <a-button v-if="!favicon" type="primary" @click="openMediaLibrary('favicon')">Select
+                    Favicon</a-button>
+                  <div v-else class="upload-preview">
+                    <a-image :width="100" :src="configuration.API_BASE_URL + favicon?.file_path" alt="favicon" />
+                    <a-button type="primary" @click="openMediaLibrary('favicon')">Change Favicon</a-button>
+                    <a-button type="danger" @click="favicon = null">Remove Favicon</a-button>
+                  </div>
                   <div class="upload-hint">Recommended: 32x32px</div>
                 </a-form-item>
               </a-col>
@@ -385,7 +378,6 @@ onMounted(async () => {
 .store-form-container {
   min-height: 100vh;
   background: #f5f7fa;
-  padding: 20px;
 }
 
 .page-header {
@@ -448,7 +440,7 @@ onMounted(async () => {
 }
 
 .form-content {
-  max-width: 1200px;
+  /* max-width: 1200px; */
   margin: 0 auto;
 }
 

@@ -35,8 +35,8 @@ export interface CreateStoreDto {
   currency?: string
   timezone?: string
   custom_domain?: string
-  logo: string
-  favicon: string
+  logo_id: number | undefined | null
+  favicon_id: number | undefined | null
   tagline?: string
 }
 
