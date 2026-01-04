@@ -511,7 +511,7 @@ const hasSelectedRows = computed(() => selectedRowKeys.value.length > 0)
           <div class="detail-row">
             <span class="detail-label">Order Date:</span>
             <span class="detail-value">{{ dayjsInstance(selectedOrder.created_at).format('MMMM D, YYYY h:mm A')
-              }}</span>
+            }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Total Amount:</span>
@@ -561,7 +561,6 @@ const hasSelectedRows = computed(() => selectedRowKeys.value.length > 0)
 
 <style scoped>
 .order-list-container {
-  padding: 24px;
   min-height: 100vh;
   background: var(--background);
 }
