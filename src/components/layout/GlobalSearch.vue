@@ -1,54 +1,8 @@
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
-import {
-  SearchOutlined,
-  ShoppingOutlined,
-  ShoppingCartOutlined,
-  UserOutlined,
-  FileTextOutlined,
-} from '@ant-design/icons-vue'
-
-const searchQuery = ref('')
-const searchVisible = ref(false)
-
-// Mock search results
-const searchResults = computed(() => {
-  if (!searchQuery.value) return { products: [], orders: [], customers: [], pages: [] }
-  const query = searchQuery.value.toLowerCase()
-  return {
-    products: [
-      { id: 1, name: 'iPhone 15 Pro', sku: 'IPH-15-PRO' },
-      { id: 2, name: 'Samsung Galaxy S24', sku: 'SAM-S24' },
-      { id: 3, name: 'MacBook Air M3', sku: 'MAC-AIR-M3' },
-    ].filter((p) => p.name.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query)),
-    orders: [
-      { id: 'ORD-001', customer: 'John Doe', total: '$599.00' },
-      { id: 'ORD-002', customer: 'Jane Smith', total: '$1,299.00' },
-    ].filter((o) => o.id.toLowerCase().includes(query) || o.customer.toLowerCase().includes(query)),
-    customers: [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
-    ].filter((c) => c.name.toLowerCase().includes(query) || c.email.toLowerCase().includes(query)),
-    pages: [
-      { id: 1, title: 'About Us', slug: '/about' },
-      { id: 2, title: 'Contact', slug: '/contact' },
-    ].filter((p) => p.title.toLowerCase().includes(query)),
-  }
-})
-
-const hasResults = computed(() => {
-  const r = searchResults.value
-  return r.products.length || r.orders.length || r.customers.length || r.pages.length
-})
 </script>
 
 <template>
-  <a-popover
-    v-model:open="searchVisible"
-    placement="bottomLeft"
-    trigger="click"
-    :overlay-style="{ width: '480px' }"
-  >
+  <a-popover v-model:open="searchVisible" placement="bottomLeft" trigger="click" :overlay-style="{ width: '480px' }">
     <template #content>
       <div class="search-results">
         <template v-if="hasResults">
@@ -128,13 +82,8 @@ const hasResults = computed(() => {
       </div>
     </template>
 
-    <a-input
-      v-model:value="searchQuery"
-      placeholder="Search everything..."
-      class="search-input"
-      allow-clear
-      @focus="searchVisible = true"
-    >
+    <a-input v-model:value="searchQuery" placeholder="Search everything..." class="search-input" allow-clear
+      @focus="searchVisible = true">
       <template #prefix>
         <SearchOutlined class="search-prefix-icon" />
       </template>
@@ -148,45 +97,34 @@ const hasResults = computed(() => {
 </template>
 
 <style scoped>
+/* Replaced hardcoded colors with CSS variables for proper theme support */
 .search-input {
   width: 320px;
   border-radius: 10px;
   height: 40px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  transition: all 0.2s ease;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-:global(.dark) .search-input {
-  background: #374151;
-  border-color: #4b5563;
-}
-
-:global(.dark) .search-input :deep(.ant-input) {
+.search-input :deep(.ant-input) {
   background: transparent;
-  color: #f3f4f6;
+  color: var(--foreground);
 }
 
-:global(.dark) .search-input :deep(.ant-input::placeholder) {
-  color: #9ca3af;
+.search-input :deep(.ant-input::placeholder) {
+  color: var(--muted-foreground);
 }
 
 .search-input:hover,
 .search-input:focus-within {
-  background: #ffffff;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-:global(.dark) .search-input:hover,
-:global(.dark) .search-input:focus-within {
-  background: #4b5563;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  background: var(--background);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px oklch(from var(--primary) l c h / 0.1);
 }
 
 .search-prefix-icon {
-  color: #9ca3af;
+  color: var(--muted-foreground);
 }
 
 .search-shortcut {
@@ -195,17 +133,13 @@ const hasResults = computed(() => {
 }
 
 .search-shortcut kbd {
-  background: #e5e7eb;
+  background: var(--muted);
+  border: 1px solid var(--border);
   border-radius: 4px;
   padding: 2px 6px;
   font-size: 11px;
-  color: #6b7280;
+  color: var(--muted-foreground);
   font-family: inherit;
-}
-
-:global(.dark) .search-shortcut kbd {
-  background: #4b5563;
-  color: #9ca3af;
 }
 
 .search-results {
@@ -225,7 +159,7 @@ const hasResults = computed(() => {
 .section-title {
   font-size: 11px;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--muted-foreground);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 0 12px;
@@ -239,17 +173,15 @@ const hasResults = computed(() => {
   padding: 10px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .result-item:hover {
-  background: #f3f4f6;
+  background: var(--accent);
+  transform: translateX(2px);
 }
 
-:global(.dark) .result-item:hover {
-  background: #374151;
-}
-
+/* Updated icon colors to use teal theme with proper contrast */
 .result-icon {
   width: 36px;
   height: 36px;
@@ -258,70 +190,57 @@ const hasResults = computed(() => {
   align-items: center;
   justify-content: center;
   font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.result-item:hover .result-icon {
+  transform: scale(1.1);
 }
 
 .result-icon.product {
-  background: #dbeafe;
-  color: #2563eb;
+  background: oklch(from var(--primary) l c h / 0.15);
+  color: var(--primary);
 }
 
 .result-icon.order {
-  background: #dcfce7;
-  color: #16a34a;
+  background: oklch(0.85 0.15 150 / 1);
+  color: oklch(0.5 0.2 150 / 1);
 }
 
 .result-icon.customer {
-  background: #fef3c7;
-  color: #d97706;
+  background: oklch(0.9 0.1 60 / 1);
+  color: oklch(0.55 0.15 60 / 1);
 }
 
 .result-icon.page {
-  background: #f3e8ff;
-  color: #9333ea;
+  background: oklch(0.88 0.12 300 / 1);
+  color: oklch(0.5 0.2 300 / 1);
 }
 
 .result-name {
   font-weight: 500;
-  color: #1f2937;
+  color: var(--foreground);
   font-size: 14px;
-}
-
-:global(.dark) .result-name {
-  color: #f3f4f6;
 }
 
 .result-meta {
   font-size: 12px;
-  color: #6b7280;
-}
-
-:global(.dark) .result-meta {
-  color: #9ca3af;
+  color: var(--muted-foreground);
 }
 
 .no-results,
 .search-hint {
   padding: 32px 16px;
   text-align: center;
-  color: #6b7280;
-}
-
-:global(.dark) .no-results,
-:global(.dark) .search-hint {
-  color: #9ca3af;
+  color: var(--muted-foreground);
 }
 
 .no-results-icon,
 .hint-icon {
   font-size: 32px;
-  color: #d1d5db;
+  color: var(--border);
   margin-bottom: 12px;
   display: block;
-}
-
-:global(.dark) .no-results-icon,
-:global(.dark) .hint-icon {
-  color: #6b7280;
 }
 
 .hint-shortcuts {
@@ -331,22 +250,34 @@ const hasResults = computed(() => {
   justify-content: center;
   gap: 4px;
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--muted-foreground);
 }
 
 .hint-shortcuts kbd {
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  background: var(--muted);
+  border: 1px solid var(--border);
   border-radius: 4px;
   padding: 2px 6px;
   font-size: 11px;
-  color: #6b7280;
+  color: var(--muted-foreground);
   font-family: inherit;
 }
 
-:global(.dark) .hint-shortcuts kbd {
-  background: #374151;
-  border-color: #4b5563;
-  color: #9ca3af;
+/* Custom scrollbar for search results */
+.search-results::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-results::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.search-results::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.search-results::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
 }
 </style>

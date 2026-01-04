@@ -6,11 +6,21 @@ import {
   SearchOutlined,
   EyeOutlined,
   ReloadOutlined,
+  DownloadOutlined,
+  PrinterOutlined,
+  FilterOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  ShoppingCartOutlined,
+  DollarOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 
 const router = useRouter()
+const dayjsInstance = dayjs // Assign dayjs to a constant to avoid conditional calls
 
 // State
 const loading = ref(false)
@@ -18,14 +28,30 @@ const orders = ref<Order[]>([])
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
+const selectedRowKeys = ref<number[]>([])
+const orderDetailVisible = ref(false)
+const statusModalVisible = ref(false)
+const selectedOrder = ref<Order | null>(null)
+const newStatus = ref<OrderStatus>()
+
+// Statistics
+const statistics = ref({
+  totalOrders: 0,
+  totalRevenue: 0,
+  pendingOrders: 0,
+  deliveredOrders: 0,
+})
 
 // Filters
 const searchText = ref('')
 const selectedStatus = ref<OrderStatus | undefined>()
 const dateRange = ref<[dayjs.Dayjs, dayjs.Dayjs] | null>(null)
+const sortField = ref('created_at')
+const sortOrder = ref<'ascend' | 'descend'>('descend')
 
 onMounted(() => {
   fetchOrders()
+  fetchStatistics()
 })
 
 async function fetchOrders() {
@@ -50,19 +76,83 @@ async function fetchOrders() {
   }
 }
 
+async function fetchStatistics() {
+  try {
+    const stats = await ordersApi.getStatistics()
+    statistics.value = stats
+  } catch (error) {
+    console.error('Failed to fetch statistics', error)
+  }
+}
+
 function handleSearch() {
   currentPage.value = 1
   fetchOrders()
 }
 
-function handleTableChange(pagination: any) {
+function handleTableChange(pagination: any, filters: any, sorter: any) {
   currentPage.value = pagination.current
   pageSize.value = pagination.pageSize
+
+  if (sorter.field) {
+    sortField.value = sorter.field
+    sortOrder.value = sorter.order
+  }
+
   fetchOrders()
 }
 
-function handleViewOrder(id: number) {
-  router.push(`/orders/${id}`)
+function handleViewOrder(order: Order) {
+  selectedOrder.value = order
+  orderDetailVisible.value = true
+}
+
+function handleEditStatus(order: Order) {
+  selectedOrder.value = order
+  newStatus.value = order.status
+  statusModalVisible.value = true
+}
+
+async function handleUpdateStatus() {
+  if (!selectedOrder.value || !newStatus.value) return
+
+  try {
+    await ordersApi.updateStatus(selectedOrder.value.id, newStatus.value)
+    message.success('Order status updated successfully')
+    statusModalVisible.value = false
+    fetchOrders()
+    fetchStatistics()
+  } catch (error) {
+    message.error('Failed to update order status')
+  }
+}
+
+async function handleBulkStatusUpdate(status: OrderStatus) {
+  if (selectedRowKeys.value.length === 0) {
+    message.warning('Please select orders first')
+    return
+  }
+
+  try {
+    await Promise.all(
+      selectedRowKeys.value.map(id => ordersApi.updateStatus(id, status))
+    )
+    message.success(`Updated ${selectedRowKeys.value.length} orders`)
+    selectedRowKeys.value = []
+    fetchOrders()
+    fetchStatistics()
+  } catch (error) {
+    message.error('Failed to update orders')
+  }
+}
+
+function handleExport(format: 'csv' | 'pdf') {
+  message.success(`Exporting ${selectedRowKeys.value.length || total.value} orders as ${format.toUpperCase()}`)
+  // Implement actual export logic here
+}
+
+function handlePrint() {
+  window.print()
 }
 
 function formatCurrency(value: number) {
@@ -97,14 +187,60 @@ const statusOptions: { value: OrderStatus; label: string }[] = [
 ]
 
 const columns = [
-  { title: 'Order #', dataIndex: 'order_number', key: 'order_number', width: 140 },
-  { title: 'Customer', key: 'customer', width: 200 },
-  { title: 'Status', dataIndex: 'status', key: 'status', width: 120, align: 'center' as const },
-  { title: 'Payment', key: 'payment', width: 120, align: 'center' as const },
-  { title: 'Items', key: 'items', width: 80, align: 'center' as const },
-  { title: 'Total', dataIndex: 'total', key: 'total', width: 120, align: 'right' as const },
-  { title: 'Date', dataIndex: 'created_at', key: 'created_at', width: 140 },
-  { title: 'Actions', key: 'actions', width: 80, align: 'center' as const, fixed: 'right' as const },
+  {
+    title: 'Order #',
+    dataIndex: 'order_number',
+    key: 'order_number',
+    width: 140,
+    sorter: true,
+  },
+  {
+    title: 'Customer',
+    key: 'customer',
+    width: 220,
+  },
+  {
+    title: 'Status',
+    dataIndex: 'status',
+    key: 'status',
+    width: 130,
+    align: 'center' as const,
+    filters: statusOptions.map(s => ({ text: s.label, value: s.value })),
+  },
+  {
+    title: 'Payment',
+    key: 'payment',
+    width: 120,
+    align: 'center' as const,
+  },
+  {
+    title: 'Items',
+    key: 'items',
+    width: 80,
+    align: 'center' as const,
+  },
+  {
+    title: 'Total',
+    dataIndex: 'total',
+    key: 'total',
+    width: 130,
+    align: 'right' as const,
+    sorter: true,
+  },
+  {
+    title: 'Date',
+    dataIndex: 'created_at',
+    key: 'created_at',
+    width: 160,
+    sorter: true,
+  },
+  {
+    title: 'Actions',
+    key: 'actions',
+    width: 120,
+    align: 'center' as const,
+    fixed: 'right' as const,
+  },
 ]
 
 const pagination = computed(() => ({
@@ -113,91 +249,184 @@ const pagination = computed(() => ({
   total: total.value,
   showSizeChanger: true,
   showQuickJumper: true,
+  pageSizeOptions: ['10', '20', '50', '100'],
   showTotal: (total: number) => `Total ${total} orders`,
 }))
+
+const rowSelection = computed(() => ({
+  selectedRowKeys: selectedRowKeys.value,
+  onChange: (keys: number[]) => {
+    selectedRowKeys.value = keys
+  },
+}))
+
+const hasSelectedRows = computed(() => selectedRowKeys.value.length > 0)
 </script>
 
 <template>
-  <div class="order-list">
+  <div class="order-list-container">
     <!-- Page Header -->
     <div class="page-header">
-      <div class="header-left">
-        <h1>Orders</h1>
-        <p>Manage customer orders</p>
-      </div>
-      <div class="header-right">
-        <a-button @click="fetchOrders" :loading="loading">
-          <template #icon><ReloadOutlined /></template>
-          Refresh
-        </a-button>
+      <div class="header-content">
+        <div class="header-left">
+          <h1 class="page-title">Orders Management</h1>
+          <p class="page-subtitle">Track and manage all customer orders</p>
+        </div>
+        <div class="header-actions">
+          <a-button @click="handlePrint" class="action-btn">
+            <template #icon>
+              <PrinterOutlined />
+            </template>
+            Print
+          </a-button>
+          <a-dropdown>
+            <a-button class="action-btn">
+              <template #icon>
+                <DownloadOutlined />
+              </template>
+              Export
+            </a-button>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item @click="handleExport('csv')">Export as CSV</a-menu-item>
+                <a-menu-item @click="handleExport('pdf')">Export as PDF</a-menu-item>
+              </a-menu>
+            </template>
+          </a-dropdown>
+          <a-button type="primary" @click="fetchOrders" :loading="loading" class="refresh-btn">
+            <template #icon>
+              <ReloadOutlined />
+            </template>
+            Refresh
+          </a-button>
+        </div>
       </div>
     </div>
 
-    <!-- Filters Card -->
+    <!-- Statistics Cards -->
+    <div class="statistics-grid">
+      <div class="stat-card stat-total">
+        <div class="stat-icon">
+          <ShoppingCartOutlined />
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Total Orders</p>
+          <h3 class="stat-value">{{ statistics.totalOrders }}</h3>
+        </div>
+      </div>
+
+      <div class="stat-card stat-revenue">
+        <div class="stat-icon">
+          <DollarOutlined />
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Total Revenue</p>
+          <h3 class="stat-value">{{ formatCurrency(statistics.totalRevenue) }}</h3>
+        </div>
+      </div>
+
+      <div class="stat-card stat-pending">
+        <div class="stat-icon">
+          <ClockCircleOutlined />
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Pending Orders</p>
+          <h3 class="stat-value">{{ statistics.pendingOrders }}</h3>
+        </div>
+      </div>
+
+      <div class="stat-card stat-delivered">
+        <div class="stat-icon">
+          <CheckCircleOutlined />
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Delivered</p>
+          <h3 class="stat-value">{{ statistics.deliveredOrders }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
     <a-card :bordered="false" class="filter-card">
-      <a-row :gutter="16" align="middle">
-        <a-col :xs="24" :sm="12" :md="6">
-          <a-input-search
-            v-model:value="searchText"
-            placeholder="Search orders..."
-            allow-clear
-            @search="handleSearch"
-            @pressEnter="handleSearch"
-          >
-            <template #prefix><SearchOutlined /></template>
+      <div class="filter-header">
+        <FilterOutlined class="filter-icon" />
+        <span class="filter-title">Filters</span>
+      </div>
+      <a-row :gutter="[16, 16]" align="middle">
+        <a-col :xs="24" :sm="12" :md="6" :lg="5">
+          <a-input-search v-model:value="searchText" placeholder="Search by order # or customer..." allow-clear
+            @search="handleSearch" @pressEnter="handleSearch" class="filter-input">
+            <template #prefix>
+              <SearchOutlined />
+            </template>
           </a-input-search>
         </a-col>
-        <a-col :xs="24" :sm="12" :md="5">
-          <a-select
-            v-model:value="selectedStatus"
-            placeholder="All Status"
-            allow-clear
-            style="width: 100%"
-            @change="handleSearch"
-          >
+        <a-col :xs="24" :sm="12" :md="5" :lg="4">
+          <a-select v-model:value="selectedStatus" placeholder="All Status" allow-clear style="width: 100%"
+            @change="handleSearch" class="filter-select">
             <a-select-option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">
               {{ opt.label }}
             </a-select-option>
           </a-select>
         </a-col>
-        <a-col :xs="24" :sm="12" :md="7">
-          <a-range-picker
-            v-model:value="dateRange"
-            style="width: 100%"
-            @change="handleSearch"
-          />
+        <a-col :xs="24" :sm="16" :md="8" :lg="6">
+          <a-range-picker v-model:value="dateRange" style="width: 100%" @change="handleSearch" class="filter-date" />
         </a-col>
-        <a-col>
-          <a-button @click="() => { searchText = ''; selectedStatus = undefined; dateRange = null; handleSearch(); }">
-            Clear Filters
+        <a-col :xs="24" :sm="8" :md="5" :lg="3">
+          <a-button block
+            @click="() => { searchText = ''; selectedStatus = undefined; dateRange = null; handleSearch(); }"
+            class="clear-btn">
+            Clear All
           </a-button>
         </a-col>
       </a-row>
     </a-card>
 
+    <!-- Bulk Actions Bar -->
+    <a-card v-if="hasSelectedRows" :bordered="false" class="bulk-actions-card">
+      <div class="bulk-actions-content">
+        <span class="selection-count">{{ selectedRowKeys.length }} orders selected</span>
+        <div class="bulk-actions">
+          <a-dropdown>
+            <a-button type="primary">
+              Update Status
+            </a-button>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item v-for="status in statusOptions" :key="status.value"
+                  @click="handleBulkStatusUpdate(status.value)">
+                  {{ status.label }}
+                </a-menu-item>
+              </a-menu>
+            </template>
+          </a-dropdown>
+          <a-button danger @click="() => message.warning('Bulk delete not implemented')">
+            <template #icon>
+              <DeleteOutlined />
+            </template>
+            Delete Selected
+          </a-button>
+        </div>
+      </div>
+    </a-card>
+
     <!-- Orders Table -->
     <a-card :bordered="false" class="table-card">
-      <a-table
-        :columns="columns"
-        :data-source="orders"
-        :loading="loading"
-        :pagination="pagination"
-        row-key="id"
-        :scroll="{ x: 1000 }"
-        @change="handleTableChange"
-      >
+      <a-table :columns="columns" :data-source="orders" :loading="loading" :pagination="pagination"
+        :row-selection="rowSelection" row-key="id" :scroll="{ x: 1100 }" @change="handleTableChange"
+        class="orders-table">
         <template #bodyCell="{ column, record }">
           <!-- Order Number -->
           <template v-if="column.key === 'order_number'">
-            <a-typography-link @click="handleViewOrder(record.id)">
-              {{ record.order_number }}
+            <a-typography-link @click="handleViewOrder(record)" class="order-link">
+              <strong>{{ record.order_number }}</strong>
             </a-typography-link>
           </template>
 
           <!-- Customer -->
           <template v-if="column.key === 'customer'">
             <div class="customer-cell">
-              <a-avatar :size="32" class="customer-avatar">
+              <a-avatar :size="36" class="customer-avatar">
                 {{ record.user?.first_name?.charAt(0) || 'U' }}
               </a-avatar>
               <div class="customer-info">
@@ -211,7 +440,7 @@ const pagination = computed(() => ({
 
           <!-- Status -->
           <template v-if="column.key === 'status'">
-            <a-tag :color="getStatusColor(record.status)">
+            <a-tag :color="getStatusColor(record.status)" class="status-tag">
               {{ record.status }}
             </a-tag>
           </template>
@@ -221,12 +450,12 @@ const pagination = computed(() => ({
             <a-tag v-if="record.payment" :color="record.payment.status === 'COMPLETED' ? 'green' : 'orange'">
               {{ record.payment.status }}
             </a-tag>
-            <span v-else class="text-muted">-</span>
+            <span v-else class="text-muted">N/A</span>
           </template>
 
           <!-- Items Count -->
           <template v-if="column.key === 'items'">
-            <a-badge :count="record.items?.length || 0" :number-style="{ backgroundColor: '#667eea' }" />
+            <a-badge :count="record.items?.length || 0" :number-style="{ backgroundColor: 'oklch(0.65 0.2 195)' }" />
           </template>
 
           <!-- Total -->
@@ -237,68 +466,378 @@ const pagination = computed(() => ({
           <!-- Date -->
           <template v-if="column.key === 'created_at'">
             <div class="date-cell">
-              <span>{{ dayjs(record.created_at).format('MMM D, YYYY') }}</span>
-              <span class="time">{{ dayjs(record.created_at).format('h:mm A') }}</span>
+              <span class="date">{{ dayjsInstance(record.created_at).format('MMM D, YYYY') }}</span>
+              <span class="time">{{ dayjsInstance(record.created_at).format('h:mm A') }}</span>
             </div>
           </template>
 
           <!-- Actions -->
           <template v-if="column.key === 'actions'">
-            <a-tooltip title="View Details">
-              <a-button type="text" size="small" @click="handleViewOrder(record.id)">
-                <template #icon><EyeOutlined /></template>
-              </a-button>
-            </a-tooltip>
+            <div class="action-buttons">
+              <a-tooltip title="View Details">
+                <a-button type="text" size="small" @click="handleViewOrder(record)" class="action-icon-btn">
+                  <template #icon>
+                    <EyeOutlined />
+                  </template>
+                </a-button>
+              </a-tooltip>
+              <a-tooltip title="Update Status">
+                <a-button type="text" size="small" @click="handleEditStatus(record)" class="action-icon-btn">
+                  <template #icon>
+                    <EditOutlined />
+                  </template>
+                </a-button>
+              </a-tooltip>
+            </div>
           </template>
         </template>
       </a-table>
     </a-card>
+
+    <!-- Order Details Drawer -->
+    <a-drawer v-model:open="orderDetailVisible" title="Order Details" width="600" :body-style="{ padding: 0 }"
+      class="order-drawer">
+      <div v-if="selectedOrder" class="order-details">
+        <div class="detail-section">
+          <h3 class="section-title">Order Information</h3>
+          <div class="detail-row">
+            <span class="detail-label">Order Number:</span>
+            <span class="detail-value">{{ selectedOrder.order_number }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Status:</span>
+            <a-tag :color="getStatusColor(selectedOrder.status)">{{ selectedOrder.status }}</a-tag>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Order Date:</span>
+            <span class="detail-value">{{ dayjsInstance(selectedOrder.created_at).format('MMMM D, YYYY h:mm A')
+              }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Total Amount:</span>
+            <span class="detail-value total">{{ formatCurrency(selectedOrder.total) }}</span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="section-title">Customer Information</h3>
+          <div class="detail-row">
+            <span class="detail-label">Name:</span>
+            <span class="detail-value">{{ selectedOrder.user?.first_name }} {{ selectedOrder.user?.last_name }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Email:</span>
+            <span class="detail-value">{{ selectedOrder.user?.email }}</span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3 class="section-title">Order Items</h3>
+          <div v-for="item in selectedOrder.items" :key="item.id" class="order-item">
+            <div class="item-info">
+              <span class="item-name">{{ item.product_name }}</span>
+              <span class="item-quantity">Qty: {{ item.quantity }}</span>
+            </div>
+            <span class="item-price">{{ formatCurrency(item.price * item.quantity) }}</span>
+          </div>
+        </div>
+      </div>
+    </a-drawer>
+
+    <!-- Status Update Modal -->
+    <a-modal v-model:open="statusModalVisible" title="Update Order Status" @ok="handleUpdateStatus"
+      class="status-modal">
+      <div class="modal-content">
+        <p class="modal-label">Select new status for order {{ selectedOrder?.order_number }}:</p>
+        <a-select v-model:value="newStatus" style="width: 100%" size="large">
+          <a-select-option v-for="status in statusOptions" :key="status.value" :value="status.value">
+            {{ status.label }}
+          </a-select-option>
+        </a-select>
+      </div>
+    </a-modal>
   </div>
 </template>
 
 <style scoped>
-.order-list {
-  min-height: 100%;
+.order-list-container {
+  padding: 24px;
+  min-height: 100vh;
+  background: var(--background);
 }
 
+/* Page Header */
 .page-header {
+  margin-bottom: 24px;
+}
+
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 20px;
 }
 
-.header-left h1 {
-  font-size: 28px;
+.header-left .page-title {
+  font-size: 32px;
   font-weight: 700;
-  color: #262626;
-  margin: 0 0 4px 0;
+  color: var(--foreground);
+  margin: 0 0 6px 0;
+  line-height: 1.2;
 }
 
-.header-left p {
-  color: #8c8c8c;
+.header-left .page-subtitle {
+  font-size: 15px;
+  color: var(--muted-foreground);
   margin: 0;
 }
 
-.filter-card {
+.header-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-btn,
+.refresh-btn {
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.refresh-btn {
+  background: oklch(0.65 0.2 195);
+  border-color: oklch(0.65 0.2 195);
+}
+
+.refresh-btn:hover {
+  background: oklch(0.6 0.2 195);
+  border-color: oklch(0.6 0.2 195);
+  transform: translateY(-2px);
+}
+
+/* Statistics Grid */
+.statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
   margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, oklch(0.65 0.2 195), oklch(0.6 0.2 180));
+  transform: scaleY(0);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card:hover::before {
+  transform: scaleY(1);
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: linear-gradient(135deg, oklch(0.65 0.2 195), oklch(0.6 0.2 180));
+  color: white;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  margin: 0 0 6px 0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+  line-height: 1;
+}
+
+/* Filter Card */
+.filter-card {
+  margin-bottom: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.filter-card :deep(.ant-card-body) {
+  padding: 24px;
+}
+
+.filter-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filter-icon {
+  font-size: 18px;
+  color: oklch(0.65 0.2 195);
+}
+
+.filter-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.filter-input :deep(.ant-input),
+.filter-select :deep(.ant-select-selector),
+.filter-date :deep(.ant-picker) {
+  height: 40px;
+  border-radius: 8px;
+  border-color: var(--border);
+}
+
+.clear-btn {
+  height: 40px;
+  border-radius: 8px;
+  border-color: var(--border);
+  transition: all 0.3s;
+}
+
+.clear-btn:hover {
+  border-color: oklch(0.65 0.2 195);
+  color: oklch(0.65 0.2 195);
+}
+
+/* Bulk Actions */
+.bulk-actions-card {
+  margin-bottom: 20px;
+  border-radius: 12px;
+  border: 2px solid oklch(0.65 0.2 195);
+  background: oklch(0.98 0.02 195);
+}
+
+.bulk-actions-card :deep(.ant-card-body) {
+  padding: 16px 24px;
+}
+
+.bulk-actions-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.selection-count {
+  font-size: 15px;
+  font-weight: 600;
+  color: oklch(0.65 0.2 195);
+}
+
+.bulk-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Table Card */
+.table-card {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
 .table-card :deep(.ant-card-body) {
   padding: 0;
 }
 
+.orders-table :deep(.ant-table) {
+  background: var(--card);
+}
+
+.orders-table :deep(.ant-table-thead > tr > th) {
+  background: var(--muted);
+  color: var(--foreground);
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  padding: 16px;
+}
+
+.orders-table :deep(.ant-table-tbody > tr) {
+  transition: all 0.2s;
+}
+
+.orders-table :deep(.ant-table-tbody > tr:hover) {
+  background: var(--accent);
+}
+
+.orders-table :deep(.ant-table-tbody > tr > td) {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Table Cells */
+.order-link {
+  color: oklch(0.65 0.2 195);
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.order-link:hover {
+  color: oklch(0.6 0.2 195);
+}
+
 .customer-cell {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .customer-avatar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, oklch(0.65 0.2 195), oklch(0.6 0.2 180));
   flex-shrink: 0;
+  font-weight: 600;
 }
 
 .customer-info {
@@ -308,31 +847,229 @@ const pagination = computed(() => ({
 }
 
 .customer-name {
-  font-weight: 500;
-  color: #262626;
+  font-weight: 600;
+  color: var(--foreground);
+  font-size: 14px;
 }
 
 .customer-email {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--muted-foreground);
+}
+
+.status-tag {
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
 }
 
 .order-total {
-  font-weight: 600;
-  color: #262626;
+  font-weight: 700;
+  color: var(--foreground);
+  font-size: 15px;
 }
 
 .date-cell {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+}
+
+.date-cell .date {
+  color: var(--foreground);
+  font-weight: 500;
 }
 
 .date-cell .time {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--muted-foreground);
 }
 
 .text-muted {
-  color: #bfbfbf;
+  color: var(--muted-foreground);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.action-icon-btn {
+  color: var(--muted-foreground);
+  transition: all 0.2s;
+}
+
+.action-icon-btn:hover {
+  color: oklch(0.65 0.2 195);
+  background: oklch(0.98 0.02 195);
+}
+
+/* Order Drawer */
+.order-drawer :deep(.ant-drawer-header) {
+  background: linear-gradient(135deg, oklch(0.65 0.2 195), oklch(0.6 0.2 180));
+  color: white;
+  border: none;
+}
+
+.order-drawer :deep(.ant-drawer-title) {
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.order-drawer :deep(.ant-drawer-close) {
+  color: white;
+}
+
+.order-details {
+  padding: 24px;
+}
+
+.detail-section {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0 0 16px 0;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.detail-value.total {
+  font-size: 18px;
+  color: oklch(0.65 0.2 195);
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: var(--muted);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.item-quantity {
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.item-price {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+/* Status Modal */
+.status-modal :deep(.ant-modal-header) {
+  background: linear-gradient(135deg, oklch(0.65 0.2 195), oklch(0.6 0.2 180));
+  border: none;
+}
+
+.status-modal :deep(.ant-modal-title) {
+  color: white;
+  font-weight: 600;
+}
+
+.modal-content {
+  padding: 8px 0;
+}
+
+.modal-label {
+  margin-bottom: 16px;
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .order-list-container {
+    padding: 16px;
+  }
+
+  .header-content {
+    flex-direction: column;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .header-actions button {
+    flex: 1;
+  }
+
+  .statistics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 16px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+}
+
+@media print {
+
+  .page-header,
+  .filter-card,
+  .bulk-actions-card,
+  .action-buttons {
+    display: none;
+  }
 }
 </style>

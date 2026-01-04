@@ -109,18 +109,16 @@ const orderColumns = [
         <p>Welcome back! Here's what's happening with your store.</p>
       </div>
       <div class="header-right">
-        <a-radio-group
-          v-model:value="selectedPeriod"
-          button-style="solid"
-          @change="handlePeriodChange(selectedPeriod)"
-        >
+        <a-radio-group v-model:value="selectedPeriod" button-style="solid" @change="handlePeriodChange(selectedPeriod)">
           <a-radio-button value="today">Today</a-radio-button>
           <a-radio-button value="week">Week</a-radio-button>
           <a-radio-button value="month">Month</a-radio-button>
           <a-radio-button value="year">Year</a-radio-button>
         </a-radio-group>
         <a-button @click="refreshDashboard" :loading="dashboardStore.loading">
-          <template #icon><ReloadOutlined /></template>
+          <template #icon>
+            <ReloadOutlined />
+          </template>
           Refresh
         </a-button>
       </div>
@@ -131,43 +129,20 @@ const orderColumns = [
       <!-- Overview Stats -->
       <a-row :gutter="[24, 24]" class="stats-row">
         <a-col :xs="24" :sm="12" :lg="6">
-          <StatCard
-            title="Total Users"
-            :value="overview?.totalUsers || 0"
-            :icon="UserOutlined"
-            color="#667eea"
-            :trend="overview?.newUsersThisWeek"
-            trendLabel="new this week"
-          />
+          <StatCard title="Total Users" :value="overview?.totalUsers || 0" :icon="UserOutlined" color="#667eea"
+            :trend="overview?.newUsersThisWeek" trendLabel="new this week" />
         </a-col>
         <a-col :xs="24" :sm="12" :lg="6">
-          <StatCard
-            title="Total Orders"
-            :value="overview?.totalOrders || 0"
-            :icon="ShoppingCartOutlined"
-            color="#52c41a"
-            :trend="overview?.todayOrders"
-            trendLabel="today"
-          />
+          <StatCard title="Total Orders" :value="overview?.totalOrders || 0" :icon="ShoppingCartOutlined"
+            color="#52c41a" :trend="overview?.todayOrders" trendLabel="today" />
         </a-col>
         <a-col :xs="24" :sm="12" :lg="6">
-          <StatCard
-            title="Total Products"
-            :value="overview?.totalProducts || 0"
-            :icon="ShoppingOutlined"
-            color="#fa8c16"
-          />
+          <StatCard title="Total Products" :value="overview?.totalProducts || 0" :icon="ShoppingOutlined"
+            color="#fa8c16" />
         </a-col>
         <a-col :xs="24" :sm="12" :lg="6">
-          <StatCard
-            title="Total Revenue"
-            :value="formatCurrency(overview?.totalRevenue || 0)"
-            :icon="DollarOutlined"
-            color="#eb2f96"
-            :trend="formatCurrency(overview?.todayRevenue || 0)"
-            trendLabel="today"
-            isFormatted
-          />
+          <StatCard title="Total Revenue" :value="formatCurrency(overview?.totalRevenue || 0)" :icon="DollarOutlined"
+            color="#eb2f96" :trend="formatCurrency(overview?.todayRevenue || 0)" trendLabel="today" isFormatted />
         </a-col>
       </a-row>
 
@@ -182,15 +157,9 @@ const orderColumns = [
                   <span class="stat-value">{{ formatCurrency(sales?.totalRevenue || 0) }}</span>
                 </div>
                 <a-divider type="vertical" />
-                <div
-                  class="stat-item"
-                  :class="{ positive: (sales?.comparison?.growthPercentage || 0) >= 0 }"
-                >
-                  <component
-                    :is="
-                      (sales?.comparison?.growthPercentage || 0) >= 0 ? RiseOutlined : FallOutlined
-                    "
-                  />
+                <div class="stat-item" :class="{ positive: (sales?.comparison?.growthPercentage || 0) >= 0 }">
+                  <component :is="(sales?.comparison?.growthPercentage || 0) >= 0 ? RiseOutlined : FallOutlined
+                    " />
                   <span>{{ Math.abs(sales?.comparison?.growthPercentage || 0).toFixed(1) }}%</span>
                 </div>
               </div>
@@ -213,13 +182,7 @@ const orderColumns = [
             <template #extra>
               <router-link to="/orders">View All</router-link>
             </template>
-            <a-table
-              :columns="orderColumns"
-              :data-source="recentOrders"
-              :pagination="false"
-              size="small"
-              row-key="id"
-            >
+            <a-table :columns="orderColumns" :data-source="recentOrders" :pagination="false" size="small" row-key="id">
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'orderNumber'">
                   <a-typography-link @click="() => $router.push(`/orders/${record.id}`)">
@@ -253,11 +216,9 @@ const orderColumns = [
                 <a-list-item>
                   <a-list-item-meta>
                     <template #avatar>
-                      <a-avatar
-                        :style="{
-                          background: `linear-gradient(135deg, ${['#667eea', '#52c41a', '#fa8c16', '#eb2f96', '#722ed1'][index % 5]} 0%, ${['#764ba2', '#389e0d', '#d46b08', '#c41d7f', '#531dab'][index % 5]} 100%)`,
-                        }"
-                      >
+                      <a-avatar :style="{
+                        background: `linear-gradient(135deg, ${['oklch(0.65 0.18 210)', 'oklch(0.7 0.17 150)', 'oklch(0.7 0.15 50)', 'oklch(0.65 0.2 350)', 'oklch(0.6 0.2 280)'][index % 5]} 0%, ${['oklch(0.55 0.2 280)', 'oklch(0.6 0.19 145)', 'oklch(0.6 0.17 45)', 'oklch(0.55 0.22 345)', 'oklch(0.5 0.22 275)'][index % 5]} 100%)`,
+                      }">
                         {{ index + 1 }}
                       </a-avatar>
                     </template>
@@ -272,12 +233,7 @@ const orderColumns = [
                         <a-divider type="vertical" />
                         <span>{{ formatCurrency(item.revenue) }}</span>
                         <a-divider type="vertical" />
-                        <a-rate
-                          :value="item.averageRating"
-                          disabled
-                          allow-half
-                          :style="{ fontSize: '12px' }"
-                        />
+                        <a-rate :value="item.averageRating" disabled allow-half :style="{ fontSize: '12px' }" />
                       </div>
                     </template>
                   </a-list-item-meta>
@@ -294,27 +250,18 @@ const orderColumns = [
         <a-col :xs="24" :lg="12">
           <a-card title="Low Stock Alerts" :bordered="false" class="alert-card">
             <template #extra>
-              <a-badge
-                :count="lowStockAlerts.length"
-                :number-style="{ backgroundColor: '#ff4d4f' }"
-              />
+              <a-badge :count="lowStockAlerts.length" :number-style="{ backgroundColor: '#ff4d4f' }" />
             </template>
-            <a-list
-              v-if="lowStockAlerts.length > 0"
-              :data-source="lowStockAlerts.slice(0, 5)"
-              item-layout="horizontal"
-              size="small"
-            >
+            <a-list v-if="lowStockAlerts.length > 0" :data-source="lowStockAlerts.slice(0, 5)" item-layout="horizontal"
+              size="small">
               <template #renderItem="{ item }">
                 <a-list-item>
                   <a-list-item-meta>
                     <template #avatar>
-                      <WarningOutlined
-                        :style="{
-                          fontSize: '20px',
-                          color: getStockStatusColor(item.status) === 'red' ? '#ff4d4f' : '#faad14',
-                        }"
-                      />
+                      <WarningOutlined :style="{
+                        fontSize: '20px',
+                        color: getStockStatusColor(item.status) === 'red' ? '#ff4d4f' : '#faad14',
+                      }" />
                     </template>
                     <template #title>
                       {{ item.productName }}
@@ -340,17 +287,13 @@ const orderColumns = [
         <a-col :xs="24" :lg="12">
           <a-card title="Recent Activity" :bordered="false" class="activity-card">
             <a-timeline v-if="recentActivity.length > 0">
-              <a-timeline-item
-                v-for="activity in recentActivity.slice(0, 6)"
-                :key="activity.entityId + activity.timestamp"
-                :color="
-                  activity.type === 'order'
+              <a-timeline-item v-for="activity in recentActivity.slice(0, 6)"
+                :key="activity.entityId + activity.timestamp" :color="activity.type === 'order'
                     ? 'green'
                     : activity.type === 'payment'
                       ? 'blue'
                       : 'gray'
-                "
-              >
+                  ">
                 <template #dot>
                   <component :is="getActivityIcon(activity.type)" style="font-size: 16px" />
                 </template>
@@ -383,21 +326,13 @@ const orderColumns = [
 .header-left h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #262626;
+  color: var(--foreground);
   margin: 0 0 4px 0;
 }
 
-:global(.dark) .header-left h1 {
-  color: #f3f4f6;
-}
-
 .header-left p {
-  color: #8c8c8c;
+  color: var(--muted-foreground);
   margin: 0;
-}
-
-:global(.dark) .header-left p {
-  color: #9ca3af;
 }
 
 .header-right {
@@ -435,25 +370,17 @@ const orderColumns = [
 }
 
 .stat-label {
-  color: #8c8c8c;
+  color: var(--muted-foreground);
   font-size: 13px;
-}
-
-:global(.dark) .stat-label {
-  color: #9ca3af;
 }
 
 .stat-value {
   font-weight: 600;
-  color: #262626;
-}
-
-:global(.dark) .stat-value {
-  color: #f3f4f6;
+  color: var(--foreground);
 }
 
 .stat-item.positive {
-  color: #52c41a;
+  color: oklch(0.7 0.17 150);
 }
 
 .content-row {
@@ -464,6 +391,14 @@ const orderColumns = [
   padding: 0;
 }
 
+.table-card :deep(.ant-card-extra) {
+  color: var(--primary);
+}
+
+.table-card :deep(.ant-card-extra):hover {
+  color: var(--primary-hover);
+}
+
 .table-card :deep(.ant-table-wrapper) {
   padding: 0 24px 24px;
 }
@@ -472,16 +407,20 @@ const orderColumns = [
   padding: 12px 0;
 }
 
+.list-card :deep(.ant-card-extra) {
+  color: var(--primary);
+}
+
+.list-card :deep(.ant-card-extra):hover {
+  color: var(--primary-hover);
+}
+
 .product-stats {
   display: flex;
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #8c8c8c;
-}
-
-:global(.dark) .product-stats {
-  color: #9ca3af;
+  color: var(--muted-foreground);
 }
 
 .bottom-row :deep(.ant-card) {
@@ -489,42 +428,26 @@ const orderColumns = [
 }
 
 .variant-name {
-  color: #8c8c8c;
+  color: var(--muted-foreground);
   font-size: 13px;
-}
-
-:global(.dark) .variant-name {
-  color: #9ca3af;
 }
 
 .stock-status {
   margin-left: 8px;
   text-transform: capitalize;
-  color: #8c8c8c;
+  color: var(--muted-foreground);
   font-size: 13px;
-}
-
-:global(.dark) .stock-status {
-  color: #9ca3af;
 }
 
 .activity-description {
   margin: 0;
-  color: #262626;
-}
-
-:global(.dark) .activity-description {
-  color: #f3f4f6;
+  color: var(--foreground);
 }
 
 .activity-time {
   margin: 4px 0 0 0;
   font-size: 12px;
-  color: #8c8c8c;
-}
-
-:global(.dark) .activity-time {
-  color: #9ca3af;
+  color: var(--muted-foreground);
 }
 
 .alert-card :deep(.ant-list-item) {

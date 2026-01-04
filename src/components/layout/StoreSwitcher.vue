@@ -10,17 +10,14 @@ import type { IStore } from '@/intefaces/store/store.interface'
 const router = useRouter()
 const authStore = useAuthStore()
 const loading = ref(false)
-
-const storeStore = useStoreStore();
+const storeStore = useStoreStore()
 
 const activeStoreName = computed(() => authStore.activeStore?.name || 'Select Store')
-
 
 function handleStoreSelect(store: IStore) {
   authStore.setActiveStore(store)
   message.success(`Switched to ${store.name}`)
-  storeStore.setActiveStore(store);
-  // window.location.reload() // Reload to ensure all data is refreshed for new store context
+  storeStore.setActiveStore(store)
 }
 
 function handleCreateStore() {
@@ -38,14 +35,14 @@ function getStoreInitials(name: string): string {
 
 function getStoreColor(index: number): string {
   const colors = [
-    '#1890ff',
-    '#52c41a',
-    '#fa8c16',
-    '#eb2f96',
-    '#722ed1',
-    '#13c2c2',
-    '#faad14',
-    '#f5222d',
+    '#0d9488', // teal
+    '#14b8a6', // teal light
+    '#0f766e', // teal dark
+    '#2dd4bf', // teal lighter
+    '#115e59', // teal darker
+    '#5eead4', // teal very light
+    '#0d9488', // teal repeat
+    '#14b8a6', // teal light repeat
   ]
   return colors[index % colors.length] || ''
 }
@@ -53,7 +50,7 @@ function getStoreColor(index: number): string {
 
 <template>
   <a-dropdown :trigger="['click']" placement="bottomRight">
-    <a-button>
+    <a-button class="store-selector-btn">
       <template #icon>
         <AppstoreOutlined />
       </template>
@@ -93,37 +90,39 @@ function getStoreColor(index: number): string {
 </template>
 
 <style scoped>
+/* Updated to use CSS variables for proper theme handling */
+.store-selector-btn {
+  background: var(--background);
+  border-color: var(--border);
+  color: var(--foreground);
+  transition: all 0.3s ease;
+}
+
+.store-selector-btn:hover {
+  border-color: oklch(0.55 0.15 180);
+  color: oklch(0.55 0.15 180);
+}
+
 .store-dropdown {
-  background: #ffffff;
+  background: var(--popover);
   border-radius: 8px;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   min-width: 320px;
   max-width: 400px;
 }
 
-:global(.dark) .store-dropdown {
-  background: #1f2937;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
-}
-
 .store-header {
   padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-:global(.dark) .store-header {
-  border-bottom-color: #374151;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, oklch(0.55 0.15 180) 0%, oklch(0.50 0.15 180) 100%);
 }
 
 .store-header h3 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #262626;
-}
-
-:global(.dark) .store-header h3 {
-  color: #f3f4f6;
+  color: #ffffff;
 }
 
 .store-grid {
@@ -143,25 +142,23 @@ function getStoreColor(index: number): string {
   padding: 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  background: var(--background);
+  border: 1px solid transparent;
 }
 
 .store-item:hover {
-  background-color: #f5f5f5;
+  background: var(--accent);
   transform: translateY(-2px);
-}
-
-:global(.dark) .store-item:hover {
-  background-color: #374151;
+  border-color: var(--border);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
 }
 
 .store-item.active {
-  background-color: #e6f7ff;
-}
-
-:global(.dark) .store-item.active {
-  background-color: rgba(99, 102, 241, 0.2);
+  background: var(--accent);
+  border-color: oklch(0.55 0.15 180);
+  box-shadow: 0 0 0 2px oklch(0.55 0.15 180 / 0.2);
 }
 
 .store-icon {
@@ -174,38 +171,36 @@ function getStoreColor(index: number): string {
   font-size: 20px;
   font-weight: 600;
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.store-item:hover .store-icon {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .add-icon {
-  background-color: #f0f0f0 !important;
-  color: #8c8c8c !important;
+  background: var(--muted) !important;
+  color: var(--muted-foreground) !important;
   font-size: 24px;
 }
 
-:global(.dark) .add-icon {
-  background-color: #374151 !important;
-  color: #9ca3af !important;
-}
-
 .add-store:hover .add-icon {
-  background-color: #1890ff !important;
+  background: linear-gradient(135deg, oklch(0.55 0.15 180), oklch(0.60 0.15 180)) !important;
   color: #ffffff !important;
 }
 
 .store-name {
   font-size: 13px;
-  color: #262626;
+  color: var(--foreground);
   text-align: center;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 80px;
-}
-
-:global(.dark) .store-name {
-  color: #d1d5db;
+  font-weight: 500;
 }
 
 .check-icon {
@@ -213,11 +208,8 @@ function getStoreColor(index: number): string {
   top: 8px;
   right: 8px;
   font-size: 16px;
-  color: #1890ff;
-}
-
-:global(.dark) .check-icon {
-  color: #6366f1;
+  color: oklch(0.55 0.15 180);
+  filter: drop-shadow(0 2px 4px rgba(13, 148, 136, 0.3));
 }
 
 /* Scrollbar Styling */
@@ -226,28 +218,16 @@ function getStoreColor(index: number): string {
 }
 
 .store-grid::-webkit-scrollbar-track {
-  background: #f0f0f0;
+  background: var(--muted);
   border-radius: 3px;
-}
-
-:global(.dark) .store-grid::-webkit-scrollbar-track {
-  background: #1f2937;
 }
 
 .store-grid::-webkit-scrollbar-thumb {
-  background: #bfbfbf;
+  background: oklch(0.55 0.15 180);
   border-radius: 3px;
 }
 
-:global(.dark) .store-grid::-webkit-scrollbar-thumb {
-  background: #4b5563;
-}
-
 .store-grid::-webkit-scrollbar-thumb:hover {
-  background: #8c8c8c;
-}
-
-:global(.dark) .store-grid::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: oklch(0.50 0.15 180);
 }
 </style>

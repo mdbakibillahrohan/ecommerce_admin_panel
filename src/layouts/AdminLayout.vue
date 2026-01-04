@@ -1,8 +1,7 @@
-<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue'
-import AppSidebar from '@/components/layout/AppSidebar.vue'
-import AppHeader from '@/components/layout/AppHeader.vue'
+import AppSidebar from '../components/layout/AppSidebar.vue'
+import AppHeader from '../components/layout/AppHeader.vue'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -17,11 +16,11 @@ const SIDEBAR_COLLAPSED_WIDTH = 80
 
 const sidebarWidth = computed(() => (collapsed.value ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH))
 
-const userStore = useUserStore();
-const authStore = useAuthStore();
-const storeStore = useStoreStore();
+const userStore = useUserStore()
+const authStore = useAuthStore()
+const storeStore = useStoreStore()
 
-const router = useRouter();
+const router = useRouter()
 
 function toggleSidebar() {
   collapsed.value = !collapsed.value
@@ -29,21 +28,19 @@ function toggleSidebar() {
 
 const getUserData = async () => {
   try {
-    await userStore.fetchLoggedInUser();
+    await userStore.fetchLoggedInUser()
   } catch (error: any) {
     if (error) {
-      authStore.logout();
-      router.push("/login");
-
+      authStore.logout()
+      router.push('/login')
     }
   }
 }
 
 onMounted(async () => {
-  await getUserData();
-  await storeStore.fetchCurrentUserStores();
-});
-
+  await getUserData()
+  await storeStore.fetchCurrentUserStores()
+})
 </script>
 
 <template>
@@ -79,14 +76,11 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/* Replaced all hardcoded colors with CSS variables for proper theme switching */
 .admin-layout {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--background);
   transition: background-color 0.3s ease;
-}
-
-:global(.dark) .admin-layout {
-  background: #111827;
 }
 
 /* Fixed Sidebar */
@@ -101,15 +95,12 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-right: 1px solid #e5e7eb;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
   transition:
     border-color 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-:global(.dark) .sidebar {
-  border-right-color: #374151;
-  box-shadow: 1px 0 10px rgba(0, 0, 0, 0.3);
+    box-shadow 0.3s ease,
+    background-color 0.3s ease;
 }
 
 .sidebar :deep(.ant-layout-sider-children) {
@@ -130,12 +121,8 @@ onMounted(async () => {
 .content {
   flex: 1;
   padding: 24px;
-  background: #f8fafc;
+  background: var(--background);
   transition: background-color 0.3s ease;
-}
-
-:global(.dark) .content {
-  background: #111827;
 }
 
 .content-wrapper {
@@ -148,16 +135,12 @@ onMounted(async () => {
   background: transparent;
   padding: 16px 24px;
   text-align: center;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border);
   transition: border-color 0.3s ease;
 }
 
-:global(.dark) .footer {
-  border-top-color: #374151;
-}
-
 .footer-content {
-  color: #9ca3af;
+  color: var(--muted-foreground);
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -166,11 +149,18 @@ onMounted(async () => {
 }
 
 .footer-divider {
-  color: #e5e7eb;
+  color: var(--border);
   transition: color 0.3s ease;
 }
 
-:global(.dark) .footer-divider {
-  color: #4b5563;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .content {
+    padding: 16px;
+  }
+
+  .sidebar {
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
+  }
 }
 </style>

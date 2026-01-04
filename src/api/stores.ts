@@ -16,8 +16,10 @@ export interface Store {
   currency?: string
   timezone?: string
   owner_id: number
-  logo: string
-  favicon: string
+  logo_id: number
+  favicon_id: number
+  logo: any
+  favicon: any
   custom_domain?: string
   tagline?: string
   created_at: string

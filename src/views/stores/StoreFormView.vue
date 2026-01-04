@@ -79,6 +79,8 @@ async function fetchStore(id: number) {
   loading.value = true
   try {
     const store = await storesApi.getById(id)
+    logo.value = store.logo
+    favicon.value = store.favicon
     formState.value = {
       name: store.name,
       slug: store.slug,

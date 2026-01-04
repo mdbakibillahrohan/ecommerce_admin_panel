@@ -45,6 +45,7 @@ const formattedValue = computed(() => {
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
+  background: var(--card);
 }
 
 .stat-card:hover {
@@ -64,14 +65,16 @@ const formattedValue = computed(() => {
 
 .stat-title {
   font-size: 14px;
-  color: #8c8c8c;
+  /* replaced hardcoded color with CSS variable */
+  color: var(--muted-foreground);
   margin: 0 0 8px 0;
 }
 
 .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #262626;
+  /* replaced hardcoded color with CSS variable */
+  color: var(--foreground);
   margin: 0 0 8px 0;
   line-height: 1.2;
 }
@@ -83,13 +86,15 @@ const formattedValue = computed(() => {
 }
 
 .trend-value {
-  color: #52c41a;
+  /* using teal color for positive trends */
+  color: oklch(0.7 0.15 180);
   font-weight: 600;
   font-size: 14px;
 }
 
 .trend-label {
-  color: #8c8c8c;
+  /* replaced hardcoded color with CSS variable */
+  color: var(--muted-foreground);
   font-size: 13px;
 }
 
