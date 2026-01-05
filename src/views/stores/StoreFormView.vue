@@ -1,4 +1,3 @@
-<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -39,7 +38,6 @@ const handleUseSelected = (files: { usingFor: string, files: MediaFile[] }) => {
   mediaModalVisible.value = false;
 }
 
-
 const formState = ref<CreateStoreDto>({
   name: '',
   slug: '',
@@ -65,15 +63,10 @@ const rules = {
   email: [{ type: 'email', message: 'Please enter a valid email', trigger: 'blur' }],
 }
 
-
-
 const openMediaLibrary = (usingFor: string) => {
   mediaUsingFor.value = usingFor;
   mediaModalVisible.value = true;
 }
-
-
-
 
 async function fetchStore(id: number) {
   loading.value = true
@@ -154,9 +147,12 @@ onMounted(async () => {
   <a-modal v-model:visible="mediaModalVisible" width="80%">
     <MainMedia @file-selected="handleUseSelected" :isSelectMode="true" :usingFor="mediaUsingFor" />
   </a-modal>
+
   <div class="store-form-container">
     <a-spin :spinning="loading" size="large">
+      <!-- Professional gradient header with better visual hierarchy -->
       <div class="page-header">
+        <div class="header-gradient"></div>
         <div class="header-content">
           <a-button class="back-button" type="text" @click="router.push('/stores')">
             <template #icon>
@@ -164,496 +160,961 @@ onMounted(async () => {
             </template>
           </a-button>
           <div class="header-text">
+            <div class="page-subtitle">Store Management</div>
             <h1 class="page-title">
               <ShopOutlined class="title-icon" />
               {{ isEdit ? 'Edit Store' : 'Create New Store' }}
             </h1>
+            <p class="page-description">
+              {{ isEdit ? 'Update your store information and branding' : 'Set up your new online store with' }}
+            </p>
           </div>
         </div>
         <div class="header-actions">
-          <a-space :size="8">
-            <a-button @click="router.push('/stores')">Cancel</a-button>
-            <a-button type="primary" :loading="saving" @click="handleSubmit">
+          <a-space :size="12">
+            <a-button size="large" @click="router.push('/stores')">
+              <span>Cancel</span>
+            </a-button>
+            <a-button type="primary" size="large" :loading="saving" @click="handleSubmit">
               <template #icon>
                 <SaveOutlined />
               </template>
-              {{ isEdit ? 'Update' : 'Create' }}
+              {{ isEdit ? 'Update Store' : 'Create Store' }}
             </a-button>
           </a-space>
         </div>
       </div>
 
-      <div class="form-content">
-        <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical">
-          <a-card :bordered="false" class="form-section">
-            <div class="section-header">
-              <PictureOutlined class="section-icon" />
-              <h2 class="section-title">Branding</h2>
-            </div>
+      <div class="form-layout">
+        <!-- Main form content with improved card design -->
+        <div class="form-main">
+          <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical">
 
-            <a-row :gutter="[16, 0]">
-              <a-col :xs="24" :sm="12">
-                <a-form-item label="Logo" name="logo">
-                  <a-button v-if="!logo" type="primary" @click="openMediaLibrary('logo')">Select
-                    Logo</a-button>
-                  <div v-else class="upload-preview">
-                    <a-image :width="100" :src="configuration.API_BASE_URL + logo?.file_path" alt="logo" />
-                    <a-button type="primary" @click="openMediaLibrary('logo')">Change Logo</a-button>
-                    <a-button type="danger" @click="logo = null">Remove Logo</a-button>
-                  </div>
-                  <div class="upload-hint">Recommended: 200x200px</div>
-                </a-form-item>
-              </a-col>
+            <!-- Enhanced branding section with better image upload UI -->
+            <a-card :bordered="false" class="form-section">
+              <div class="section-header">
+                <div class="section-icon-wrapper">
+                  <PictureOutlined class="section-icon" />
+                </div>
+                <div>
+                  <h2 class="section-title">Store Branding</h2>
+                  <p class="section-description">Upload your logo and favicon to build brand identity</p>
+                </div>
+              </div>
 
-              <a-col :xs="24" :sm="12">
-                <a-form-item label="Favicon" name="favicon">
-                  <a-button v-if="!favicon" type="primary" @click="openMediaLibrary('favicon')">Select
-                    Favicon</a-button>
-                  <div v-else class="upload-preview">
-                    <a-image :width="100" :src="configuration.API_BASE_URL + favicon?.file_path" alt="favicon" />
-                    <a-button type="primary" @click="openMediaLibrary('favicon')">Change Favicon</a-button>
-                    <a-button type="danger" @click="favicon = null">Remove Favicon</a-button>
-                  </div>
-                  <div class="upload-hint">Recommended: 32x32px</div>
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-card>
+              <a-row :gutter="[24, 24]">
+                <a-col :xs="24" :sm="12">
+                  <a-form-item label="Store Logo" name="logo">
+                    <div class="image-upload-wrapper">
+                      <div v-if="!logo" class="upload-empty" @click="openMediaLibrary('logo')">
+                        <div class="upload-icon-circle">
+                          <PictureOutlined />
+                        </div>
+                        <div class="upload-text">Click to upload logo</div>
+                        <div class="upload-hint">Recommended: 200x200px, PNG or JPG</div>
+                      </div>
+                      <div v-else class="upload-preview">
+                        <a-image :width="120" :height="120" :src="configuration.API_BASE_URL + logo?.file_path"
+                          alt="logo" class="preview-image" />
+                        <div class="preview-actions">
+                          <a-button type="primary" size="small" @click="openMediaLibrary('logo')">
+                            Change
+                          </a-button>
+                          <a-button danger size="small" @click="logo = null">
+                            Remove
+                          </a-button>
+                        </div>
+                      </div>
+                    </div>
+                  </a-form-item>
+                </a-col>
 
-          <a-card :bordered="false" class="form-section">
-            <div class="section-header">
-              <AppstoreOutlined class="section-icon" />
-              <h2 class="section-title">Basic Information</h2>
-            </div>
+                <a-col :xs="24" :sm="12">
+                  <a-form-item label="Store Favicon" name="favicon">
+                    <div class="image-upload-wrapper">
+                      <div v-if="!favicon" class="upload-empty" @click="openMediaLibrary('favicon')">
+                        <div class="upload-icon-circle">
+                          <PictureOutlined />
+                        </div>
+                        <div class="upload-text">Click to upload favicon</div>
+                        <div class="upload-hint">Recommended: 32x32px, ICO or PNG</div>
+                      </div>
+                      <div v-else class="upload-preview">
+                        <a-image :width="120" :height="120" :src="configuration.API_BASE_URL + favicon?.file_path"
+                          alt="favicon" class="preview-image" />
+                        <div class="preview-actions">
+                          <a-button type="primary" size="small" @click="openMediaLibrary('favicon')">
+                            Change
+                          </a-button>
+                          <a-button danger size="small" @click="favicon = null">
+                            Remove
+                          </a-button>
+                        </div>
+                      </div>
+                    </div>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-card>
 
-            <a-row :gutter="[16, 0]">
-              <a-col :xs="24" :lg="12">
-                <a-form-item label="Store Name" name="name">
-                  <a-input v-model:value="formState.name" placeholder="Enter your store name"
-                    @blur="!isEdit && generateSlug()" />
-                </a-form-item>
-              </a-col>
+            <!-- Enhanced basic information section -->
+            <a-card :bordered="false" class="form-section">
+              <div class="section-header">
+                <div class="section-icon-wrapper">
+                  <AppstoreOutlined class="section-icon" />
+                </div>
+                <div>
+                  <h2 class="section-title">Basic Information</h2>
+                  <p class="section-description">Provide essential details about your store</p>
+                </div>
+              </div>
 
-              <a-col :xs="24" :lg="12">
-                <a-form-item label="Store Category" name="store_category_id">
-                  <a-select v-model:value="formState.store_category_id" placeholder="Select a category">
-                    <a-select-option v-for="storeCategory in storeStore.storeCategories" :key="storeCategory.id"
-                      :value="storeCategory.id">
-                      {{ storeCategory.name }}
-                    </a-select-option>
-                  </a-select>
-                </a-form-item>
-              </a-col>
+              <a-row :gutter="[16, 0]">
+                <a-col :xs="24" :lg="12">
+                  <a-form-item label="Store Name" name="name">
+                    <a-input v-model:value="formState.name" size="large" placeholder="Enter your store name"
+                      @blur="!isEdit && generateSlug()" />
+                  </a-form-item>
+                </a-col>
 
-              <a-col :span="24">
-                <a-form-item label="Tagline" name="tagline">
-                  <a-input v-model:value="formState.tagline"
-                    placeholder="A short, catchy phrase that describes your store" :maxlength="100" show-count />
-                </a-form-item>
-              </a-col>
+                <a-col :xs="24" :lg="12">
+                  <a-form-item label="Store Category" name="store_category_id">
+                    <a-select v-model:value="formState.store_category_id" size="large" placeholder="Select a category">
+                      <a-select-option v-for="storeCategory in storeStore.storeCategories" :key="storeCategory.id"
+                        :value="storeCategory.id">
+                        {{ storeCategory.name }}
+                      </a-select-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
 
-              <a-col :span="24">
-                <a-form-item label="Description" name="description">
-                  <a-textarea v-model:value="formState.description" :rows="3"
-                    placeholder="Tell customers about your store..." show-count :maxlength="500" />
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-card>
+                <a-col :span="24">
+                  <a-form-item label="Tagline" name="tagline">
+                    <a-input v-model:value="formState.tagline" size="large"
+                      placeholder="A short, catchy phrase that describes your store" :maxlength="100" show-count />
+                  </a-form-item>
+                </a-col>
 
-          <a-card :bordered="false" class="form-section">
-            <div class="section-header">
-              <GlobalOutlined class="section-icon" />
-              <h2 class="section-title">URL & Domain</h2>
-            </div>
+                <a-col :span="24">
+                  <a-form-item label="Description" name="description">
+                    <a-textarea v-model:value="formState.description" :rows="4"
+                      placeholder="Tell customers about your store..." show-count :maxlength="500" />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-card>
 
-            <a-row :gutter="[16, 0]">
-              <a-col :xs="24" :lg="12">
-                <a-form-item label="URL Slug" name="slug">
-                  <template #extra>
-                    <span class="field-hint">{{ formState.slug || 'your-store' }}.adaptixinnovate.com</span>
-                  </template>
-                  <a-input v-model:value="formState.slug" placeholder="my-awesome-store" />
-                </a-form-item>
-              </a-col>
+            <!-- Enhanced URL section with preview -->
+            <a-card :bordered="false" class="form-section">
+              <div class="section-header">
+                <div class="section-icon-wrapper">
+                  <GlobalOutlined class="section-icon" />
+                </div>
+                <div>
+                  <h2 class="section-title">URL & Domain</h2>
+                  <p class="section-description">Configure your store's web address</p>
+                </div>
+              </div>
 
-              <a-col :xs="24" :lg="12">
-                <a-form-item label="Custom Domain">
-                  <template #extra>
-                    <span class="field-hint">
-                      <span class="premium-badge">Premium</span>
-                    </span>
-                  </template>
-                  <a-input v-model:value="customDomain" placeholder="www.yourstore.com" disabled />
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-card>
+              <a-row :gutter="[16, 0]">
+                <a-col :xs="24" :lg="12">
+                  <a-form-item label="URL Slug" name="slug">
+                    <a-input v-model:value="formState.slug" size="large" placeholder="my-awesome-store" />
+                    <div class="url-preview">
+                      <GlobalOutlined />
+                      <span>{{ formState.slug || 'your-store' }}.adaptixinnovate.com</span>
+                    </div>
+                  </a-form-item>
+                </a-col>
 
-          <a-card :bordered="false" class="form-section">
-            <div class="section-header">
-              <MailOutlined class="section-icon" />
-              <h2 class="section-title">Contact Information</h2>
-            </div>
+                <a-col :xs="24" :lg="12">
+                  <a-form-item label="Custom Domain">
+                    <a-input v-model:value="customDomain" size="large" placeholder="www.yourstore.com" disabled />
+                    <div class="premium-notice">
+                      <span class="premium-badge">Premium Feature</span>
+                      <span class="premium-text">Upgrade to use custom domain</span>
+                    </div>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-card>
 
-            <a-row :gutter="[16, 0]">
-              <a-col :xs="24" :lg="8">
-                <a-form-item label="Email" name="email">
-                  <a-input v-model:value="formState.email" type="email" placeholder="contact@yourstore.com">
-                    <template #prefix>
-                      <MailOutlined />
-                    </template>
-                  </a-input>
-                </a-form-item>
-              </a-col>
+            <!-- Enhanced contact section -->
+            <a-card :bordered="false" class="form-section">
+              <div class="section-header">
+                <div class="section-icon-wrapper">
+                  <MailOutlined class="section-icon" />
+                </div>
+                <div>
+                  <h2 class="section-title">Contact Information</h2>
+                  <p class="section-description">How customers can reach you</p>
+                </div>
+              </div>
 
-              <a-col :xs="24" :lg="8">
-                <a-form-item label="Phone" name="phone">
-                  <a-input v-model:value="formState.phone" placeholder="+880 1234-567890">
-                    <template #prefix>
-                      <PhoneOutlined />
-                    </template>
-                  </a-input>
-                </a-form-item>
-              </a-col>
+              <a-row :gutter="[16, 0]">
+                <a-col :xs="24" :lg="8">
+                  <a-form-item label="Email Address" name="email">
+                    <a-input v-model:value="formState.email" size="large" type="email"
+                      placeholder="contact@yourstore.com">
+                      <template #prefix>
+                        <MailOutlined />
+                      </template>
+                    </a-input>
+                  </a-form-item>
+                </a-col>
 
-              <a-col :xs="24" :lg="8">
-                <a-form-item label="Address" name="address">
-                  <a-input v-model:value="formState.address" placeholder="Your business address">
-                    <template #prefix>
-                      <EnvironmentOutlined />
-                    </template>
-                  </a-input>
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-card>
+                <a-col :xs="24" :lg="8">
+                  <a-form-item label="Phone Number" name="phone">
+                    <a-input v-model:value="formState.phone" size="large" placeholder="+880 1234-567890">
+                      <template #prefix>
+                        <PhoneOutlined />
+                      </template>
+                    </a-input>
+                  </a-form-item>
+                </a-col>
 
-          <a-card :bordered="false" class="form-section">
-            <div class="section-header">
-              <DollarOutlined class="section-icon" />
-              <h2 class="section-title">Regional Settings</h2>
-            </div>
+                <a-col :xs="24" :lg="8">
+                  <a-form-item label="Business Address" name="address">
+                    <a-input v-model:value="formState.address" size="large" placeholder="Your business address">
+                      <template #prefix>
+                        <EnvironmentOutlined />
+                      </template>
+                    </a-input>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-card>
 
-            <a-row :gutter="[16, 0]">
-              <a-col :xs="24" :lg="12">
-                <a-form-item label="Currency" name="currency">
-                  <a-select v-model:value="formState.currency">
-                    <a-select-option value="BDT">Bangladeshi Taka (BDT)</a-select-option>
-                    <a-select-option value="USD">US Dollar (USD)</a-select-option>
-                    <a-select-option value="EUR">Euro (EUR)</a-select-option>
-                    <a-select-option value="GBP">British Pound (GBP)</a-select-option>
-                  </a-select>
-                </a-form-item>
-              </a-col>
+            <!-- Enhanced regional settings -->
+            <a-card :bordered="false" class="form-section">
+              <div class="section-header">
+                <div class="section-icon-wrapper">
+                  <DollarOutlined class="section-icon" />
+                </div>
+                <div>
+                  <h2 class="section-title">Regional Settings</h2>
+                  <p class="section-description">Configure currency and timezone preferences</p>
+                </div>
+              </div>
 
-              <a-col :xs="24" :lg="12">
-                <a-form-item label="Timezone" name="timezone">
-                  <a-select v-model:value="formState.timezone" show-search>
-                    <a-select-option value="Asia/Dhaka">Asia/Dhaka (GMT+6)</a-select-option>
-                    <a-select-option value="America/New_York">America/New_York (EST)</a-select-option>
-                    <a-select-option value="Europe/London">Europe/London (GMT)</a-select-option>
-                    <a-select-option value="Asia/Tokyo">Asia/Tokyo (JST)</a-select-option>
-                  </a-select>
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-card>
+              <a-row :gutter="[16, 0]">
+                <a-col :xs="24" :lg="12">
+                  <a-form-item label="Currency" name="currency">
+                    <a-select v-model:value="formState.currency" size="large">
+                      <a-select-option value="BDT">🇧🇩 Bangladeshi Taka (BDT)</a-select-option>
+                      <a-select-option value="USD">🇺🇸 US Dollar (USD)</a-select-option>
+                      <a-select-option value="EUR">🇪🇺 Euro (EUR)</a-select-option>
+                      <a-select-option value="GBP">🇬🇧 British Pound (GBP)</a-select-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
 
-        </a-form>
+                <a-col :xs="24" :lg="12">
+                  <a-form-item label="Timezone" name="timezone">
+                    <a-select v-model:value="formState.timezone" size="large" show-search>
+                      <a-select-option value="Asia/Dhaka">Asia/Dhaka (GMT+6)</a-select-option>
+                      <a-select-option value="America/New_York">America/New_York (EST)</a-select-option>
+                      <a-select-option value="Europe/London">Europe/London (GMT)</a-select-option>
+                      <a-select-option value="Asia/Tokyo">Asia/Tokyo (JST)</a-select-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-card>
 
-        <div class="mobile-actions">
-          <a-button block @click="router.push('/stores')">Cancel</a-button>
-          <a-button type="primary" block :loading="saving" @click="handleSubmit">
-            <template #icon>
-              <SaveOutlined />
-            </template>
-            {{ isEdit ? 'Update' : 'Create' }}
-          </a-button>
+          </a-form>
         </div>
+
+        <!-- New sidebar with store preview and quick summary -->
+        <div class="form-sidebar">
+          <a-card :bordered="false" class="sidebar-card sticky-card">
+            <div class="card-header">
+              <ShopOutlined class="card-icon" />
+              <h3 class="card-title">Store Preview</h3>
+            </div>
+
+            <div class="store-preview">
+              <div class="preview-logo">
+                <img v-if="logo" :src="configuration.API_BASE_URL + logo?.file_path" alt="Store Logo" />
+                <div v-else class="preview-logo-placeholder">
+                  <ShopOutlined />
+                </div>
+              </div>
+
+              <div class="preview-info">
+                <h3 class="preview-name">{{ formState.name || 'Store Name' }}</h3>
+                <p class="preview-tagline">{{ formState.tagline || 'Your store tagline' }}</p>
+                <div class="preview-url">
+                  <GlobalOutlined />
+                  <span>{{ formState.slug || 'your-store' }}.adaptixinnovate.com</span>
+                </div>
+              </div>
+
+              <div class="preview-details">
+                <div class="detail-item">
+                  <span class="detail-label">Category</span>
+                  <span class="detail-value">
+                    {{storeStore.storeCategories.find(c => c.id === formState.store_category_id)?.name || 'Notselected'
+                    }}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Currency</span>
+                  <span class="detail-value">{{ formState.currency }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Timezone</span>
+                  <span class="detail-value">{{ formState.timezone }}</span>
+                </div>
+              </div>
+            </div>
+          </a-card>
+
+          <a-card :bordered="false" class="sidebar-card">
+            <div class="card-header">
+              <AppstoreOutlined class="card-icon" />
+              <h3 class="card-title">Quick Tips</h3>
+            </div>
+
+            <div class="tips-list">
+              <div class="tip-item">
+                <div class="tip-icon">💡</div>
+                <div class="tip-content">
+                  <strong>Choose a memorable name</strong>
+                  <span>Pick a name that's easy to remember and spell</span>
+                </div>
+              </div>
+              <div class="tip-item">
+                <div class="tip-icon">🎨</div>
+                <div class="tip-content">
+                  <strong>Upload quality images</strong>
+                  <span>Use high-resolution logos for better branding</span>
+                </div>
+              </div>
+              <div class="tip-item">
+                <div class="tip-icon">📝</div>
+                <div class="tip-content">
+                  <strong>Write a compelling tagline</strong>
+                  <span>Describe what makes your store unique</span>
+                </div>
+              </div>
+            </div>
+          </a-card>
+        </div>
+      </div>
+
+      <!-- Mobile-only action buttons -->
+      <div class="mobile-actions">
+        <a-button block size="large" @click="router.push('/stores')">Cancel</a-button>
+        <a-button type="primary" block size="large" :loading="saving" @click="handleSubmit">
+          <template #icon>
+            <SaveOutlined />
+          </template>
+          {{ isEdit ? 'Update' : 'Create' }}
+        </a-button>
       </div>
     </a-spin>
   </div>
 </template>
 
 <style scoped>
+/* Completely redesigned with CSS variables for theme support */
 .store-form-container {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--background);
+  padding: 0;
 }
 
+/* Header Styles */
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 20px;
-  padding: 16px 20px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  position: relative;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.header-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg,
+      oklch(0.65 0.25 192) 0%,
+      oklch(0.60 0.22 200) 50%,
+      oklch(0.65 0.25 192) 100%);
 }
 
 .header-content {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px;
+  padding-bottom: 20px;
 }
 
 .back-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--muted-foreground);
+  flex-shrink: 0;
+  margin-top: 4px;
 }
 
 .back-button:hover {
-  background: #f0f5ff;
-  color: #1890ff;
+  background: oklch(0.65 0.25 192 / 0.1);
+  color: oklch(0.65 0.25 192);
+  transform: translateX(-2px);
 }
 
 .header-text {
   flex: 1;
 }
 
+.page-subtitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
 .page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1a1a2e;
-  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0 0 8px 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 .title-icon {
-  font-size: 20px;
-  color: #1890ff;
+  font-size: 28px;
+  color: oklch(0.65 0.25 192);
+}
+
+.page-description {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  margin: 0;
+  line-height: 1.5;
 }
 
 .header-actions {
-  display: flex;
-  align-items: center;
+  padding: 0 24px 20px;
 }
 
-.form-content {
-  /* max-width: 1200px; */
+/* Form Layout */
+.form-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  padding: 0 24px 80px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
+.form-main {
+  min-width: 0;
+}
+
+.form-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Form Section Styles */
 .form-section {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.2s ease;
+  border: 1px solid var(--border);
+  background: var(--card);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .form-section:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px oklch(0 0 0 / 0.06);
+  border-color: oklch(0.65 0.25 192 / 0.3);
 }
 
 .section-header {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
-.section-icon {
-  font-size: 18px;
-  color: #1890ff;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a2e;
-  margin: 0;
-}
-
-.field-hint {
-  color: #8c8c8c;
-  font-size: 12px;
-  display: inline-block;
-  margin-top: 2px;
-}
-
-.premium-badge {
-  display: inline-block;
-  padding: 1px 6px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 3px;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.upload-preview {
-  width: 100%;
-  height: 100%;
+.section-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg,
+      oklch(0.65 0.25 192 / 0.1) 0%,
+      oklch(0.60 0.22 200 / 0.1) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.upload-preview img {
+.section-icon {
+  font-size: 22px;
+  color: oklch(0.65 0.25 192);
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0 0 4px 0;
+}
+
+.section-description {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Image Upload Styles */
+.image-upload-wrapper {
+  width: 100%;
+}
+
+.upload-empty {
+  width: 100%;
+  height: 200px;
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--background);
+}
+
+.upload-empty:hover {
+  border-color: oklch(0.65 0.25 192);
+  background: oklch(0.65 0.25 192 / 0.05);
+}
+
+.upload-empty:hover .upload-icon-circle {
+  background: oklch(0.65 0.25 192);
+  color: white;
+  transform: scale(1.1);
+}
+
+.upload-icon-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: var(--muted-foreground);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.upload-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.upload-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--background);
+}
+
+.preview-image {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+}
+
+.preview-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* URL Preview */
+.url-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: oklch(0.65 0.25 192 / 0.08);
+  border-radius: 8px;
+  font-size: 13px;
+  color: oklch(0.65 0.25 192);
+  font-weight: 500;
+}
+
+.premium-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, oklch(0.60 0.18 285 / 0.1), oklch(0.55 0.20 310 / 0.1));
+  border-radius: 8px;
+}
+
+.premium-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, oklch(0.60 0.18 285), oklch(0.55 0.20 310));
+  color: white;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.premium-text {
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+/* Sidebar Styles */
+.sidebar-card {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.sticky-card {
+  position: sticky;
+  top: 24px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-icon {
+  font-size: 18px;
+  color: oklch(0.65 0.25 192);
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+}
+
+/* Store Preview */
+.store-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.preview-logo {
+  width: 100%;
+  height: 140px;
+  border-radius: 10px;
+  background: linear-gradient(135deg,
+      oklch(0.65 0.25 192 / 0.1) 0%,
+      oklch(0.60 0.22 200 / 0.1) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 2px solid var(--border);
+}
+
+.preview-logo img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
 }
 
-.upload-placeholder {
-  display: flex;
-  flex-direction: column;
+.preview-logo-placeholder {
+  font-size: 48px;
+  color: var(--muted-foreground);
+}
+
+.preview-info {
+  text-align: center;
+}
+
+.preview-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0 0 6px 0;
+}
+
+.preview-tagline {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.preview-url {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: #8c8c8c;
-}
-
-.upload-icon {
-  font-size: 28px;
-}
-
-.upload-text {
+  gap: 6px;
+  padding: 6px 12px;
+  background: oklch(0.65 0.25 192 / 0.1);
+  border-radius: 6px;
   font-size: 12px;
+  color: oklch(0.65 0.25 192);
   font-weight: 500;
 }
 
-.upload-hint {
-  font-size: 11px;
-  color: #8c8c8c;
-  margin-top: 4px;
+.preview-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
 }
 
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-label {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 13px;
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+/* Tips List */
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tip-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: var(--muted);
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tip-item:hover {
+  background: oklch(0.65 0.25 192 / 0.08);
+  transform: translateX(4px);
+}
+
+.tip-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.tip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tip-content strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.tip-content span {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  line-height: 1.4;
+}
+
+/* Mobile Actions */
 .mobile-actions {
   display: none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 12px;
-  background: white;
-  border-top: 1px solid #f0f0f0;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
-  gap: 10px;
-  z-index: 100;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .form-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .form-sidebar {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
   .store-form-container {
-    padding: 12px;
+    padding: 0;
   }
 
   .page-header {
-    padding: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
   }
 
   .header-content {
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-start;
-  }
-
-  .back-button {
-    align-self: flex-start;
+    padding: 16px;
+    padding-bottom: 12px;
   }
 
   .page-title {
-    font-size: 18px;
+    font-size: 22px;
   }
 
   .title-icon {
-    font-size: 18px;
+    font-size: 22px;
+  }
+
+  .page-description {
+    font-size: 13px;
   }
 
   .header-actions {
     display: none;
   }
 
-  .mobile-actions {
-    display: flex;
+  .form-layout {
+    padding: 0 16px 100px;
+    gap: 16px;
   }
 
   .form-section {
-    border-radius: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+  }
+
+  .section-header {
+    gap: 12px;
+  }
+
+  .section-icon-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+
+  .section-icon {
+    font-size: 18px;
   }
 
   .section-title {
-    font-size: 15px;
+    font-size: 16px;
   }
 
-  .form-content {
-    padding-bottom: 70px;
+  .mobile-actions {
+    display: flex;
+    gap: 12px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 16px oklch(0 0 0 / 0.08);
+    z-index: 100;
   }
+}
+
+/* Ant Design Overrides */
+:deep(.ant-card-body) {
+  padding: 24px;
 }
 
 :deep(.ant-input),
 :deep(.ant-select-selector),
 :deep(.ant-input-textarea) {
   border-radius: 8px;
+  border-color: var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.ant-input:hover),
+:deep(.ant-select-selector:hover) {
+  border-color: oklch(0.65 0.25 192 / 0.5);
 }
 
 :deep(.ant-input:focus),
 :deep(.ant-select-focused .ant-select-selector) {
-  border-color: #1890ff;
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+  border-color: oklch(0.65 0.25 192);
+  box-shadow: 0 0 0 3px oklch(0.65 0.25 192 / 0.1);
 }
 
 :deep(.ant-form-item-label > label) {
   font-weight: 600;
-  color: #374151;
-  font-size: 13px;
-}
-
-:deep(.ant-card-body) {
-  padding: 20px;
+  color: var(--foreground);
+  font-size: 14px;
 }
 
 :deep(.ant-btn) {
   border-radius: 8px;
-  font-weight: 500;
-  height: 36px;
-  padding: 0 16px;
+  font-weight: 600;
+  height: auto;
+  padding: 8px 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.ant-btn-lg) {
+  padding: 12px 24px;
+  font-size: 15px;
 }
 
 :deep(.ant-btn-primary) {
-  background: #1890ff;
+  background: linear-gradient(135deg, oklch(0.65 0.25 192), oklch(0.60 0.22 200));
   border: none;
-  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.25);
+  box-shadow: 0 4px 12px oklch(0.65 0.25 192 / 0.3);
 }
 
 :deep(.ant-btn-primary:hover) {
-  background: #40a9ff;
-  box-shadow: 0 3px 8px rgba(24, 144, 255, 0.35);
+  background: linear-gradient(135deg, oklch(0.68 0.25 192), oklch(0.63 0.22 200));
+  box-shadow: 0 6px 16px oklch(0.65 0.25 192 / 0.4);
+  transform: translateY(-1px);
 }
 
 :deep(.ant-form-item) {
-  margin-bottom: 16px;
-}
-
-:deep(.ant-upload.ant-upload-select-picture-card) {
-  width: 120px;
-  height: 120px;
-  border-radius: 8px;
-  border: 2px dashed #d9d9d9;
-  transition: all 0.2s ease;
-}
-
-:deep(.ant-upload.ant-upload-select-picture-card:hover) {
-  border-color: #1890ff;
+  margin-bottom: 20px;
 }
 
 :deep(.ant-spin-container) {

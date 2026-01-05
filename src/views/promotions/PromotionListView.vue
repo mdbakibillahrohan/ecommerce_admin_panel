@@ -517,7 +517,6 @@ onMounted(() => {
 
 <style scoped>
 .promotion-list-container {
-  max-width: 1400px;
   margin: 0 auto;
 }
 

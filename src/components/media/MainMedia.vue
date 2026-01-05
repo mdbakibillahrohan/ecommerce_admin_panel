@@ -219,7 +219,7 @@ const toggleFileSelection = (id: number) => {
   if (selectedFileIds.value.includes(id)) {
     selectedFileIds.value = selectedFileIds.value.filter(i => i !== id)
   } else {
-    selectedFileIds.value = [...selectedFileIds.value, id] // Create new array reactivity
+    selectedFileIds.value = [...selectedFileIds.value, id]
   }
 }
 
@@ -281,29 +281,33 @@ onMounted(() => {
     </div>
 
     <!-- Bulk Action Bar -->
-    <div v-if="hasSelection" class="bulk-action-bar">
-      <div class="bulk-content">
-        <span class="bulk-count">{{ selectionCount }} items selected</span>
-        <div class="bulk-actions">
-          <!-- Potential "Use Selected" button here if needed for multi-pick -->
+    <transition name="slide-up">
+      <div v-if="hasSelection" class="bulk-action-bar">
+        <div class="bulk-content">
+          <div class="bulk-info">
+            <div class="bulk-count">{{ selectionCount }}</div>
+            <span class="bulk-label">items selected</span>
+          </div>
+          <div class="bulk-actions">
+            <a-button v-if="isSelectMode" type="primary" size="large" @click="handleUseSelected"
+              class="action-btn use-btn">
+              <UploadOutlined />
+              Use Selected
+            </a-button>
 
-          <a-button v-if="isSelectMode" type="primary" @click="handleUseSelected">
-            <UploadOutlined />
-            Use Selected
-          </a-button>
+            <a-button type="primary" danger size="large" @click="handleBulkDelete" class="action-btn delete-btn">
+              <DeleteOutlined />
+              Delete
+            </a-button>
 
-          <a-button type="primary" danger @click="handleBulkDelete">
-            <DeleteOutlined />
-            Delete Selected
-          </a-button>
-
-          <a-button @click="clearSelection">
-            <CloseOutlined />
-            Cancel
-          </a-button>
+            <a-button size="large" @click="clearSelection" class="action-btn cancel-btn">
+              <CloseOutlined />
+              Cancel
+            </a-button>
+          </div>
         </div>
       </div>
-    </div>
+    </transition>
 
     <!-- Modals -->
     <UploadModal v-model:open="uploadModalVisible" :confirmLoading="uploading" @upload="handleUploadFiles" />
@@ -313,12 +317,14 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* Replace all hardcoded colors with CSS variables for proper theming */
 .media-library {
   min-height: 100vh;
-  background: #f9fafb;
-  color: #111827;
+  background: var(--background);
+  color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
   position: relative;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .main-content {
@@ -326,10 +332,9 @@ onMounted(() => {
   margin: 0 auto;
   padding: 32px 24px;
   padding-bottom: 100px;
-  /* Space for bulk bar */
 }
 
-/* Empty State */
+/* Empty State with teal accents */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -337,78 +342,222 @@ onMounted(() => {
   justify-content: center;
   padding: 120px 24px;
   text-align: center;
+  animation: fade-in 0.5s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .empty-icon {
   font-size: 80px;
-  color: #d1d5db;
+  color: var(--muted-foreground);
   margin-bottom: 24px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .empty-title {
   font-size: 24px;
   font-weight: 600;
-  color: #111827;
+  color: var(--foreground);
   margin: 0 0 12px 0;
 }
 
 .empty-description {
   font-size: 15px;
-  color: #6b7280;
+  color: var(--muted-foreground);
   margin: 0 0 32px 0;
   max-width: 400px;
 }
 
 .empty-cta {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--primary);
+  border-color: var(--primary);
   color: #ffffff;
   display: flex;
   align-items: center;
   gap: 8px;
+  height: 48px;
+  padding: 0 32px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Bulk Action Bar */
+.empty-cta:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced Bulk Action Bar with glass morphism */
 .bulk-action-bar {
   position: fixed;
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  padding: 12px 24px;
-  border-radius: 12px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  animation: slide-up 0.3s ease-out;
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  padding: 16px 28px;
+  border-radius: 16px;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(0, 0, 0, 0.1);
+  min-width: 500px;
 }
 
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-  }
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translate(-50%, 30px);
+}
+
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translate(-50%, 30px);
 }
 
 .bulk-content {
   display: flex;
   align-items: center;
   gap: 24px;
+  justify-content: space-between;
+}
+
+.bulk-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .bulk-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: #ffffff;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.bulk-label {
   font-weight: 600;
-  color: #111827;
+  color: var(--foreground);
+  font-size: 15px;
 }
 
 .bulk-actions {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.action-btn {
+  height: 44px;
+  padding: 0 24px;
+  font-weight: 600;
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.use-btn {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.use-btn:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.delete-btn {
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.delete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.cancel-btn {
+  background: var(--background);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.cancel-btn:hover {
+  background: var(--muted);
+  border-color: var(--border);
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .bulk-action-bar {
+    min-width: auto;
+    width: calc(100% - 48px);
+    padding: 12px 16px;
+  }
+
+  .bulk-content {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .bulk-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .main-content {
+    padding: 24px 16px;
+    padding-bottom: 180px;
+  }
 }
 </style>

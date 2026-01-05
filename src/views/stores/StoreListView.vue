@@ -435,6 +435,12 @@ onMounted(() => {
           <span class="store-count">{{ totalStores }}</span>
         </div>
       </div>
+      <a-button type="primary" class="add-store-btn" @click="handleAddStore">
+        <template #icon>
+          <plus-outlined />
+        </template>
+        Add New Store
+      </a-button>
     </div>
 
     <!-- Statistics Cards -->
@@ -603,19 +609,25 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* Updated to use CSS variables for proper theming */
 .stores-list-page {
-  background: #f5f5f5;
+  background: var(--background);
   min-height: 100vh;
   position: relative;
 }
 
 /* Page Header */
 .page-header {
-  background: #ffffff;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 20px 24px;
   margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
 }
 
 .header-content {
@@ -627,13 +639,14 @@ onMounted(() => {
 .header-icon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, oklch(0.65 0.2 190) 0%, oklch(0.6 0.18 195) 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  color: #ffffff;
+  color: white;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
 }
 
 .header-text {
@@ -645,17 +658,31 @@ onMounted(() => {
 .header-text h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--foreground);
   margin: 0;
 }
 
 .store-count {
-  background: #f0f0f0;
-  color: #595959;
+  background: var(--muted);
+  color: var(--muted-foreground);
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
+}
+
+.add-store-btn {
+  background: linear-gradient(135deg, oklch(0.65 0.2 190) 0%, oklch(0.6 0.18 195) 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+  height: 40px;
+  padding: 0 24px;
+  font-weight: 600;
+}
+
+.add-store-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.35);
 }
 
 /* Statistics Cards */
@@ -667,14 +694,15 @@ onMounted(() => {
 }
 
 .stat-card {
-  background: #ffffff;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 24px;
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -686,28 +714,29 @@ onMounted(() => {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, oklch(0.65 0.2 190) 0%, oklch(0.6 0.18 195) 100%);
 }
 
 .stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-color: oklch(0.65 0.2 190);
 }
 
 .stat-card.total::before {
-  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(90deg, oklch(0.65 0.2 230) 0%, oklch(0.65 0.2 250) 100%);
 }
 
 .stat-card.active::before {
-  background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+  background: linear-gradient(90deg, oklch(0.7 0.18 145) 0%, oklch(0.72 0.16 165) 100%);
 }
 
 .stat-card.inactive::before {
-  background: linear-gradient(90deg, #fa709a 0%, #fee140 100%);
+  background: linear-gradient(90deg, oklch(0.7 0.15 45) 0%, oklch(0.72 0.13 60) 100%);
 }
 
 .stat-card.new::before {
-  background: linear-gradient(90deg, #fccb90 0%, #d57eeb 100%);
+  background: linear-gradient(90deg, oklch(0.65 0.2 190) 0%, oklch(0.6 0.18 195) 100%);
 }
 
 .stat-icon {
@@ -718,28 +747,33 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   font-size: 32px;
-  background: #f5f5f5;
-  color: #595959;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  transition: all 0.3s ease;
 }
 
 .stat-card.total .stat-icon {
-  background: #e6f7ff;
-  color: #1890ff;
+  background: oklch(0.65 0.2 230 / 0.15);
+  color: oklch(0.65 0.2 230);
 }
 
 .stat-card.active .stat-icon {
-  background: #f6ffed;
-  color: #52c41a;
+  background: oklch(0.7 0.18 145 / 0.15);
+  color: oklch(0.7 0.18 145);
 }
 
 .stat-card.inactive .stat-icon {
-  background: #fff2e8;
-  color: #fa8c16;
+  background: oklch(0.7 0.15 45 / 0.15);
+  color: oklch(0.7 0.15 45);
 }
 
 .stat-card.new .stat-icon {
-  background: #fff1f0;
-  color: #f5222d;
+  background: oklch(0.65 0.2 190 / 0.15);
+  color: oklch(0.65 0.2 190);
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1) rotate(5deg);
 }
 
 .stat-content {
@@ -749,27 +783,28 @@ onMounted(() => {
 .stat-value {
   font-size: 32px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--foreground);
   line-height: 1;
   margin-bottom: 8px;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #8c8c8c;
+  color: var(--muted-foreground);
   font-weight: 500;
 }
 
 /* Financial Summary */
 .financial-summary {
-  background: #ffffff;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 20px 24px;
   margin-bottom: 24px;
   display: flex;
   align-items: center;
   justify-content: space-around;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .financial-item {
@@ -780,20 +815,20 @@ onMounted(() => {
 
 .financial-icon {
   font-size: 20px;
-  color: #595959;
+  color: var(--muted-foreground);
 }
 
 .financial-item.success .financial-icon {
-  color: #52c41a;
+  color: oklch(0.7 0.18 145);
 }
 
 .financial-item.danger .financial-icon {
-  color: #f5222d;
+  color: oklch(0.65 0.2 25);
 }
 
 .financial-label {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--muted-foreground);
   font-weight: 600;
   letter-spacing: 0.5px;
   margin-right: 8px;
@@ -802,29 +837,30 @@ onMounted(() => {
 .financial-value {
   font-size: 18px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--foreground);
 }
 
 .financial-item.success .financial-value {
-  color: #52c41a;
+  color: oklch(0.7 0.18 145);
 }
 
 .financial-item.danger .financial-value {
-  color: #f5222d;
+  color: oklch(0.65 0.2 25);
 }
 
 .divider-vertical {
   width: 1px;
   height: 40px;
-  background: #e8e8e8;
+  background: var(--border);
 }
 
 /* Content Card */
 .content-card {
-  background: #ffffff;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .table-header {
@@ -839,7 +875,7 @@ onMounted(() => {
 .table-title {
   font-size: 20px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--foreground);
   margin: 0;
 }
 
@@ -859,22 +895,22 @@ onMounted(() => {
 }
 
 .export-btn {
-  border-color: #52c41a;
-  color: #52c41a;
+  border-color: oklch(0.7 0.18 145);
+  color: oklch(0.7 0.18 145);
+  font-weight: 600;
 }
 
 .export-btn:hover {
-  background: #52c41a;
-  color: #ffffff;
-  border-color: #52c41a;
+  background: oklch(0.7 0.18 145 / 0.1);
+  border-color: oklch(0.7 0.18 145);
+  color: oklch(0.7 0.18 145);
 }
 
-/* Table Container */
+/* Table Styles */
 .table-container {
   overflow-x: auto;
 }
 
-/* Store Info */
 .store-info {
   display: flex;
   align-items: center;
@@ -884,12 +920,13 @@ onMounted(() => {
 .store-logo {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 8px;
+  border-radius: 10px;
+  background: var(--muted);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
+  border: 2px solid var(--border);
 }
 
 .store-details {
@@ -897,18 +934,16 @@ onMounted(() => {
 }
 
 .store-name {
-  font-size: 15px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--foreground);
   margin-bottom: 4px;
 }
 
 .store-id {
-  font-size: 13px;
-  color: #8c8c8c;
+  font-size: 12px;
+  color: var(--muted-foreground);
 }
 
-/* Owner Info */
 .owner-info {
   display: flex;
   flex-direction: column;
@@ -916,22 +951,19 @@ onMounted(() => {
 }
 
 .owner-name {
-  font-size: 14px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--foreground);
 }
 
 .owner-contact {
-  font-size: 13px;
-  color: #8c8c8c;
+  font-size: 12px;
+  color: var(--muted-foreground);
 }
 
-/* Action Buttons */
 .action-buttons {
   display: flex;
-  align-items: center;
+  gap: 8px;
   justify-content: center;
-  gap: 4px;
 }
 
 .action-btn {
@@ -940,72 +972,78 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .view-btn {
-  color: #1890ff;
-  background: #e6f7ff;
-  border: 1px solid #91d5ff;
+  color: oklch(0.65 0.2 230);
 }
 
 .view-btn:hover {
-  background: #1890ff;
-  color: #ffffff;
-  border-color: #1890ff;
+  background: oklch(0.65 0.2 230 / 0.1);
+  color: oklch(0.65 0.2 230);
 }
 
 .edit-btn {
-  color: #52c41a;
-  background: #f6ffed;
-  border: 1px solid #b7eb8f;
+  color: oklch(0.65 0.2 190);
 }
 
 .edit-btn:hover {
-  background: #52c41a;
-  color: #ffffff;
-  border-color: #52c41a;
+  background: oklch(0.65 0.2 190 / 0.1);
+  color: oklch(0.65 0.2 190);
 }
 
 .delete-btn {
-  color: #f5222d;
-  background: #fff1f0;
-  border: 1px solid #ffa39e;
+  color: oklch(0.65 0.2 25);
 }
 
 .delete-btn:hover {
-  background: #f5222d;
-  color: #ffffff;
-  border-color: #f5222d;
+  background: oklch(0.65 0.2 25 / 0.1);
+  color: oklch(0.65 0.2 25);
 }
 
 /* Floating Add Button */
 .floating-add-btn {
   position: fixed;
-  bottom: 32px;
   right: 32px;
+  bottom: 32px;
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  font-size: 20px;
+  background: linear-gradient(135deg, oklch(0.65 0.2 190) 0%, oklch(0.6 0.18 195) 100%);
+  border: none;
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+  font-size: 24px;
   z-index: 999;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .floating-add-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.5);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 32px rgba(13, 148, 136, 0.45);
 }
 
-/* Responsive */
+.floating-add-btn:active {
+  transform: translateY(-2px) scale(1);
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
   .stores-list-page {
     padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .add-store-btn {
+    width: 100%;
   }
 
   .stats-container {
@@ -1018,8 +1056,7 @@ onMounted(() => {
   }
 
   .divider-vertical {
-    width: 100%;
-    height: 1px;
+    display: none;
   }
 
   .table-header {
@@ -1036,29 +1073,10 @@ onMounted(() => {
   .search-input {
     width: 100%;
   }
-}
 
-/* Ant Design Table Customization */
-:deep(.ant-table) {
-  font-size: 14px;
-}
-
-:deep(.ant-table-thead > tr > th) {
-  background: #fafafa;
-  color: #595959;
-  font-weight: 600;
-  border-bottom: 2px solid #e8e8e8;
-}
-
-:deep(.ant-table-tbody > tr:hover > td) {
-  background: #f5f5f5;
-}
-
-:deep(.ant-table-tbody > tr > td) {
-  border-bottom: 1px solid #f0f0f0;
-}
-
-:deep(.ant-switch-checked) {
-  background: #52c41a;
+  .floating-add-btn {
+    right: 20px;
+    bottom: 20px;
+  }
 }
 </style>

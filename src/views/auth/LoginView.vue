@@ -72,7 +72,6 @@ async function handleSubmit() {
     })
 
     if (success) {
-      console.log('Login successful, redirecting to dashboard')
       router.push('/dashboard')
     }
   } catch (error) {
@@ -94,7 +93,7 @@ async function handleSubmit() {
               <SafetyCertificateOutlined />
             </div>
             <div class="logo-text">
-              <span class="logo-name">Adaptix</span>
+              <span class="logo-name">Adaptive Innovate</span>
               <span class="logo-tagline">E-Commerce Admin</span>
             </div>
           </div>
@@ -146,7 +145,7 @@ async function handleSubmit() {
             <div class="logo-icon small">
               <SafetyCertificateOutlined />
             </div>
-            <span class="logo-name">Adaptix</span>
+            <span class="logo-name">Adaptive Innovate</span>
           </div>
 
           <!-- Form Header -->
@@ -211,7 +210,7 @@ async function handleSubmit() {
 <style scoped>
 .login-page {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--background);
 }
 
 .login-container {
@@ -222,7 +221,10 @@ async function handleSubmit() {
 /* Branding Side */
 .login-branding {
   flex: 1;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+  background: linear-gradient(135deg,
+      oklch(0.55 0.18 192) 0%,
+      oklch(0.50 0.20 192) 50%,
+      oklch(0.45 0.22 192) 100%);
   padding: 48px;
   display: flex;
   flex-direction: column;
@@ -234,13 +236,37 @@ async function handleSubmit() {
 .branding-overlay {
   position: absolute;
   inset: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2H6zM6 34v-4H4v4H0v2h4v4h2V6h4V4H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 34v-4H4v4H0v2h4v4h2V6h4V4H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  animation: slidePattern 30s linear infinite;
+}
+
+@keyframes slidePattern {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(60px, 60px);
+  }
 }
 
 .branding-content {
   position: relative;
   z-index: 1;
   max-width: 540px;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .brand-logo {
@@ -248,6 +274,7 @@ async function handleSubmit() {
   align-items: center;
   gap: 16px;
   margin-bottom: 48px;
+  animation: fadeInUp 0.8s ease-out 0.1s both;
 }
 
 .logo-icon {
@@ -261,6 +288,13 @@ async function handleSubmit() {
   color: #ffffff;
   font-size: 28px;
   backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo-icon:hover {
+  transform: scale(1.05) rotate(5deg);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
 }
 
 .logo-icon.small {
@@ -288,6 +322,7 @@ async function handleSubmit() {
 
 .hero-section {
   margin-bottom: 48px;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
 }
 
 .hero-title {
@@ -321,12 +356,30 @@ async function handleSubmit() {
   border-radius: 16px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.8s ease-out calc(0.3s + var(--index) * 0.1s) both;
+}
+
+.feature-card:nth-child(1) {
+  --index: 0;
+}
+
+.feature-card:nth-child(2) {
+  --index: 1;
+}
+
+.feature-card:nth-child(3) {
+  --index: 2;
+}
+
+.feature-card:nth-child(4) {
+  --index: 3;
 }
 
 .feature-card:hover {
   background: rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 .feature-icon {
@@ -340,6 +393,15 @@ async function handleSubmit() {
   color: #ffffff;
   font-size: 20px;
   flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.feature-content {
+  flex: 1;
 }
 
 .feature-title {
@@ -359,6 +421,7 @@ async function handleSubmit() {
 .trust-section {
   display: flex;
   align-items: center;
+  animation: fadeInUp 0.8s ease-out 0.7s both;
 }
 
 .trust-badge {
@@ -372,6 +435,12 @@ async function handleSubmit() {
   font-size: 14px;
   font-weight: 500;
   backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.trust-badge:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
 }
 
 /* Decorative Circles */
@@ -386,6 +455,19 @@ async function handleSubmit() {
   position: absolute;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.05);
+  animation: float 20s ease-in-out infinite;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
 }
 
 .circle-1 {
@@ -393,6 +475,7 @@ async function handleSubmit() {
   height: 400px;
   top: -100px;
   right: -100px;
+  animation-delay: 0s;
 }
 
 .circle-2 {
@@ -400,6 +483,7 @@ async function handleSubmit() {
   height: 300px;
   bottom: -50px;
   left: -50px;
+  animation-delay: -7s;
 }
 
 .circle-3 {
@@ -407,7 +491,7 @@ async function handleSubmit() {
   height: 200px;
   top: 50%;
   right: 20%;
-  transform: translateY(-50%);
+  animation-delay: -14s;
 }
 
 /* Form Side */
@@ -417,12 +501,25 @@ async function handleSubmit() {
   align-items: center;
   justify-content: center;
   padding: 48px;
-  background: #ffffff;
+  background: var(--card);
 }
 
 .login-form-wrapper {
   width: 100%;
   max-width: 400px;
+  animation: fadeInRight 0.8s ease-out;
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .mobile-logo {
@@ -433,13 +530,15 @@ async function handleSubmit() {
 }
 
 .mobile-logo .logo-icon {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg,
+      oklch(0.55 0.18 192) 0%,
+      oklch(0.45 0.22 192) 100%);
 }
 
 .mobile-logo .logo-name {
   font-size: 24px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--foreground);
 }
 
 .form-header {
@@ -449,14 +548,14 @@ async function handleSubmit() {
 .form-title {
   font-size: 28px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--foreground);
   margin: 0 0 8px 0;
   letter-spacing: -0.5px;
 }
 
 .form-subtitle {
   font-size: 15px;
-  color: #6b7280;
+  color: var(--muted-foreground);
   margin: 0;
 }
 
@@ -467,7 +566,7 @@ async function handleSubmit() {
 
 .login-form :deep(.ant-form-item-label > label) {
   font-weight: 500;
-  color: #374151;
+  color: var(--foreground);
   font-size: 14px;
 }
 
@@ -476,27 +575,37 @@ async function handleSubmit() {
   height: 48px;
   border-radius: 12px;
   font-size: 15px;
+  background: var(--background);
+  color: var(--foreground);
+  border: 1.5px solid var(--border);
 }
 
 .form-input :deep(.ant-input-affix-wrapper) {
   padding: 0 16px;
   border-radius: 12px;
-  border: 1.5px solid #e5e7eb;
-  transition: all 0.2s ease;
+  border: 1.5px solid var(--border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--background);
 }
 
 .form-input :deep(.ant-input-affix-wrapper:hover) {
-  border-color: #6366f1;
+  border-color: oklch(0.55 0.18 192);
+  box-shadow: 0 0 0 3px oklch(0.55 0.18 192 / 0.1);
 }
 
 .form-input :deep(.ant-input-affix-wrapper-focused) {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  border-color: oklch(0.55 0.18 192);
+  box-shadow: 0 0 0 4px oklch(0.55 0.18 192 / 0.15);
 }
 
 .input-icon {
-  color: #9ca3af;
+  color: var(--muted-foreground);
   font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.form-input :deep(.ant-input-affix-wrapper:focus-within) .input-icon {
+  color: oklch(0.55 0.18 192);
 }
 
 .form-options {
@@ -506,18 +615,20 @@ async function handleSubmit() {
 }
 
 .remember-checkbox {
-  color: #4b5563;
+  color: var(--muted-foreground);
 }
 
 .forgot-link {
-  color: #6366f1;
+  color: oklch(0.55 0.18 192);
   font-weight: 500;
   font-size: 14px;
-  transition: color 0.2s ease;
+  transition: all 0.3s ease;
+  text-decoration: none;
 }
 
 .forgot-link:hover {
-  color: #4f46e5;
+  color: oklch(0.50 0.20 192);
+  text-decoration: underline;
 }
 
 .login-button {
@@ -525,29 +636,41 @@ async function handleSubmit() {
   border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg,
+      oklch(0.55 0.18 192) 0%,
+      oklch(0.45 0.22 192) 100%);
   border: none;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px oklch(0.55 0.18 192 / 0.35);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.login-button:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
-  transform: translateY(-1px);
+.login-button:not(:disabled):hover {
+  background: linear-gradient(135deg,
+      oklch(0.50 0.20 192) 0%,
+      oklch(0.40 0.24 192) 100%);
+  box-shadow: 0 6px 20px oklch(0.55 0.18 192 / 0.45);
+  transform: translateY(-2px);
+}
+
+.login-button:not(:disabled):active {
+  transform: translateY(0);
 }
 
 .form-footer {
   text-align: center;
   margin-top: 32px;
   padding-top: 24px;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid var(--border);
 }
 
 .footer-text {
-  color: #9ca3af;
+  color: var(--muted-foreground);
   font-size: 13px;
   margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 /* Responsive */
@@ -567,12 +690,25 @@ async function handleSubmit() {
 }
 
 @media (max-width: 480px) {
+  .login-form-container {
+    padding: 20px;
+  }
+
   .login-form-wrapper {
     max-width: 100%;
   }
 
   .form-title {
     font-size: 24px;
+  }
+
+  .form-input :deep(.ant-input),
+  .form-input :deep(.ant-input-password) {
+    height: 44px;
+  }
+
+  .login-button {
+    height: 48px;
   }
 }
 </style>
