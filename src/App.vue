@@ -2,7 +2,7 @@
 import { computed, onMounted } from 'vue'
 import { theme } from 'ant-design-vue'
 import { RouterView } from 'vue-router'
-import { useThemeStore } from '@/stores/theme'
+import { useThemeStore } from '@/modules/themes/store'
 
 const themeStore = useThemeStore()
 
