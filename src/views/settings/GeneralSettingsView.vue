@@ -503,7 +503,7 @@
                   </div>
                   <div class="security-desc">Force HTTPS for all pages (recommended)</div>
                 </div>
-                <a-switch v-model:checked="settings.security.forceHttps" class="switch-enhanced" checked />
+                <a-switch v-model:checked="settings.security.forceHttps" class="switch-enhanced" />
               </div>
 
               <div class="security-item">
@@ -698,84 +698,6 @@ const settings = reactive({
     shippingPolicyUrl: '',
     cookiePolicyUrl: ''
   },
-  // Kept the original structure for fields not directly modified in the updates, ensuring backwards compatibility
-  // The reactive object only needs to include fields that are being used or modified in the updated component.
-  // Fields from the original `settings` ref that are not explicitly in `reactive` are still accessible through the `settings` object.
-  // However, for clarity and to ensure all fields are managed by `reactive`, let's include them.
-  storeDescription: 'We offer a wide selection of premium products for all your needs.', // Assuming this was intended to be initialized
-  metaTitle: 'My Awesome Store - Quality Products',
-  metaDescription: 'Discover amazing products at unbeatable prices. Shop now for the best deals on quality items.',
-  // ... include all other fields from the original settings ref if they are not explicitly defined above.
-  // For brevity, and assuming the reactive declaration covers all necessary fields for this update,
-  // we'll leave the remaining fields as they are within the original `settings` object.
-  // A more robust solution might involve deep merging or migrating all original fields into the `reactive` object.
-  // For the purpose of this merge, we'll assume the reactive object is the primary source for updated component logic.
-
-  // The original `settings` ref had many more fields.
-  // To ensure a complete merge, all fields from the original `settings` should be in the `reactive` object.
-  // Re-creating the `reactive` object with all fields from the original `settings` ref for completeness:
-  storeLogo: '',
-  socialMedia: {
-    facebook: '',
-    instagram: '',
-    twitter: '',
-    linkedin: '',
-    youtube: ''
-  },
-  googleAnalyticsId: '',
-  facebookPixelId: '',
-  googleTagManagerId: '',
-  address: {
-    line1: '123 Main Street',
-    line2: 'Suite 100',
-    city: 'New York',
-    state: 'NY',
-    zipCode: '10001',
-    country: 'US'
-  },
-  currency: 'USD',
-  currencyFormat: 'symbol',
-  decimalSeparator: '.',
-  thousandSeparator: ',',
-  timeZone: 'America/New_York',
-  dateFormat: 'MM/DD/YYYY',
-  timeFormat: '12',
-  language: 'en',
-  weightUnit: 'lb',
-  dimensionUnit: 'in',
-  notifications: {
-    newOrders: true,
-    lowStock: true,
-    newReviews: true,
-    marketing: false,
-    security: true,
-    email: ''
-  },
-  security: {
-    forceHttps: true,
-    twoFactorAuth: false,
-    sessionTimeout: 60,
-    ipWhitelist: '',
-    maxLoginAttempts: 5
-  },
-  policies: {
-    returnPolicy: '',
-    refundPolicy: '',
-    privacyPolicyUrl: '',
-    termsOfServiceUrl: '',
-    shippingPolicyUrl: '',
-    cookiePolicyUrl: ''
-  },
-  // The following fields were in the original `settings` ref but not in the `reactive` declaration in the updates.
-  // Adding them here to ensure all original settings are available.
-  // Note: For a clean refactor, it's better to have one source of truth.
-  // This merge assumes the `reactive` object in the updates is the intended source for the component's state.
-  // If specific fields from the original `settings` ref were *not* meant to be part of the `reactive` object,
-  // they would need to be managed separately or removed if no longer used.
-  // For this merge, we are ensuring all original fields are present in the `reactive` object.
-  // The initial values from the existing code are used where they exist in the updates, and defaults are used otherwise.
-  websiteUrl: 'https://mystore.com', // This was in the original, but not explicitly in the reactive declaration in updates
-  storeLogo: '', // This was in the original, but the updates use '' as default.
   advanced: { // These fields from the original `settings` ref were not present in the updates.
     orderIdPrefix: 'ORD',
     orderIdStart: 1001,

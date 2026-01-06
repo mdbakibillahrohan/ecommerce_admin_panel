@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import api from "@/config/http.config"
+import api from '@/config/http.config'
 
 export interface Customer {
   id: number
@@ -7,9 +6,13 @@ export interface Customer {
   last_name: string
   email: string
   phone?: string
+  avatar?: string
+  status?: 'active' | 'inactive'
+  address?: string
   total_spent: number
   orders_count: number
   groups?: CustomerGroup[]
+  last_order_date?: string
   created_at: string
 }
 
@@ -29,8 +32,17 @@ export interface CustomerNote {
   }
 }
 
+export interface CustomerQueryParams {
+  page?: number
+  limit?: number
+  search?: string
+  group?: string
+  status?: string
+  [key: string]: unknown
+}
+
 export const customerService = {
-  async getCustomers(params?: any) {
+  async getCustomers(params?: CustomerQueryParams) {
     const response = await api.get('/customers', { params })
     return response.data
   },
@@ -40,7 +52,7 @@ export const customerService = {
     return response.data
   },
 
-  async updateCustomer(id: number, data: any) {
+  async updateCustomer(id: number, data: Partial<Customer>) {
     const response = await api.patch(`/customers/${id}`, data)
     return response.data
   },
@@ -53,5 +65,5 @@ export const customerService = {
   async addNote(customerId: number, content: string) {
     const response = await api.post(`/customers/${customerId}/notes`, { content })
     return response.data
-  }
+  },
 }

@@ -95,7 +95,7 @@ function handleSearch() {
   fetchProducts()
 }
 
-function handleTableChange(pagination: any) {
+function handleTableChange(pagination: { current: number; pageSize: number }) {
   currentPage.value = pagination.current
   pageSize.value = pagination.pageSize
   fetchProducts()
@@ -189,14 +189,20 @@ async function handleTogglePublish(product: Product) {
 
 async function handleDuplicate(product: Product) {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, created_at, updated_at, ...productData } = product
     const newProduct = {
-      ...product,
+      ...productData,
+      description: productData.description ?? undefined,
+      short_description: productData.short_description ?? undefined,
+      sale_price: productData.sale_price ?? undefined,
+      thumbnail_id: productData.thumbnail_id ?? undefined,
+      category_id: productData.category_id ?? undefined,
+      meta_title: productData.meta_title ?? undefined,
+      meta_description: productData.meta_description ?? undefined,
       name: `${product.name} (Copy)`,
       sku: product.sku ? `${product.sku}-copy` : undefined,
     }
-    delete (newProduct as any).id
-    delete (newProduct as any).created_at
-    delete (newProduct as any).updated_at
 
     await productsApi.create(newProduct)
     message.success('Product duplicated successfully')
@@ -413,7 +419,7 @@ const rowSelection = computed(() => ({
               Export
             </a-button>
             <template #overlay>
-              <a-menu @click="({ key }) => handleExport(key as 'csv' | 'pdf')">
+              <a-menu @click="({ key }: { key: string }) => handleExport(key as 'csv' | 'pdf')">
                 <a-menu-item key="csv">Export as CSV</a-menu-item>
                 <a-menu-item key="pdf">Export as PDF</a-menu-item>
               </a-menu>
@@ -602,7 +608,7 @@ const rowSelection = computed(() => ({
 
       <div class="grid-pagination">
         <a-pagination v-model:current="currentPage" v-model:page-size="pageSize" :total="total" show-size-changer
-          show-quick-jumper :show-total="(total) => `Total ${total} products`" @change="handleSearch" />
+          show-quick-jumper :show-total="(total: number) => `Total ${total} products`" @change="handleSearch" />
       </div>
     </div>
   </div>

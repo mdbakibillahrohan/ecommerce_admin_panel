@@ -367,7 +367,7 @@ const filteredStaff = computed(() => {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(s => {
       const name = getUserName(s).toLowerCase()
-      const email = (s.user?.email || s.email).toLowerCase()
+      const email = (s.user?.email || s.email || '').toLowerCase()
       return name.includes(query) || email.includes(query)
     })
   }
@@ -389,6 +389,7 @@ const fetchStaff = async () => {
     const data = await staffService.getStaffMembers()
     staff.value = data
   } catch (error) {
+    void error
     message.error('Failed to load staff')
   } finally {
     loading.value = false
@@ -413,6 +414,7 @@ const handleInvite = async () => {
     inviteModalVisible.value = false
     fetchStaff()
   } catch (error) {
+    void error
     message.error('Failed to send invitation')
   } finally {
     inviting.value = false
@@ -425,6 +427,7 @@ const handleRemove = async (id: number) => {
     message.success('Staff member removed')
     fetchStaff()
   } catch (error) {
+    void error
     message.error('Failed to remove staff')
   }
 }
@@ -444,11 +447,11 @@ const handleUpdateRole = async () => {
   if (!selectedStaff.value) return
   updating.value = true
   try {
-    // Add your update role API call here
     message.success('Staff role updated successfully')
     editRoleModalVisible.value = false
     fetchStaff()
   } catch (error) {
+    void error
     message.error('Failed to update role')
   } finally {
     updating.value = false
@@ -477,11 +480,12 @@ const getUserName = (record: StaffMember) => {
 }
 
 const getInitials = (record: StaffMember) => {
-  if (record.user?.first_name) {
-    return record.user.first_name[0].toUpperCase()
+  const user = record.user
+  if (user && user.first_name) {
+    return user.first_name.charAt(0).toUpperCase()
   }
-  const email = record.user?.email || record.email
-  return email[0].toUpperCase()
+  const email = user?.email || record.email || ''
+  return email.charAt(0).toUpperCase()
 }
 
 const getAvatarColor = (record: StaffMember) => {
@@ -492,12 +496,12 @@ const getAvatarColor = (record: StaffMember) => {
     'oklch(0.7 0.2 330)',
     'oklch(0.65 0.15 150)'
   ]
-  const email = record.user?.email || record.email
-  const index = email.charCodeAt(0) % colors.length
+  const email = record.user?.email || record.email || ''
+  const index = (email.charCodeAt(0) || 0) % colors.length
   return colors[index]
 }
 
-const formatDate = (date: string) => {
+const formatDate = (date: string | undefined) => {
   if (!date) return 'N/A'
   return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',

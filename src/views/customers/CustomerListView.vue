@@ -297,8 +297,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { customerService, type Customer } from '@/services/customer.service'
-import dayjs from 'dayjs'
+import { customerService, type Customer, type CustomerQueryParams } from '@/services/customer.service'
+import dayjs, { type Dayjs } from 'dayjs'
 
 const router = useRouter()
 const loading = ref(false)
@@ -311,7 +311,7 @@ const selectedRowKeys = ref<number[]>([])
 const filters = ref({
   group: '',
   status: '',
-  dateRange: null as any,
+  dateRange: null as [Dayjs, Dayjs] | null,
 })
 
 const pagination = ref({
@@ -349,7 +349,7 @@ const fetchCustomers = async () => {
   loading.value = true
   try {
     const { current, pageSize } = pagination.value
-    const params: any = {
+    const params: CustomerQueryParams = {
       page: current,
       limit: pageSize,
     }
@@ -360,8 +360,12 @@ const fetchCustomers = async () => {
     const data = await customerService.getCustomers(params)
     customers.value = data.data
     pagination.value.total = data.total
-  } catch (error: any) {
-    message.error(error.message || 'Failed to fetch customers')
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      message.error(error.message)
+    } else {
+      message.error('Failed to fetch customers')
+    }
   } finally {
     loading.value = false
   }
@@ -387,7 +391,7 @@ const clearFilters = () => {
   fetchCustomers()
 }
 
-const handleTableChange = (pag: any) => {
+const handleTableChange = (pag: { current: number; pageSize: number; total: number }) => {
   pagination.value = pag
   fetchCustomers()
 }

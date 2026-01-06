@@ -310,16 +310,27 @@ const editingRate = ref<ShippingRate | null>(null)
 const currentZone = ref<ShippingZone | null>(null)
 
 // Forms
-const zoneForm = reactive({
+const zoneForm = reactive<{
+  name: string
+  countries: string[]
+  enabled: boolean
+}>({
   name: '',
   countries: [],
   enabled: true
 })
 
-const rateForm = reactive({
+const rateForm = reactive<{
+  name: string
+  description: string
+  type: 'flat-rate' | 'free' | 'weight-based' | 'express'
+  price: number
+  minOrder?: number
+  deliveryTime: string
+}>({
   name: '',
   description: '',
-  type: 'flat-rate' as const,
+  type: 'flat-rate',
   price: 0,
   minOrder: undefined,
   deliveryTime: ''
@@ -366,11 +377,11 @@ const saveZone = () => {
     // Update existing zone
     const index = shippingZones.value.findIndex(z => z.id === editingZone.value!.id)
     if (index !== -1) {
-      shippingZones.value[index] = {
-        ...shippingZones.value[index],
-        name: zoneForm.name,
-        countries: zoneForm.countries,
-        enabled: zoneForm.enabled
+      const zone = shippingZones.value[index]
+      if (zone) {
+        zone.name = zoneForm.name
+        zone.countries = zoneForm.countries
+        zone.enabled = zoneForm.enabled
       }
       message.success('Shipping zone updated successfully')
     }
@@ -436,14 +447,14 @@ const saveRate = () => {
     // Update existing rate
     const index = zone.rates.findIndex(r => r.id === editingRate.value!.id)
     if (index !== -1) {
-      zone.rates[index] = {
-        ...zone.rates[index],
-        name: rateForm.name,
-        description: rateForm.description,
-        type: rateForm.type,
-        price: rateForm.price,
-        minOrder: rateForm.minOrder,
-        deliveryTime: rateForm.deliveryTime
+      const rate = zone.rates[index]
+      if (rate) {
+        rate.name = rateForm.name
+        rate.description = rateForm.description
+        rate.type = rateForm.type
+        rate.price = rateForm.price
+        rate.minOrder = rateForm.minOrder
+        rate.deliveryTime = rateForm.deliveryTime
       }
       message.success('Shipping rate updated successfully')
     }

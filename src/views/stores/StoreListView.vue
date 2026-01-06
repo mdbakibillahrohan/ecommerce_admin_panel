@@ -9,14 +9,12 @@ import {
   ExportOutlined,
   PlusOutlined,
   SearchOutlined,
-  FilterOutlined,
   ShoppingOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
   DollarOutlined,
-  FileTextOutlined,
-  StarOutlined
+  FileTextOutlined
 } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
 
@@ -540,7 +538,7 @@ onMounted(() => {
       <!-- Table -->
       <div class="table-container">
         <a-table :columns="columns" :data-source="filteredStores"
-          :pagination="{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `Total ${total} stores` }"
+          :pagination="{ pageSize: 10, showSizeChanger: true, showTotal: (total: number) => `Total ${total} stores` }"
           :loading="loading" row-key="id" :scroll="{ x: 1200 }">
           <!-- Store Information -->
           <template #bodyCell="{ column, record }">

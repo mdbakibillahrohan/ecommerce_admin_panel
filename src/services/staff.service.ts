@@ -1,18 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import api from "@/config/http.config"
+import api from '@/config/http.config'
 
 export interface StaffMember {
   id: number
-  user: {
+  email?: string
+  user?: {
     id: number
     first_name: string
     last_name: string
     email: string
   }
   role: string // OWNER, ADMIN, MEMBER
-  status: string // ACTIVE, INVITED
+  status: string // ACTIVE, INVITED, PENDING
   invited_at?: string
   joined_at?: string
+  created_at?: string
 }
 
 export const staffService = {
@@ -36,8 +37,8 @@ export const staffService = {
   },
 
   async getRoles() {
-      // If we have dynamic roles API
-      // For now we can return static or fetch if backend has it
-      return ['ADMIN', 'MEMBER', 'SUPPORT']
-  }
+    // If we have dynamic roles API
+    // For now we can return static or fetch if backend has it
+    return ['ADMIN', 'MEMBER', 'SUPPORT']
+  },
 }

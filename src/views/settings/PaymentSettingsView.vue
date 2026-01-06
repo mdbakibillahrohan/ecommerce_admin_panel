@@ -204,7 +204,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, type Component } from 'vue'
 import {
   PlusOutlined,
   CheckCircleOutlined,
@@ -225,7 +225,7 @@ interface PaymentProvider {
   id: string
   name: string
   description: string
-  icon: any
+  icon: Component
   color: string
   enabled: boolean
   testMode: boolean
