@@ -1,100 +1,122 @@
 <template>
-  <div class="tax-settings mx-auto">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Tax Settings</h1>
-      <a-button type="primary" @click="showAddModal">
-        <template #icon>
-          <PlusOutlined />
-        </template>
-        Add Tax Rate
-      </a-button>
+  <div class="tax-settings-container">
+    <!-- Gradient Header with Professional Styling -->
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-left">
+          <h1 class="page-title">Tax Settings</h1>
+          <p class="page-subtitle">Manage tax rates and global tax configuration</p>
+        </div>
+        <a-button type="primary" @click="showAddModal" class="add-button">
+          <template #icon>
+            <PlusOutlined />
+          </template>
+          Add Tax Rate
+        </a-button>
+      </div>
     </div>
 
-    <!-- Global Tax Configuration -->
-    <a-card :bordered="true" class="shadow-sm! rounded-lg! mb-6!" style="border: 1px solid #e5e7eb;">
-      <h3 class="text-base font-semibold text-gray-900 mb-4">Global Configuration</h3>
-
-      <div class="space-y-4">
-        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-          <div>
-            <div class="font-medium text-gray-900">All prices include tax</div>
-            <div class="text-sm text-gray-500">Display prices with tax included for customers</div>
-          </div>
-          <a-switch v-model:checked="globalSettings.pricesIncludeTax" />
+    <!-- Custom Styled Cards -->
+    <div class="settings-content">
+      <!-- Global Tax Configuration -->
+      <div class="settings-card">
+        <div class="card-header">
+          <h3 class="card-title">Global Configuration</h3>
+          <p class="card-subtitle">Configure how taxes are calculated and displayed</p>
         </div>
 
-        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-          <div>
-            <div class="font-medium text-gray-900">Calculate tax based on</div>
-            <div class="text-sm text-gray-500">Choose how to determine tax rates</div>
+        <div class="settings-list">
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-label">All prices include tax</div>
+              <div class="setting-description">Display prices with tax included for customers</div>
+            </div>
+            <a-switch v-model:checked="globalSettings.pricesIncludeTax" />
           </div>
-          <a-select v-model:value="globalSettings.taxCalculationBasis" style="width: 200px">
-            <a-select-option value="shipping">Shipping address</a-select-option>
-            <a-select-option value="billing">Billing address</a-select-option>
-            <a-select-option value="store">Store location</a-select-option>
-          </a-select>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-label">Calculate tax based on</div>
+              <div class="setting-description">Choose how to determine tax rates</div>
+            </div>
+            <a-select v-model:value="globalSettings.taxCalculationBasis" class="setting-select">
+              <a-select-option value="shipping">Shipping address</a-select-option>
+              <a-select-option value="billing">Billing address</a-select-option>
+              <a-select-option value="store">Store location</a-select-option>
+            </a-select>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-label">Show tax breakdown</div>
+              <div class="setting-description">Display detailed tax information at checkout</div>
+            </div>
+            <a-switch v-model:checked="globalSettings.showTaxBreakdown" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Tax Rates List -->
+      <div class="settings-card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Tax Rates</h3>
+            <p class="card-subtitle">Manage tax rates for different regions</p>
+          </div>
+          <a-input-search v-model:value="searchQuery" placeholder="Search tax rates..." class="search-input" />
         </div>
 
-        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-          <div>
-            <div class="font-medium text-gray-900">Show tax breakdown</div>
-            <div class="text-sm text-gray-500">Display detailed tax information at checkout</div>
-          </div>
-          <a-switch v-model:checked="globalSettings.showTaxBreakdown" />
+        <div v-if="filteredTaxRates.length === 0" class="empty-state">
+          <a-empty description="No tax rates configured">
+            <a-button type="primary" @click="showAddModal">Add Your First Tax Rate</a-button>
+          </a-empty>
         </div>
-      </div>
-    </a-card>
 
-    <!-- Tax Rates List -->
-    <a-card :bordered="true" class="shadow-sm! rounded-lg!" style="border: 1px solid #e5e7eb; background: white;">
-      <div class="flex! justify-between! items-center! mb-4!">
-        <h3 class="text-base! font-semibold! text-gray-900!">Tax Rates</h3>
-        <a-input-search v-model:value="searchQuery" placeholder="Search tax rates..." style="width: 250px" />
-      </div>
-
-      <div v-if="filteredTaxRates.length === 0" class="text-center! py-8!">
-        <a-empty description="No tax rates configured">
-          <a-button type="primary" @click="showAddModal">Add Your First Tax Rate</a-button>
-        </a-empty>
-      </div>
-
-      <div v-else class="space-y-4!">
-        <a-card v-for="rate in filteredTaxRates" :key="rate.id" :bordered="true" class="tax-rate-card"
-          :class="{ 'opacity-60': !rate.enabled }">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <div class="flex items-center gap-3 mb-3">
-                <h4 class="text-base font-semibold text-gray-900">{{ rate.name }}</h4>
-                <a-tag :color="rate.enabled ? 'green' : 'default'" class="rounded-full">
-                  {{ rate.enabled ? 'Active' : 'Inactive' }}
-                </a-tag>
-                <a-tag v-if="rate.isCompound" color="orange" class="rounded-full">Compound</a-tag>
+        <!-- Enhanced Tax Rate Cards with Better Visual Hierarchy -->
+        <div v-else class="tax-rates-grid">
+          <div v-for="rate in filteredTaxRates" :key="rate.id" class="tax-rate-card"
+            :class="{ 'inactive': !rate.enabled }">
+            <div class="rate-card-content">
+              <div class="rate-header">
+                <h4 class="rate-name">{{ rate.name }}</h4>
+                <div class="rate-badges">
+                  <a-tag :color="rate.enabled ? 'success' : 'default'" class="status-badge">
+                    {{ rate.enabled ? 'Active' : 'Inactive' }}
+                  </a-tag>
+                  <a-tag v-if="rate.isCompound" color="warning" class="compound-badge">
+                    Compound
+                  </a-tag>
+                </div>
               </div>
 
-              <div class="space-y-2 text-sm">
-                <div class="flex items-center gap-2 text-gray-700">
-                  <EnvironmentOutlined class="text-gray-400" />
-                  <span><strong class="font-medium">Region:</strong> {{ rate.region }}</span>
+              <div class="rate-details">
+                <div class="detail-row">
+                  <EnvironmentOutlined class="detail-icon" />
+                  <span class="detail-label">Region:</span>
+                  <span class="detail-value">{{ rate.region }}</span>
                 </div>
-                <div class="flex items-center gap-2 text-gray-700">
-                  <PercentageOutlined class="text-gray-400" />
-                  <span><strong class="font-medium">Rate:</strong> {{ rate.rate }}%</span>
+                <div class="detail-row">
+                  <PercentageOutlined class="detail-icon" />
+                  <span class="detail-label">Rate:</span>
+                  <span class="detail-value">{{ rate.rate }}%</span>
                 </div>
-                <div v-if="rate.categories.length > 0" class="flex items-center gap-2 text-gray-700">
-                  <TagOutlined class="text-gray-400" />
-                  <span><strong class="font-medium">Categories:</strong> {{ rate.categories.join(', ') }}</span>
+                <div v-if="rate.categories.length > 0" class="detail-row">
+                  <TagOutlined class="detail-icon" />
+                  <span class="detail-label">Categories:</span>
+                  <span class="detail-value">{{ rate.categories.join(', ') }}</span>
                 </div>
-                <div v-if="rate.priority" class="flex items-center gap-2 text-gray-700">
-                  <SortAscendingOutlined class="text-gray-400" />
-                  <span><strong class="font-medium">Priority:</strong> {{ rate.priority }}</span>
+                <div v-if="rate.priority" class="detail-row">
+                  <SortAscendingOutlined class="detail-icon" />
+                  <span class="detail-label">Priority:</span>
+                  <span class="detail-value">{{ rate.priority }}</span>
                 </div>
               </div>
             </div>
 
-            <div class="flex items-center gap-3">
-              <a-switch v-model:checked="rate.enabled" @change="toggleTaxRate(rate)" />
+            <div class="rate-actions">
+              <a-switch v-model:checked="rate.enabled" @change="toggleTaxRate(rate)" size="small" />
               <a-dropdown>
-                <a-button type="text" size="small">
+                <a-button type="text" size="small" class="action-button">
                   <MoreOutlined />
                 </a-button>
                 <template #overlay>
@@ -114,14 +136,14 @@
               </a-dropdown>
             </div>
           </div>
-        </a-card>
+        </div>
       </div>
-    </a-card>
+    </div>
 
     <!-- Add/Edit Tax Rate Modal -->
     <a-modal v-model:open="modalVisible" :title="editingRate ? 'Edit Tax Rate' : 'Add Tax Rate'" @ok="handleSubmit"
-      @cancel="handleCancel" width="600px">
-      <a-form :model="formData" layout="vertical" class="mt-4">
+      @cancel="handleCancel" width="600px" class="tax-modal">
+      <a-form :model="formData" layout="vertical" class="tax-form">
         <a-form-item label="Tax Rate Name" required>
           <a-input v-model:value="formData.name" placeholder="e.g., California State Tax" />
         </a-form-item>
@@ -153,7 +175,7 @@
         <a-form-item label="Priority">
           <a-input-number v-model:value="formData.priority" :min="1" placeholder="1 = highest priority"
             style="width: 100%" />
-          <div class="text-xs text-gray-500 mt-1">
+          <div class="form-hint">
             Higher priority rates are applied first when multiple rates match
           </div>
         </a-form-item>
@@ -364,8 +386,7 @@ const handleSubmit = () => {
     if (index !== -1) {
       taxRates.value[index] = {
         ...taxRates.value[index],
-        ...formData.value,
-
+        ...formData.value
       }
       message.success('Tax rate updated successfully')
     }
@@ -420,29 +441,280 @@ const confirmDelete = (rate: TaxRate) => {
 </script>
 
 <style scoped>
-.tax-settings {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+/* Replaced all Tailwind with custom CSS using CSS variables for theming */
+.tax-settings-container {
+  margin: 0 auto;
 }
 
-/* Added custom styling for tax rate cards with proper borders, shadows, and hover effects */
-.tax-rate-card {
-  border: 1px solid #e5e7eb !important;
-  border-radius: 8px;
-  background: #ffffff;
+.page-header {
+  background: linear-gradient(135deg, oklch(0.6 0.15 180) 0%, oklch(0.55 0.13 185) 100%);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.15);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.header-left {
+  flex: 1;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+  margin: 8px 0 0 0;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.add-button {
+  height: 40px;
+  padding: 0 24px;
+  font-weight: 500;
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settings-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.card-subtitle {
+  margin: 4px 0 0 0;
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+
+.search-input {
+  width: 280px;
+}
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: var(--muted);
+  border-radius: 10px;
+  border: 1px solid var(--border);
   transition: all 0.3s ease;
 }
 
+.setting-item:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.1);
+}
+
+.setting-info {
+  flex: 1;
+}
+
+.setting-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 4px;
+}
+
+.setting-description {
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+.setting-select {
+  width: 200px;
+}
+
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.tax-rates-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.tax-rate-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .tax-rate-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-color: #d1d5db !important;
+  border-color: oklch(0.6 0.15 180);
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.12);
+  transform: translateY(-2px);
 }
 
-.tax-rate-card.opacity-60 {
-  background: #f9fafb;
+.tax-rate-card.inactive {
+  opacity: 0.6;
+  background: var(--muted);
 }
 
-/* Improved spacing utility for consistent gaps */
-.space-y-4>*+* {
-  margin-top: 1rem;
+.rate-card-content {
+  flex: 1;
+}
+
+.rate-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.rate-name {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.rate-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.status-badge,
+.compound-badge {
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.rate-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--foreground);
+}
+
+.detail-icon {
+  color: oklch(0.6 0.15 180);
+  font-size: 14px;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.detail-value {
+  color: var(--foreground);
+}
+
+.rate-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-button {
+  color: var(--muted-foreground);
+  transition: all 0.2s ease;
+}
+
+.action-button:hover {
+  color: oklch(0.6 0.15 180);
+  background: var(--accent);
+}
+
+.tax-form {
+  margin-top: 24px;
+}
+
+.form-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .card-header {
+    flex-direction: column;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .tax-rate-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rate-actions {
+    width: 100%;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
 }
 </style>
