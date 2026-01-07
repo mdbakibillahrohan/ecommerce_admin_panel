@@ -5,6 +5,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { categoriesApi, type CreateCategoryDto, type Category } from '@/modules/categories/api/categories'
 import { SaveOutlined, ArrowLeftOutlined, InboxOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
+import FormSkeleton from '@/modules/shared/components/skeletons/FormSkeleton.vue'
 import type { FormInstance } from 'ant-design-vue'
 
 const router = useRouter()
@@ -131,7 +132,8 @@ const availableParents = computed(() => {
 
 <template>
   <div class="category-form">
-    <a-spin :spinning="loading">
+    <FormSkeleton v-if="loading" :field-count="4" />
+    <template v-else>
       <!-- Page Header -->
       <div class="page-header">
         <div class="header-left">
@@ -143,7 +145,7 @@ const availableParents = computed(() => {
           <div class="header-content">
             <h1>{{ isEdit ? 'Edit Category' : 'Create Category' }}</h1>
             <p>{{ isEdit ? 'Update category information and settings' : 'Add a new category to organize your products'
-            }}</p>
+              }}</p>
           </div>
         </div>
         <div class="header-right">
@@ -276,9 +278,10 @@ const availableParents = computed(() => {
           </a-card>
         </a-col>
       </a-row>
-    </a-spin>
+    </template>
   </div>
 </template>
+
 
 <style scoped>
 .category-form {

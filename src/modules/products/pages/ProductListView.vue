@@ -21,6 +21,9 @@ import {
 } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
 import dayjs from 'dayjs'
+import StatCardSkeleton from '@/modules/shared/components/skeletons/StatCardSkeleton.vue'
+import TableSkeleton from '@/modules/shared/components/skeletons/TableSkeleton.vue'
+import CardGridSkeleton from '@/modules/shared/components/skeletons/CardGridSkeleton.vue'
 
 const router = useRouter()
 const dayjsInstance = dayjs // Assign dayjs to a constant to use it at the top level
@@ -323,49 +326,54 @@ const rowSelection = computed(() => ({
 
     <!-- Statistics Cards -->
     <div class="statistics-grid">
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.7 0.15 195) 0%, oklch(0.65 0.18 210) 100%);">
-          <ShoppingOutlined />
+      <template v-if="loading">
+        <StatCardSkeleton v-for="i in 4" :key="i" />
+      </template>
+      <template v-else>
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.7 0.15 195) 0%, oklch(0.65 0.18 210) 100%);">
+            <ShoppingOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Total Products</div>
+            <div class="stat-value">{{ statistics.total }}</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Total Products</div>
-          <div class="stat-value">{{ statistics.total }}</div>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.75 0.17 145) 0%, oklch(0.7 0.15 160) 100%);">
-          <TagOutlined />
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.75 0.17 145) 0%, oklch(0.7 0.15 160) 100%);">
+            <TagOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Published</div>
+            <div class="stat-value">{{ statistics.published }}</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Published</div>
-          <div class="stat-value">{{ statistics.published }}</div>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.75 0.15 60) 0%, oklch(0.7 0.17 45) 100%);">
-          <InboxOutlined />
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.75 0.15 60) 0%, oklch(0.7 0.17 45) 100%);">
+            <InboxOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Low Stock</div>
+            <div class="stat-value">{{ statistics.lowStock }}</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Low Stock</div>
-          <div class="stat-value">{{ statistics.lowStock }}</div>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.7 0.19 330) 0%, oklch(0.65 0.2 345) 100%);">
-          <DollarOutlined />
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.7 0.19 330) 0%, oklch(0.65 0.2 345) 100%);">
+            <DollarOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Inventory Value</div>
+            <div class="stat-value">{{ formatCurrency(statistics.totalValue) }}</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Inventory Value</div>
-          <div class="stat-value">{{ formatCurrency(statistics.totalValue) }}</div>
-        </div>
-      </div>
+      </template>
     </div>
 
     <!-- Filters & Actions Card -->
@@ -450,167 +458,174 @@ const rowSelection = computed(() => ({
     </div>
 
     <!-- Products Table -->
-    <div class="table-card" v-if="viewMode === 'list'">
-      <a-table :columns="columns" :data-source="products" :loading="loading" :pagination="pagination"
-        :row-selection="rowSelection" row-key="id" :scroll="{ x: 1200 }" @change="handleTableChange">
-        <template #bodyCell="{ column, record }">
-          <!-- Product -->
-          <template v-if="column.key === 'product'">
-            <div class="product-cell">
-              <a-avatar :src="record.thumbnail?.url" :size="56" shape="square" class="product-avatar">
-                {{ record.name.charAt(0) }}
-              </a-avatar>
-              <div class="product-info">
-                <div class="product-name">{{ record.name }}</div>
-                <div class="product-meta">
-                  <span v-if="record.sku" class="sku">SKU: {{ record.sku }}</span>
-                  <a-tag v-if="record.is_featured" color="gold" size="small">Featured</a-tag>
-                  <a-tag v-if="record.product_type === 'DIGITAL'" color="purple" size="small">Digital</a-tag>
+    <template v-if="viewMode === 'list'">
+      <TableSkeleton v-if="loading" :rows="pageSize" :columns="7" />
+      <div v-else class="table-card">
+        <a-table :columns="columns" :data-source="products" :loading="loading" :pagination="pagination"
+          :row-selection="rowSelection" row-key="id" :scroll="{ x: 1200 }" @change="handleTableChange">
+          <template #bodyCell="{ column, record }">
+            <!-- Product -->
+            <template v-if="column.key === 'product'">
+              <div class="product-cell">
+                <a-avatar :src="record.thumbnail?.url" :size="56" shape="square" class="product-avatar">
+                  {{ record.name.charAt(0) }}
+                </a-avatar>
+                <div class="product-info">
+                  <div class="product-name">{{ record.name }}</div>
+                  <div class="product-meta">
+                    <span v-if="record.sku" class="sku">SKU: {{ record.sku }}</span>
+                    <a-tag v-if="record.is_featured" color="gold" size="small">Featured</a-tag>
+                    <a-tag v-if="record.product_type === 'DIGITAL'" color="purple" size="small">Digital</a-tag>
+                  </div>
                 </div>
               </div>
-            </div>
-          </template>
+            </template>
 
-          <!-- Category -->
-          <template v-if="column.key === 'category'">
-            <span v-if="record.category" class="category-name">{{ record.category.category_name }}</span>
-            <span v-else class="text-muted">Uncategorized</span>
-          </template>
+            <!-- Category -->
+            <template v-if="column.key === 'category'">
+              <span v-if="record.category" class="category-name">{{ record.category.category_name }}</span>
+              <span v-else class="text-muted">Uncategorized</span>
+            </template>
 
-          <!-- Price -->
-          <template v-if="column.key === 'price'">
-            <div class="price-cell">
-              <span v-if="record.sale_price" class="sale-price">
-                {{ formatCurrency(record.sale_price) }}
-              </span>
-              <span :class="{ 'original-price': record.sale_price, 'base-price': !record.sale_price }">
-                {{ formatCurrency(record.base_price) }}
-              </span>
-            </div>
-          </template>
-
-          <!-- Stock -->
-          <template v-if="column.key === 'stock'">
-            <a-tag
-              :color="record.stock_quantity <= 0 ? 'red' : record.stock_quantity <= record.low_stock_threshold ? 'orange' : 'green'"
-              class="stock-tag">
-              {{ record.stock_quantity }}
-            </a-tag>
-          </template>
-
-          <!-- Status -->
-          <template v-if="column.key === 'status'">
-            <a-switch :checked="record.is_published" checked-children="Published" un-checked-children="Draft"
-              @change="() => handleTogglePublish(record)" />
-          </template>
-
-          <!-- Created At -->
-          <template v-if="column.key === 'created_at'">
-            <span class="date-text">{{ dayjsInstance(record.created_at).format('MMM D, YYYY') }}</span>
-          </template>
-
-          <!-- Actions -->
-          <template v-if="column.key === 'actions'">
-            <a-space :size="4">
-              <a-tooltip title="View">
-                <a-button type="text" size="small" @click="handleView(record.id)">
-                  <template #icon>
-                    <EyeOutlined />
-                  </template>
-                </a-button>
-              </a-tooltip>
-              <a-tooltip title="Edit">
-                <a-button type="text" size="small" @click="handleEdit(record.id)">
-                  <template #icon>
-                    <EditOutlined />
-                  </template>
-                </a-button>
-              </a-tooltip>
-              <a-tooltip title="Duplicate">
-                <a-button type="text" size="small" @click="handleDuplicate(record)">
-                  <template #icon>
-                    <CopyOutlined />
-                  </template>
-                </a-button>
-              </a-tooltip>
-              <a-tooltip title="Delete">
-                <a-button type="text" size="small" danger @click="handleDelete(record.id)">
-                  <template #icon>
-                    <DeleteOutlined />
-                  </template>
-                </a-button>
-              </a-tooltip>
-            </a-space>
-          </template>
-        </template>
-      </a-table>
-    </div>
-
-    <!-- Products Grid -->
-    <div class="products-grid" v-else>
-      <div class="grid-container">
-        <div v-for="product in products" :key="product.id" class="product-card">
-          <div class="product-image-container">
-            <img v-if="product.thumbnail?.url" :src="product.thumbnail.url" :alt="product.name" class="product-image" />
-            <div v-else class="product-image-placeholder">
-              <ShoppingOutlined />
-            </div>
-            <div class="product-badges">
-              <a-tag v-if="product.is_featured" color="gold">Featured</a-tag>
-              <a-tag v-if="!product.is_published" color="default">Draft</a-tag>
-            </div>
-            <div class="product-hover-actions">
-              <a-button type="primary" size="small" @click="handleView(product.id)">
-                <EyeOutlined /> View
-              </a-button>
-              <a-button size="small" @click="handleEdit(product.id)">
-                <EditOutlined /> Edit
-              </a-button>
-            </div>
-          </div>
-          <div class="product-card-content">
-            <div class="product-card-header">
-              <h3 class="product-card-title">{{ product.name }}</h3>
-              <a-dropdown>
-                <a-button type="text" size="small">⋯</a-button>
-                <template #overlay>
-                  <a-menu>
-                    <a-menu-item @click="handleEdit(product.id)">
-                      <EditOutlined /> Edit
-                    </a-menu-item>
-                    <a-menu-item @click="handleDuplicate(product)">
-                      <CopyOutlined /> Duplicate
-                    </a-menu-item>
-                    <a-menu-divider />
-                    <a-menu-item danger @click="handleDelete(product.id)">
-                      <DeleteOutlined /> Delete
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
-            </div>
-            <p class="product-category">{{ product.category?.category_name || 'Uncategorized' }}</p>
-            <div class="product-card-footer">
-              <div class="product-price">
-                <span v-if="product.sale_price" class="sale-price">{{ formatCurrency(product.sale_price) }}</span>
-                <span :class="{ 'original-price': product.sale_price, 'base-price': !product.sale_price }">
-                  {{ formatCurrency(product.base_price) }}
+            <!-- Price -->
+            <template v-if="column.key === 'price'">
+              <div class="price-cell">
+                <span v-if="record.sale_price" class="sale-price">
+                  {{ formatCurrency(record.sale_price) }}
+                </span>
+                <span :class="{ 'original-price': record.sale_price, 'base-price': !record.sale_price }">
+                  {{ formatCurrency(record.base_price) }}
                 </span>
               </div>
+            </template>
+
+            <!-- Stock -->
+            <template v-if="column.key === 'stock'">
               <a-tag
-                :color="product.stock_quantity <= 0 ? 'red' : product.stock_quantity <= product.low_stock_threshold ? 'orange' : 'green'">
-                Stock: {{ product.stock_quantity }}
+                :color="record.stock_quantity <= 0 ? 'red' : record.stock_quantity <= record.low_stock_threshold ? 'orange' : 'green'"
+                class="stock-tag">
+                {{ record.stock_quantity }}
               </a-tag>
+            </template>
+
+            <!-- Status -->
+            <template v-if="column.key === 'status'">
+              <a-switch :checked="record.is_published" checked-children="Published" un-checked-children="Draft"
+                @change="() => handleTogglePublish(record)" />
+            </template>
+
+            <!-- Created At -->
+            <template v-if="column.key === 'created_at'">
+              <span class="date-text">{{ dayjsInstance(record.created_at).format('MMM D, YYYY') }}</span>
+            </template>
+
+            <!-- Actions -->
+            <template v-if="column.key === 'actions'">
+              <a-space :size="4">
+                <a-tooltip title="View">
+                  <a-button type="text" size="small" @click="handleView(record.id)">
+                    <template #icon>
+                      <EyeOutlined />
+                    </template>
+                  </a-button>
+                </a-tooltip>
+                <a-tooltip title="Edit">
+                  <a-button type="text" size="small" @click="handleEdit(record.id)">
+                    <template #icon>
+                      <EditOutlined />
+                    </template>
+                  </a-button>
+                </a-tooltip>
+                <a-tooltip title="Duplicate">
+                  <a-button type="text" size="small" @click="handleDuplicate(record)">
+                    <template #icon>
+                      <CopyOutlined />
+                    </template>
+                  </a-button>
+                </a-tooltip>
+                <a-tooltip title="Delete">
+                  <a-button type="text" size="small" danger @click="handleDelete(record.id)">
+                    <template #icon>
+                      <DeleteOutlined />
+                    </template>
+                  </a-button>
+                </a-tooltip>
+              </a-space>
+            </template>
+          </template>
+        </a-table>
+      </div>
+    </template>
+
+    <!-- Products Grid -->
+    <template v-else>
+      <CardGridSkeleton v-if="loading" :count="pageSize" />
+      <div v-else class="products-grid">
+        <div class="grid-container">
+          <div v-for="product in products" :key="product.id" class="product-card">
+            <div class="product-image-container">
+              <img v-if="product.thumbnail?.url" :src="product.thumbnail.url" :alt="product.name"
+                class="product-image" />
+              <div v-else class="product-image-placeholder">
+                <ShoppingOutlined />
+              </div>
+              <div class="product-badges">
+                <a-tag v-if="product.is_featured" color="gold">Featured</a-tag>
+                <a-tag v-if="!product.is_published" color="default">Draft</a-tag>
+              </div>
+              <div class="product-hover-actions">
+                <a-button type="primary" size="small" @click="handleView(product.id)">
+                  <EyeOutlined /> View
+                </a-button>
+                <a-button size="small" @click="handleEdit(product.id)">
+                  <EditOutlined /> Edit
+                </a-button>
+              </div>
+            </div>
+            <div class="product-card-content">
+              <div class="product-card-header">
+                <h3 class="product-card-title">{{ product.name }}</h3>
+                <a-dropdown>
+                  <a-button type="text" size="small">⋯</a-button>
+                  <template #overlay>
+                    <a-menu>
+                      <a-menu-item @click="handleEdit(product.id)">
+                        <EditOutlined /> Edit
+                      </a-menu-item>
+                      <a-menu-item @click="handleDuplicate(product)">
+                        <CopyOutlined /> Duplicate
+                      </a-menu-item>
+                      <a-menu-divider />
+                      <a-menu-item danger @click="handleDelete(product.id)">
+                        <DeleteOutlined /> Delete
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
+              </div>
+              <p class="product-category">{{ product.category?.category_name || 'Uncategorized' }}</p>
+              <div class="product-card-footer">
+                <div class="product-price">
+                  <span v-if="product.sale_price" class="sale-price">{{ formatCurrency(product.sale_price) }}</span>
+                  <span :class="{ 'original-price': product.sale_price, 'base-price': !product.sale_price }">
+                    {{ formatCurrency(product.base_price) }}
+                  </span>
+                </div>
+                <a-tag
+                  :color="product.stock_quantity <= 0 ? 'red' : product.stock_quantity <= product.low_stock_threshold ? 'orange' : 'green'">
+                  Stock: {{ product.stock_quantity }}
+                </a-tag>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="grid-pagination">
-        <a-pagination v-model:current="currentPage" v-model:page-size="pageSize" :total="total" show-size-changer
-          show-quick-jumper :show-total="(total: number) => `Total ${total} products`" @change="handleSearch" />
+        <div class="grid-pagination">
+          <a-pagination v-model:current="currentPage" v-model:page-size="pageSize" :total="total" show-size-changer
+            show-quick-jumper :show-total="(total: number) => `Total ${total} products`" @change="handleSearch" />
+        </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 

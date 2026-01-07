@@ -5,6 +5,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { storesApi, type CreateStoreDto } from '@/modules/stores/api/stores'
 import { SaveOutlined, ArrowLeftOutlined, ShopOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, GlobalOutlined, DollarOutlined, AppstoreOutlined, PictureOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
+import FormSkeleton from '@/modules/shared/components/skeletons/FormSkeleton.vue'
 import type { FormInstance } from 'ant-design-vue'
 import { useStoreStore } from '@/modules/stores/store/store'
 import type { MediaFile } from '@/modules/media/services/media.service'
@@ -150,7 +151,8 @@ onMounted(async () => {
   </a-modal>
 
   <div class="store-form-container">
-    <a-spin :spinning="loading" size="large">
+    <FormSkeleton v-if="loading" :field-count="8" />
+    <template v-else>
       <!-- Professional gradient header with better visual hierarchy -->
       <div class="page-header">
         <div class="header-gradient"></div>
@@ -455,7 +457,7 @@ onMounted(async () => {
                 <div class="detail-item">
                   <span class="detail-label">Category</span>
                   <span class="detail-value">
-                    {{storeStore.storeCategories.find(c => c.id === formState.store_category_id)?.name || 'Notselected'
+                    {{storeStore.storeCategories.find(c => c.id === formState.store_category_id)?.name || 'Not selected'
                     }}
                   </span>
                 </div>
@@ -514,9 +516,10 @@ onMounted(async () => {
           {{ isEdit ? 'Update' : 'Create' }}
         </a-button>
       </div>
-    </a-spin>
+    </template>
   </div>
 </template>
+
 
 <style scoped>
 /* Completely redesigned with CSS variables for theme support */

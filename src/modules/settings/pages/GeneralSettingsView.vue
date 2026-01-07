@@ -18,7 +18,8 @@
     </div>
 
     <!-- Added tabs for better organization -->
-    <a-tabs v-model:activeKey="activeTab" class="settings-tabs" type="card">
+    <FormSkeleton v-if="loading" />
+    <a-tabs v-else v-model:activeKey="activeTab" class="settings-tabs" type="card">
       <!-- Store Information Tab -->
       <a-tab-pane key="store" tab="Store Information">
         <template #tab>
@@ -598,7 +599,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+import FormSkeleton from '@/modules/shared/components/skeletons/FormSkeleton.vue'
 import { message } from 'ant-design-vue'
 import {
   ShopOutlined,
@@ -635,7 +637,16 @@ import {
 } from '@ant-design/icons-vue'
 
 const activeTab = ref('store')
+const loading = ref(false)
 const saving = ref(false)
+
+onMounted(() => {
+  loading.value = true
+  // Simulate loading settings
+  setTimeout(() => {
+    loading.value = false
+  }, 800)
+})
 
 const settings = reactive({
   storeName: 'My Awesome Store',

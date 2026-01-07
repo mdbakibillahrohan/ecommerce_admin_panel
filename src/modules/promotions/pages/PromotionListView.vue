@@ -14,49 +14,54 @@
 
     <!-- Statistics Cards -->
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.7 0.15 195) 0%, oklch(0.65 0.18 200) 100%);">
-          <TagsOutlined />
+      <template v-if="loading">
+        <StatCardSkeleton v-for="i in 4" :key="i" />
+      </template>
+      <template v-else>
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.7 0.15 195) 0%, oklch(0.65 0.18 200) 100%);">
+            <TagsOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Total Promotions</div>
+            <div class="stat-value">{{ stats.total }}</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Total Promotions</div>
-          <div class="stat-value">{{ stats.total }}</div>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.75 0.20 145) 0%, oklch(0.70 0.22 150) 100%);">
-          <CheckCircleOutlined />
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.75 0.20 145) 0%, oklch(0.70 0.22 150) 100%);">
+            <CheckCircleOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Active Promotions</div>
+            <div class="stat-value">{{ stats.active }}</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Active Promotions</div>
-          <div class="stat-value">{{ stats.active }}</div>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.75 0.20 35) 0%, oklch(0.70 0.22 40) 100%);">
-          <GiftOutlined />
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.75 0.20 35) 0%, oklch(0.70 0.22 40) 100%);">
+            <GiftOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Total Usage</div>
+            <div class="stat-value">{{ stats.totalUsage }}</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Total Usage</div>
-          <div class="stat-value">{{ stats.totalUsage }}</div>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.70 0.25 330) 0%, oklch(0.65 0.27 335) 100%);">
-          <ClockCircleOutlined />
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.70 0.25 330) 0%, oklch(0.65 0.27 335) 100%);">
+            <ClockCircleOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Scheduled</div>
+            <div class="stat-value">{{ stats.scheduled }}</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Scheduled</div>
-          <div class="stat-value">{{ stats.scheduled }}</div>
-        </div>
-      </div>
+      </template>
     </div>
 
     <!-- Filters & Actions -->
@@ -137,8 +142,9 @@
 
     <!-- Table -->
     <div class="table-card">
-      <a-table :columns="columns" :dataSource="promotions" :loading="loading" :pagination="pagination"
-        :row-selection="rowSelection" @change="handleTableChange" rowKey="id" class="promotions-table">
+      <TableSkeleton v-if="loading" :columns="7" :rows="8" />
+      <a-table v-else :columns="columns" :dataSource="promotions" :pagination="pagination" :row-selection="rowSelection"
+        @change="handleTableChange" rowKey="id" class="promotions-table">
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'name'">
             <div class="promotion-name-cell">
@@ -295,6 +301,8 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue'
+import TableSkeleton from '@/modules/shared/components/skeletons/TableSkeleton.vue'
+import StatCardSkeleton from '@/modules/shared/components/skeletons/StatCardSkeleton.vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import {
@@ -371,7 +379,7 @@ const columns = [
 
 const rowSelection = computed(() => ({
   selectedRowKeys: selectedRowKeys.value,
-  onChange: (keys: any[]) => {
+  onChange: (keys: number[]) => {
     selectedRowKeys.value = keys
   }
 }))
@@ -384,7 +392,7 @@ const fetchPromotions = async () => {
   loading.value = true
   try {
     const { current, pageSize } = pagination.value
-    const params: any = {
+    const params: Record<string, string | number | undefined> = {
       page: current,
       limit: pageSize,
     }
@@ -399,19 +407,19 @@ const fetchPromotions = async () => {
 
     // Calculate stats
     stats.value.total = data.total
-    stats.value.active = data.data.filter((p: any) => p.is_active).length
-    stats.value.totalUsage = data.data.reduce((sum: number, p: any) => sum + p.used_count, 0)
-    stats.value.scheduled = data.data.filter((p: any) => {
+    stats.value.active = data.data.filter((p: Promotion) => p.is_active).length
+    stats.value.totalUsage = data.data.reduce((sum: number, p: Promotion) => sum + p.used_count, 0)
+    stats.value.scheduled = data.data.filter((p: Promotion) => {
       return new Date(p.start_date) > new Date()
     }).length
-  } catch (error) {
+  } catch {
     message.error('Failed to load promotions')
   } finally {
     loading.value = false
   }
 }
 
-const handleTableChange = (pag: any) => {
+const handleTableChange = (pag: { current: number; pageSize: number; total: number }) => {
   pagination.value = pag
   fetchPromotions()
 }
@@ -433,7 +441,7 @@ const handleDelete = async (id: number) => {
     await promotionService.deletePromotion(id)
     message.success('Promotion deleted successfully')
     fetchPromotions()
-  } catch (error) {
+  } catch {
     message.error('Failed to delete promotion')
   }
 }
@@ -446,7 +454,7 @@ const handleBulkDelete = async () => {
     message.success(`${selectedRowKeys.value.length} promotions deleted`)
     selectedRowKeys.value = []
     fetchPromotions()
-  } catch (error) {
+  } catch {
     message.error('Failed to delete promotions')
   }
 }
@@ -463,18 +471,18 @@ const handleBulkDeactivate = async () => {
   selectedRowKeys.value = []
 }
 
-const handleToggleStatus = async (record: any) => {
+const handleToggleStatus = async (record: Promotion) => {
   try {
     // Toggle the status
     await promotionService.updatePromotion(record.id, { is_active: !record.is_active })
     message.success(`Promotion ${record.is_active ? 'deactivated' : 'activated'}`)
     fetchPromotions()
-  } catch (error) {
+  } catch {
     message.error('Failed to update status')
   }
 }
 
-const handleView = (record: any) => {
+const handleView = (record: Promotion) => {
   selectedPromotion.value = record
   viewDrawerVisible.value = true
 }
@@ -497,12 +505,12 @@ const formatDate = (date: string) => {
   return dayjs(date).format('MMM D, YYYY')
 }
 
-const getUsagePercentage = (record: any) => {
+const getUsagePercentage = (record: Promotion) => {
   if (!record.usage_limit) return 0
   return Math.min((record.used_count / record.usage_limit) * 100, 100)
 }
 
-const getStatusColor = (record: any) => {
+const getStatusColor = (record: Promotion) => {
   const now = new Date()
   const startDate = new Date(record.start_date)
   const endDate = new Date(record.end_date)
@@ -513,7 +521,7 @@ const getStatusColor = (record: any) => {
   return 'green'
 }
 
-const getStatusText = (record: any) => {
+const getStatusText = (record: Promotion) => {
   const now = new Date()
   const startDate = new Date(record.start_date)
   const endDate = new Date(record.end_date)

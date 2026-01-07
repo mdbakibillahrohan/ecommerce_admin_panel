@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import TableSkeleton from '@/modules/shared/components/skeletons/TableSkeleton.vue'
+import StatCardSkeleton from '@/modules/shared/components/skeletons/StatCardSkeleton.vue'
 import { ordersApi, type Order, type OrderQuery, type OrderStatus } from '@/modules/orders/api/orders'
 import {
   SearchOutlined,
@@ -19,7 +20,8 @@ import {
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 
-const router = useRouter()
+// router is unused here, it was probably for navigation but fetchOrders is used instead.
+// const router = useRouter()
 const dayjsInstance = dayjs // Assign dayjs to a constant to avoid conditional calls
 
 // State
@@ -46,8 +48,8 @@ const statistics = ref({
 const searchText = ref('')
 const selectedStatus = ref<OrderStatus | undefined>()
 const dateRange = ref<[dayjs.Dayjs, dayjs.Dayjs] | null>(null)
-const sortField = ref('created_at')
-const sortOrder = ref<'ascend' | 'descend'>('descend')
+const sortField = ref<string | undefined>('created_at')
+const sortOrder = ref<'ascend' | 'descend' | undefined>('descend')
 
 onMounted(() => {
   fetchOrders()
@@ -90,13 +92,16 @@ function handleSearch() {
   fetchOrders()
 }
 
-function handleTableChange(pagination: any, filters: any, sorter: any) {
+function handleTableChange(pagination: { current: number; pageSize: number; total: number }, _filters: Record<string, string[] | null>, sorter: { field?: string; order?: 'ascend' | 'descend' }) {
   currentPage.value = pagination.current
   pageSize.value = pagination.pageSize
 
-  if (sorter.field) {
+  if (sorter.field && sorter.order) {
     sortField.value = sorter.field
     sortOrder.value = sorter.order
+  } else {
+    sortField.value = undefined
+    sortOrder.value = undefined
   }
 
   fetchOrders()
@@ -122,7 +127,7 @@ async function handleUpdateStatus() {
     statusModalVisible.value = false
     fetchOrders()
     fetchStatistics()
-  } catch (error) {
+  } catch {
     message.error('Failed to update order status')
   }
 }
@@ -141,7 +146,7 @@ async function handleBulkStatusUpdate(status: OrderStatus) {
     selectedRowKeys.value = []
     fetchOrders()
     fetchStatistics()
-  } catch (error) {
+  } catch {
     message.error('Failed to update orders')
   }
 }
@@ -305,45 +310,50 @@ const hasSelectedRows = computed(() => selectedRowKeys.value.length > 0)
 
     <!-- Statistics Cards -->
     <div class="statistics-grid">
-      <div class="stat-card stat-total">
-        <div class="stat-icon">
-          <ShoppingCartOutlined />
+      <template v-if="loading">
+        <StatCardSkeleton v-for="i in 4" :key="i" />
+      </template>
+      <template v-else>
+        <div class="stat-card stat-total">
+          <div class="stat-icon">
+            <ShoppingCartOutlined />
+          </div>
+          <div class="stat-content">
+            <p class="stat-label">Total Orders</p>
+            <h3 class="stat-value">{{ statistics.totalOrders }}</h3>
+          </div>
         </div>
-        <div class="stat-content">
-          <p class="stat-label">Total Orders</p>
-          <h3 class="stat-value">{{ statistics.totalOrders }}</h3>
-        </div>
-      </div>
 
-      <div class="stat-card stat-revenue">
-        <div class="stat-icon">
-          <DollarOutlined />
+        <div class="stat-card stat-revenue">
+          <div class="stat-icon">
+            <DollarOutlined />
+          </div>
+          <div class="stat-content">
+            <p class="stat-label">Total Revenue</p>
+            <h3 class="stat-value">{{ formatCurrency(statistics.totalRevenue) }}</h3>
+          </div>
         </div>
-        <div class="stat-content">
-          <p class="stat-label">Total Revenue</p>
-          <h3 class="stat-value">{{ formatCurrency(statistics.totalRevenue) }}</h3>
-        </div>
-      </div>
 
-      <div class="stat-card stat-pending">
-        <div class="stat-icon">
-          <ClockCircleOutlined />
+        <div class="stat-card stat-pending">
+          <div class="stat-icon">
+            <ClockCircleOutlined />
+          </div>
+          <div class="stat-content">
+            <p class="stat-label">Pending Orders</p>
+            <h3 class="stat-value">{{ statistics.pendingOrders }}</h3>
+          </div>
         </div>
-        <div class="stat-content">
-          <p class="stat-label">Pending Orders</p>
-          <h3 class="stat-value">{{ statistics.pendingOrders }}</h3>
-        </div>
-      </div>
 
-      <div class="stat-card stat-delivered">
-        <div class="stat-icon">
-          <CheckCircleOutlined />
+        <div class="stat-card stat-delivered">
+          <div class="stat-icon">
+            <CheckCircleOutlined />
+          </div>
+          <div class="stat-content">
+            <p class="stat-label">Delivered</p>
+            <h3 class="stat-value">{{ statistics.completedOrders }}</h3>
+          </div>
         </div>
-        <div class="stat-content">
-          <p class="stat-label">Delivered</p>
-          <h3 class="stat-value">{{ statistics.completedOrders }}</h3>
-        </div>
-      </div>
+      </template>
     </div>
 
     <!-- Filters Section -->
@@ -412,9 +422,9 @@ const hasSelectedRows = computed(() => selectedRowKeys.value.length > 0)
 
     <!-- Orders Table -->
     <a-card :bordered="false" class="table-card">
-      <a-table :columns="columns" :data-source="orders" :loading="loading" :pagination="pagination"
-        :row-selection="rowSelection" row-key="id" :scroll="{ x: 1100 }" @change="handleTableChange"
-        class="orders-table">
+      <TableSkeleton v-if="loading" :columns="7" :rows="10" />
+      <a-table v-else :columns="columns" :data-source="orders" :pagination="pagination" :row-selection="rowSelection"
+        row-key="id" :scroll="{ x: 1100 }" @change="handleTableChange" class="orders-table">
         <template #bodyCell="{ column, record }">
           <!-- Order Number -->
           <template v-if="column.key === 'order_number'">

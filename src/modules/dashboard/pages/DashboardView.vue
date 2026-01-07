@@ -4,6 +4,7 @@ import { useDashboardStore } from '@/modules/dashboard/store'
 import StatCard from '@/modules/dashboard/components/StatCard.vue'
 import SalesChart from '@/modules/dashboard/components/SalesChart.vue'
 import OrderStatusChart from '@/modules/dashboard/components/OrderStatusChart.vue'
+import StatCardSkeleton from '@/modules/shared/components/skeletons/StatCardSkeleton.vue'
 import {
   UserOutlined,
   ShoppingCartOutlined,
@@ -30,7 +31,6 @@ onMounted(() => {
 const overview = computed(() => dashboardStore.dashboardData?.overview)
 const orders = computed(() => dashboardStore.dashboardData?.orders)
 const sales = computed(() => dashboardStore.dashboardData?.sales)
-const products = computed(() => dashboardStore.dashboardData?.products)
 const recentOrders = computed(() => dashboardStore.dashboardData?.recentOrders || [])
 const topProducts = computed(() => dashboardStore.dashboardData?.topProducts || [])
 const lowStockAlerts = computed(() => dashboardStore.dashboardData?.lowStockAlerts || [])
@@ -124,10 +124,14 @@ const orderColumns = [
       </div>
     </div>
 
-    <!-- Loading State -->
-    <a-spin :spinning="dashboardStore.loading" tip="Loading dashboard...">
-      <!-- Overview Stats -->
-      <a-row :gutter="[24, 24]" class="stats-row">
+    <!-- Overview Stats -->
+    <a-row :gutter="[24, 24]" class="stats-row">
+      <template v-if="dashboardStore.loading">
+        <a-col v-for="i in 4" :key="i" :xs="24" :sm="12" :lg="6">
+          <StatCardSkeleton />
+        </a-col>
+      </template>
+      <template v-else>
         <a-col :xs="24" :sm="12" :lg="6">
           <StatCard title="Total Users" :value="overview?.totalUsers || 0" :icon="UserOutlined" color="#667eea"
             :trend="overview?.newUsersThisWeek" trendLabel="new this week" />
@@ -144,10 +148,24 @@ const orderColumns = [
           <StatCard title="Total Revenue" :value="formatCurrency(overview?.totalRevenue || 0)" :icon="DollarOutlined"
             color="#eb2f96" :trend="formatCurrency(overview?.todayRevenue || 0)" trendLabel="today" isFormatted />
         </a-col>
-      </a-row>
+      </template>
+    </a-row>
 
-      <!-- Charts Row -->
-      <a-row :gutter="[24, 24]" class="charts-row">
+    <!-- Charts Row -->
+    <a-row :gutter="[24, 24]" class="charts-row">
+      <template v-if="dashboardStore.loading">
+        <a-col :xs="24" :lg="16">
+          <a-card title="Sales Overview" :bordered="false" class="chart-card">
+            <a-skeleton :active="true" :paragraph="{ rows: 8 }" />
+          </a-card>
+        </a-col>
+        <a-col :xs="24" :lg="8">
+          <a-card title="Order Status" :bordered="false" class="chart-card">
+            <a-skeleton :active="true" :paragraph="{ rows: 8 }" />
+          </a-card>
+        </a-col>
+      </template>
+      <template v-else>
         <a-col :xs="24" :lg="16">
           <a-card title="Sales Overview" :bordered="false" class="chart-card">
             <template #extra>
@@ -158,8 +176,7 @@ const orderColumns = [
                 </div>
                 <a-divider type="vertical" />
                 <div class="stat-item" :class="{ positive: (sales?.comparison?.growthPercentage || 0) >= 0 }">
-                  <component :is="(sales?.comparison?.growthPercentage || 0) >= 0 ? RiseOutlined : FallOutlined
-                    " />
+                  <component :is="(sales?.comparison?.growthPercentage || 0) >= 0 ? RiseOutlined : FallOutlined" />
                   <span>{{ Math.abs(sales?.comparison?.growthPercentage || 0).toFixed(1) }}%</span>
                 </div>
               </div>
@@ -172,140 +189,145 @@ const orderColumns = [
             <OrderStatusChart :data="orders" />
           </a-card>
         </a-col>
-      </a-row>
+      </template>
+    </a-row>
 
-      <!-- Content Row -->
-      <a-row :gutter="[24, 24]" class="content-row">
-        <!-- Recent Orders -->
-        <a-col :xs="24" :xl="14">
-          <a-card title="Recent Orders" :bordered="false" class="table-card">
-            <template #extra>
-              <router-link to="/orders">View All</router-link>
-            </template>
-            <a-table :columns="orderColumns" :data-source="recentOrders" :pagination="false" size="small" row-key="id">
-              <template #bodyCell="{ column, record }">
-                <template v-if="column.key === 'orderNumber'">
-                  <a-typography-link @click="() => $router.push(`/orders/${record.id}`)">
-                    {{ record.orderNumber }}
-                  </a-typography-link>
-                </template>
-                <template v-if="column.key === 'status'">
-                  <a-tag :color="getStatusColor(record.status)">
-                    {{ record.status }}
-                  </a-tag>
-                </template>
-                <template v-if="column.key === 'total'">
-                  {{ formatCurrency(record.total) }}
-                </template>
-                <template v-if="column.key === 'createdAt'">
-                  {{ dayjs(record.createdAt).fromNow() }}
-                </template>
+    <!-- Content Row -->
+    <a-row :gutter="[24, 24]" class="content-row">
+      <!-- Recent Orders -->
+      <a-col :xs="24" :xl="14">
+        <a-card title="Recent Orders" :bordered="false" class="table-card">
+          <template #extra>
+            <router-link to="/orders">View All</router-link>
+          </template>
+          <a-skeleton v-if="dashboardStore.loading" :active="true" :paragraph="{ rows: 5 }" />
+          <a-table v-else :columns="orderColumns" :data-source="recentOrders" :pagination="false" size="small"
+            row-key="id">
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'orderNumber'">
+                <a-typography-link @click="() => $router.push(`/orders/${record.id}`)">
+                  {{ record.orderNumber }}
+                </a-typography-link>
               </template>
-            </a-table>
-          </a-card>
-        </a-col>
-
-        <!-- Top Products -->
-        <a-col :xs="24" :xl="10">
-          <a-card title="Top Selling Products" :bordered="false" class="list-card">
-            <template #extra>
-              <router-link to="/products">View All</router-link>
-            </template>
-            <a-list :data-source="topProducts" item-layout="horizontal" :split="false">
-              <template #renderItem="{ item, index }">
-                <a-list-item>
-                  <a-list-item-meta>
-                    <template #avatar>
-                      <a-avatar :style="{
-                        background: `linear-gradient(135deg, ${['oklch(0.65 0.18 210)', 'oklch(0.7 0.17 150)', 'oklch(0.7 0.15 50)', 'oklch(0.65 0.2 350)', 'oklch(0.6 0.2 280)'][index % 5]} 0%, ${['oklch(0.55 0.2 280)', 'oklch(0.6 0.19 145)', 'oklch(0.6 0.17 45)', 'oklch(0.55 0.22 345)', 'oklch(0.5 0.22 275)'][index % 5]} 100%)`,
-                      }">
-                        {{ index + 1 }}
-                      </a-avatar>
-                    </template>
-                    <template #title>
-                      <router-link :to="`/products/${item.id}/edit`">
-                        {{ item.name }}
-                      </router-link>
-                    </template>
-                    <template #description>
-                      <div class="product-stats">
-                        <span>{{ item.unitsSold }} sold</span>
-                        <a-divider type="vertical" />
-                        <span>{{ formatCurrency(item.revenue) }}</span>
-                        <a-divider type="vertical" />
-                        <a-rate :value="item.averageRating" disabled allow-half :style="{ fontSize: '12px' }" />
-                      </div>
-                    </template>
-                  </a-list-item-meta>
-                </a-list-item>
+              <template v-if="column.key === 'status'">
+                <a-tag :color="getStatusColor(record.status)">
+                  {{ record.status }}
+                </a-tag>
               </template>
-            </a-list>
-          </a-card>
-        </a-col>
-      </a-row>
-
-      <!-- Bottom Row -->
-      <a-row :gutter="[24, 24]" class="bottom-row">
-        <!-- Low Stock Alerts -->
-        <a-col :xs="24" :lg="12">
-          <a-card title="Low Stock Alerts" :bordered="false" class="alert-card">
-            <template #extra>
-              <a-badge :count="lowStockAlerts.length" :number-style="{ backgroundColor: '#ff4d4f' }" />
-            </template>
-            <a-list v-if="lowStockAlerts.length > 0" :data-source="lowStockAlerts.slice(0, 5)" item-layout="horizontal"
-              size="small">
-              <template #renderItem="{ item }">
-                <a-list-item>
-                  <a-list-item-meta>
-                    <template #avatar>
-                      <WarningOutlined :style="{
-                        fontSize: '20px',
-                        color: getStockStatusColor(item.status) === 'red' ? '#ff4d4f' : '#faad14',
-                      }" />
-                    </template>
-                    <template #title>
-                      {{ item.productName }}
-                      <span v-if="item.variantName" class="variant-name">
-                        ({{ item.variantName }})
-                      </span>
-                    </template>
-                    <template #description>
-                      <a-tag :color="getStockStatusColor(item.status)">
-                        {{ item.currentStock }} / {{ item.threshold }}
-                      </a-tag>
-                      <span class="stock-status">{{ item.status.replace('_', ' ') }}</span>
-                    </template>
-                  </a-list-item-meta>
-                </a-list-item>
+              <template v-if="column.key === 'total'">
+                {{ formatCurrency(record.total) }}
               </template>
-            </a-list>
-            <a-empty v-else description="No low stock alerts" :image="false" />
-          </a-card>
-        </a-col>
+              <template v-if="column.key === 'createdAt'">
+                {{ dayjs(record.createdAt).fromNow() }}
+              </template>
+            </template>
+          </a-table>
+        </a-card>
+      </a-col>
 
-        <!-- Recent Activity -->
-        <a-col :xs="24" :lg="12">
-          <a-card title="Recent Activity" :bordered="false" class="activity-card">
-            <a-timeline v-if="recentActivity.length > 0">
-              <a-timeline-item v-for="activity in recentActivity.slice(0, 6)"
-                :key="activity.entityId + activity.timestamp" :color="activity.type === 'order'
-                  ? 'green'
-                  : activity.type === 'payment'
-                    ? 'blue'
-                    : 'gray'
-                  ">
-                <template #dot>
-                  <component :is="getActivityIcon(activity.type)" style="font-size: 16px" />
-                </template>
-                <p class="activity-description">{{ activity.description }}</p>
-                <p class="activity-time">{{ dayjs(activity.timestamp).fromNow() }}</p>
-              </a-timeline-item>
-            </a-timeline>
-            <a-empty v-else description="No recent activity" :image="false" />
-          </a-card>
-        </a-col>
-      </a-row>
-    </a-spin>
+      <!-- Top Products -->
+      <a-col :xs="24" :xl="10">
+        <a-card title="Top Selling Products" :bordered="false" class="list-card">
+          <template #extra>
+            <router-link to="/products">View All</router-link>
+          </template>
+          <a-skeleton v-if="dashboardStore.loading" :active="true" :paragraph="{ rows: 5 }" />
+          <a-list v-else :data-source="topProducts" item-layout="horizontal" :split="false">
+            <template #renderItem="{ item, index }">
+              <a-list-item>
+                <a-list-item-meta>
+                  <template #avatar>
+                    <a-avatar :style="{
+                      background: `linear-gradient(135deg, ${['oklch(0.65 0.18 210)', 'oklch(0.7 0.17 150)', 'oklch(0.7 0.15 50)', 'oklch(0.65 0.2 350)', 'oklch(0.6 0.2 280)'][index % 5]} 0%, ${['oklch(0.55 0.2 280)', 'oklch(0.6 0.19 145)', 'oklch(0.6 0.17 45)', 'oklch(0.55 0.22 345)', 'oklch(0.5 0.22 275)'][index % 5]} 100%)`,
+                    }">
+                      {{ index + 1 }}
+                    </a-avatar>
+                  </template>
+                  <template #title>
+                    <router-link :to="`/products/${item.id}/edit`">
+                      {{ item.name }}
+                    </router-link>
+                  </template>
+                  <template #description>
+                    <div class="product-stats">
+                      <span>{{ item.unitsSold }} sold</span>
+                      <a-divider type="vertical" />
+                      <span>{{ formatCurrency(item.revenue) }}</span>
+                      <a-divider type="vertical" />
+                      <a-rate :value="item.averageRating" disabled allow-half :style="{ fontSize: '12px' }" />
+                    </div>
+                  </template>
+                </a-list-item-meta>
+              </a-list-item>
+            </template>
+          </a-list>
+        </a-card>
+      </a-col>
+    </a-row>
+
+    <!-- Bottom Row -->
+    <a-row :gutter="[24, 24]" class="bottom-row">
+      <!-- Low Stock Alerts -->
+      <a-col :xs="24" :lg="12">
+        <a-card title="Low Stock Alerts" :bordered="false" class="alert-card">
+          <template #extra>
+            <a-badge :count="lowStockAlerts.length" :number-style="{ backgroundColor: '#ff4d4f' }" />
+          </template>
+          <a-skeleton v-if="dashboardStore.loading" :active="true" :paragraph="{ rows: 4 }" />
+          <a-list v-else-if="lowStockAlerts.length > 0" :data-source="lowStockAlerts.slice(0, 5)"
+            item-layout="horizontal" size="small">
+            <template #renderItem="{ item }">
+              <a-list-item>
+                <a-list-item-meta>
+                  <template #avatar>
+                    <WarningOutlined :style="{
+                      fontSize: '20px',
+                      color: getStockStatusColor(item.status) === 'red' ? '#ff4d4f' : '#faad14',
+                    }" />
+                  </template>
+                  <template #title>
+                    {{ item.productName }}
+                    <span v-if="item.variantName" class="variant-name">
+                      ({{ item.variantName }})
+                    </span>
+                  </template>
+                  <template #description>
+                    <a-tag :color="getStockStatusColor(item.status)">
+                      {{ item.currentStock }} / {{ item.threshold }}
+                    </a-tag>
+                    <span class="stock-status">{{ item.status.replace('_', ' ') }}</span>
+                  </template>
+                </a-list-item-meta>
+              </a-list-item>
+            </template>
+          </a-list>
+          <a-empty v-else description="No low stock alerts" :image="false" />
+        </a-card>
+      </a-col>
+
+      <!-- Recent Activity -->
+      <a-col :xs="24" :lg="12">
+        <a-card title="Recent Activity" :bordered="false" class="activity-card">
+          <a-skeleton v-if="dashboardStore.loading" :active="true" :paragraph="{ rows: 6 }" />
+          <a-timeline v-else-if="recentActivity.length > 0">
+            <a-timeline-item v-for="activity in recentActivity.slice(0, 6)"
+              :key="activity.entityId + activity.timestamp" :color="activity.type === 'order'
+                ? 'green'
+                : activity.type === 'payment'
+                  ? 'blue'
+                  : 'gray'
+                ">
+              <template #dot>
+                <component :is="getActivityIcon(activity.type)" style="font-size: 16px" />
+              </template>
+              <p class="activity-description">{{ activity.description }}</p>
+              <p class="activity-time">{{ dayjs(activity.timestamp).fromNow() }}</p>
+            </a-timeline-item>
+          </a-timeline>
+          <a-empty v-else description="No recent activity" :image="false" />
+        </a-card>
+      </a-col>
+    </a-row>
   </div>
 </template>
 

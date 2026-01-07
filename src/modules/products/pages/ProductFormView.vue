@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, reactive } from 'vue'
+import FormSkeleton from '@/modules/shared/components/skeletons/FormSkeleton.vue'
 import { useRouter, useRoute } from 'vue-router'
-import { productsApi, type CreateProductDto, type Product } from '@/modules/products/api/products'
+import { productsApi, type CreateProductDto } from '@/modules/products/api/products'
 import { categoriesApi, type Category } from '@/modules/categories/api/categories'
 import {
   SaveOutlined,
@@ -16,9 +17,7 @@ import {
   DollarOutlined,
   InboxOutlined,
   SearchOutlined,
-  GlobalOutlined,
   SettingOutlined,
-  LinkOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   SaveFilled,
@@ -45,7 +44,7 @@ const previewVisible = ref(false)
 const lastSaved = ref<Date | null>(null)
 
 // Images
-const imageList = ref<any[]>([])
+const imageList = ref<UploadProps['fileList']>([])
 const uploadedImages = ref<string[]>([])
 
 // Variants
@@ -200,12 +199,13 @@ async function handleSubmit(publishNow = false) {
 
     lastSaved.value = new Date()
     router.push('/products')
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = err as { errorFields?: unknown[] }
     if (error.errorFields) {
       message.error('Please check the form for errors')
     } else {
       message.error('Failed to save product')
-      console.error(error)
+      console.error(err)
     }
   } finally {
     saving.value = false
@@ -256,7 +256,7 @@ function generateSKU() {
 const handleImageUpload: UploadProps['onChange'] = (info) => {
   imageList.value = info.fileList
   if (info.file.status === 'done') {
-    uploadedImages.value.push((info.file.response as any)?.url || '')
+    uploadedImages.value.push((info.file.response as { url?: string })?.url || '')
     message.success(`${info.file.name} uploaded successfully`)
   } else if (info.file.status === 'error') {
     message.error(`${info.file.name} upload failed`)
@@ -378,7 +378,9 @@ const savingsPercentage = computed(() => {
       </div>
     </div>
 
-    <a-spin :spinning="loading">
+    <FormSkeleton v-if="loading" :field-count="8" :show-extra-section="true" />
+    <template v-else>
+
       <div class="form-content">
         <a-row :gutter="24">
           <!-- Main Content Area -->
@@ -898,7 +900,8 @@ const savingsPercentage = computed(() => {
           </a-col>
         </a-row>
       </div>
-    </a-spin>
+    </template>
+
 
     <!-- Preview Modal -->
     <a-modal v-model:visible="previewVisible" title="Product Preview" width="800px" :footer="null">

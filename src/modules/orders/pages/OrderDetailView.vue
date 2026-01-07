@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import DetailViewSkeleton from '@/modules/shared/components/skeletons/DetailViewSkeleton.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ordersApi, type Order, type OrderStatus } from '@/modules/orders/api/orders'
 import {
   ArrowLeftOutlined,
-  PrinterOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
   CarOutlined,
-  GiftOutlined,
 } from '@ant-design/icons-vue'
-import { message, Modal } from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 
 const router = useRouter()
@@ -140,7 +137,8 @@ const itemColumns = [
 
 <template>
   <div class="order-detail">
-    <a-spin :spinning="loading">
+    <DetailViewSkeleton v-if="loading" />
+    <template v-else>
       <!-- Page Header -->
       <div class="page-header">
         <div class="header-left">
@@ -311,7 +309,8 @@ const itemColumns = [
           </a-col>
         </a-row>
       </template>
-    </a-spin>
+    </template>
+
 
     <!-- Status Update Modal -->
     <a-modal v-model:open="showStatusModal" title="Update Order Status" @ok="handleUpdateStatus"

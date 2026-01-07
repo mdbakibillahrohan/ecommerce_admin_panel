@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import TableSkeleton from '@/modules/shared/components/skeletons/TableSkeleton.vue'
+import StatCardSkeleton from '@/modules/shared/components/skeletons/StatCardSkeleton.vue'
 import { inventoryApi, type Inventory, type BulkUpdateItem } from '@/modules/inventory/api/inventory'
 import {
-  SearchOutlined,
   WarningOutlined,
   ReloadOutlined,
   EditOutlined,
@@ -10,7 +11,7 @@ import {
   CheckCircleOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons-vue'
-import { message, Modal } from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 
 // State
 const loading = ref(false)
@@ -32,7 +33,6 @@ const bulkItems = ref<{ id: number; name: string; quantity: number }[]>([])
 
 // Filter
 const showLowStockOnly = ref(false)
-const searchText = ref('')
 
 onMounted(() => {
   fetchInventory()
@@ -127,7 +127,7 @@ async function handleBulkUpdate() {
   }
 }
 
-function handleTableChange(pagination: any) {
+function handleTableChange(pagination: { current: number; pageSize: number }) {
   currentPage.value = pagination.current
   pageSize.value = pagination.pageSize
   fetchInventory()
@@ -187,54 +187,60 @@ const pagination = computed(() => ({
 
     <!-- Statistics Cards -->
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.7 0.15 210) 0%, oklch(0.65 0.18 220) 100%)">
-          <InboxOutlined />
+      <template v-if="loading">
+        <StatCardSkeleton v-for="i in 4" :key="i" />
+      </template>
+      <template v-else>
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.7 0.15 210) 0%, oklch(0.65 0.18 220) 100%)">
+            <InboxOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Total Items</div>
+            <div class="stat-value">{{ statistics.totalItems }}</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Total Items</div>
-          <div class="stat-value">{{ statistics.totalItems }}</div>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.75 0.15 140) 0%, oklch(0.7 0.18 150) 100%)">
-          <CheckCircleOutlined />
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.75 0.15 140) 0%, oklch(0.7 0.18 150) 100%)">
+            <CheckCircleOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Inventory Value</div>
+            <div class="stat-value">${{ statistics.totalValue.toFixed(2) }}</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Inventory Value</div>
-          <div class="stat-value">${{ statistics.totalValue.toFixed(2) }}</div>
-        </div>
-      </div>
 
-      <div class="stat-card warning">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.75 0.15 50) 0%, oklch(0.7 0.18 40) 100%)">
-          <WarningOutlined />
+        <div class="stat-card warning">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.75 0.15 50) 0%, oklch(0.7 0.18 40) 100%)">
+            <WarningOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Low Stock</div>
+            <div class="stat-value">{{ statistics.lowStock }}</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Low Stock</div>
-          <div class="stat-value">{{ statistics.lowStock }}</div>
-        </div>
-      </div>
 
-      <div class="stat-card danger">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.7 0.2 20) 0%, oklch(0.65 0.22 15) 100%)">
-          <ExclamationCircleOutlined />
+        <div class="stat-card danger">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.7 0.2 20) 0%, oklch(0.65 0.22 15) 100%)">
+            <ExclamationCircleOutlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Out of Stock</div>
+            <div class="stat-value">{{ statistics.outOfStock }}</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Out of Stock</div>
-          <div class="stat-value">{{ statistics.outOfStock }}</div>
-        </div>
-      </div>
+      </template>
     </div>
 
     <!-- Inventory Table -->
     <div class="table-container">
-      <a-table :columns="columns" :data-source="inventory" :loading="loading" :pagination="pagination" row-key="id"
+      <TableSkeleton v-if="loading" :columns="8" :rows="10" />
+      <a-table v-else :columns="columns" :data-source="inventory" :pagination="pagination" row-key="id"
         :scroll="{ x: 900 }" @change="handleTableChange">
         <template #bodyCell="{ column, record }">
           <!-- Product -->

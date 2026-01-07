@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import TableSkeleton from '@/modules/shared/components/skeletons/TableSkeleton.vue'
+import StatCardSkeleton from '@/modules/shared/components/skeletons/StatCardSkeleton.vue'
 import { useRouter } from 'vue-router'
 import {
   ShopOutlined,
@@ -443,45 +445,50 @@ onMounted(() => {
 
     <!-- Statistics Cards -->
     <div class="stats-container">
-      <div class="stat-card total">
-        <div class="stat-icon">
-          <shopping-outlined />
+      <template v-if="loading">
+        <StatCardSkeleton v-for="i in 4" :key="i" />
+      </template>
+      <template v-else>
+        <div class="stat-card total">
+          <div class="stat-icon">
+            <shopping-outlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ totalStores }}</div>
+            <div class="stat-label">Total stores</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ totalStores }}</div>
-          <div class="stat-label">Total stores</div>
-        </div>
-      </div>
 
-      <div class="stat-card active">
-        <div class="stat-icon">
-          <check-circle-outlined />
+        <div class="stat-card active">
+          <div class="stat-icon">
+            <check-circle-outlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ activeStores }}</div>
+            <div class="stat-label">Active stores</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ activeStores }}</div>
-          <div class="stat-label">Active stores</div>
-        </div>
-      </div>
 
-      <div class="stat-card inactive">
-        <div class="stat-icon">
-          <close-circle-outlined />
+        <div class="stat-card inactive">
+          <div class="stat-icon">
+            <close-circle-outlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ inactiveStores }}</div>
+            <div class="stat-label">Inactive stores</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ inactiveStores }}</div>
-          <div class="stat-label">Inactive stores</div>
-        </div>
-      </div>
 
-      <div class="stat-card new">
-        <div class="stat-icon">
-          <clock-circle-outlined />
+        <div class="stat-card new">
+          <div class="stat-icon">
+            <clock-circle-outlined />
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ newlyJoinedStores }}</div>
+            <div class="stat-label">Newly joined stores</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ newlyJoinedStores }}</div>
-          <div class="stat-label">Newly joined stores</div>
-        </div>
-      </div>
+      </template>
     </div>
 
     <!-- Financial Summary -->
@@ -537,7 +544,8 @@ onMounted(() => {
 
       <!-- Table -->
       <div class="table-container">
-        <a-table :columns="columns" :data-source="filteredStores"
+        <TableSkeleton v-if="loading" :rows="5" :columns="6" />
+        <a-table v-else :columns="columns" :data-source="filteredStores"
           :pagination="{ pageSize: 10, showSizeChanger: true, showTotal: (total: number) => `Total ${total} stores` }"
           :loading="loading" row-key="id" :scroll="{ x: 1200 }">
           <!-- Store Information -->

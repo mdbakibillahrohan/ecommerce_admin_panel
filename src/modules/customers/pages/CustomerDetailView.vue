@@ -14,26 +14,27 @@
       </div>
     </div>
 
-    <a-spin :spinning="loading">
+    <DetailViewSkeleton v-if="loading" />
+    <template v-else>
       <div v-if="customer" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
           <!-- Stats -->
           <div class="grid grid-cols-3 gap-4">
-            <a-card>
+            <a-card shadow="none">
               <a-statistic title="Total Spent" :value="customer.total_spent" prefix="$" :precision="2" />
             </a-card>
-            <a-card>
+            <a-card shadow="none">
               <a-statistic title="Orders" :value="customer.orders_count" />
             </a-card>
-            <a-card>
+            <a-card shadow="none">
               <a-statistic title="Avg. Order" :value="customer.total_spent / (customer.orders_count || 1)" prefix="$"
                 :precision="2" />
             </a-card>
           </div>
 
           <!-- Last Order (Placeholder) -->
-          <a-card title="Recent Orders">
+          <a-card title="Recent Orders" shadow="none">
             <a-empty description="No recent orders found" />
             <!-- We would fetch orders for this customer here -->
           </a-card>
@@ -42,14 +43,14 @@
         <!-- Sidebar -->
         <div class="space-y-6">
           <!-- Contact Info -->
-          <a-card title="Contact Info">
+          <a-card title="Contact Info" shadow="none">
             <div class="mb-2"><strong>Email:</strong> {{ customer.email }}</div>
             <div class="mb-2"><strong>Phone:</strong> {{ customer.phone || 'N/A' }}</div>
             <a-button type="link" class="p-0">Edit Contact</a-button>
           </a-card>
 
           <!-- Notes -->
-          <a-card title="Notes">
+          <a-card title="Notes" shadow="none">
             <div class="space-y-4 max-h-60 overflow-y-auto mb-4">
               <div v-for="note in notes" :key="note.id" class="bg-gray-50 p-3 rounded">
                 <p class="text-sm">{{ note.content }}</p>
@@ -66,7 +67,7 @@
           </a-card>
 
           <!-- Tags/Groups -->
-          <a-card title="Tags" :bodyStyle="{ padding: '12px 24px' }">
+          <a-card title="Tags" :bodyStyle="{ padding: '12px 24px' }" shadow="none">
             <div class="flex flex-wrap gap-2 mb-4">
               <a-tag v-for="group in customer.groups" :key="group.id" closable>{{ group.name }}</a-tag>
             </div>
@@ -74,12 +75,14 @@
           </a-card>
         </div>
       </div>
-    </a-spin>
+    </template>
+
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
+import DetailViewSkeleton from '@/modules/shared/components/skeletons/DetailViewSkeleton.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { customerService, type Customer, type CustomerNote } from '@/modules/customers/services/customer.service'

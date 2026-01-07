@@ -26,53 +26,58 @@
 
     <!-- Statistics Cards -->
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.65 0.25 210) 0%, oklch(0.55 0.20 220) 100%)">
-          <i class="icon-users"></i>
+      <template v-if="loading">
+        <StatCardSkeleton v-for="i in 4" :key="i" />
+      </template>
+      <template v-else>
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.65 0.25 210) 0%, oklch(0.55 0.20 220) 100%)">
+            <i class="icon-users"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Total Customers</div>
+            <div class="stat-value">{{ statistics.totalCustomers }}</div>
+            <div class="stat-change positive">+{{ statistics.newThisMonth }} this month</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Total Customers</div>
-          <div class="stat-value">{{ statistics.totalCustomers }}</div>
-          <div class="stat-change positive">+{{ statistics.newThisMonth }} this month</div>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.65 0.25 160) 0%, oklch(0.55 0.20 170) 100%)">
-          <i class="icon-dollar"></i>
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.65 0.25 160) 0%, oklch(0.55 0.20 170) 100%)">
+            <i class="icon-dollar"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value">BDT {{ formatCurrency(statistics.totalRevenue) }}</div>
+            <div class="stat-change positive">+12.5% vs last month</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Total Revenue</div>
-          <div class="stat-value">BDT {{ formatCurrency(statistics.totalRevenue) }}</div>
-          <div class="stat-change positive">+12.5% vs last month</div>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.75 0.20 140) 0%, oklch(0.65 0.15 150) 100%)">
-          <i class="icon-shopping"></i>
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.75 0.20 140) 0%, oklch(0.65 0.15 150) 100%)">
+            <i class="icon-shopping"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Avg Order Value</div>
+            <div class="stat-value">BDT {{ formatCurrency(statistics.avgOrderValue) }}</div>
+            <div class="stat-change positive">+8.3% increase</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Avg Order Value</div>
-          <div class="stat-value">BDT {{ formatCurrency(statistics.avgOrderValue) }}</div>
-          <div class="stat-change positive">+8.3% increase</div>
-        </div>
-      </div>
 
-      <div class="stat-card">
-        <div class="stat-icon"
-          style="background: linear-gradient(135deg, oklch(0.70 0.25 40) 0%, oklch(0.60 0.20 50) 100%)">
-          <i class="icon-repeat"></i>
+        <div class="stat-card">
+          <div class="stat-icon"
+            style="background: linear-gradient(135deg, oklch(0.70 0.25 40) 0%, oklch(0.60 0.20 50) 100%)">
+            <i class="icon-repeat"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Repeat Customers</div>
+            <div class="stat-value">{{ statistics.repeatCustomers }}%</div>
+            <div class="stat-change positive">+5.2% retention</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">Repeat Customers</div>
-          <div class="stat-value">{{ statistics.repeatCustomers }}%</div>
-          <div class="stat-change positive">+5.2% retention</div>
-        </div>
-      </div>
+      </template>
     </div>
 
     <!-- Filters Section -->
@@ -127,8 +132,9 @@
 
     <!-- Customer Table -->
     <div class="table-container">
-      <a-table :columns="columns" :data-source="customers" :loading="loading" :pagination="pagination"
-        :row-selection="rowSelection" @change="handleTableChange" rowKey="id">
+      <TableSkeleton v-if="loading" :columns="6" :rows="8" />
+      <a-table v-else :columns="columns" :data-source="customers" :pagination="pagination" :row-selection="rowSelection"
+        @change="handleTableChange" rowKey="id">
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'customer'">
             <div class="customer-info">
@@ -295,6 +301,8 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue'
+import TableSkeleton from '@/modules/shared/components/skeletons/TableSkeleton.vue'
+import StatCardSkeleton from '@/modules/shared/components/skeletons/StatCardSkeleton.vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { customerService, type Customer, type CustomerQueryParams } from '@/modules/customers/services/customer.service'
