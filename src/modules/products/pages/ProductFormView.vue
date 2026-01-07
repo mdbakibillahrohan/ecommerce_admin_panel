@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, reactive } from 'vue'
+import CommonPageHeader from '@/modules/shared/components/ui/CommonPageHeader.vue'
 import FormSkeleton from '@/modules/shared/components/skeletons/FormSkeleton.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { productsApi, type CreateProductDto } from '@/modules/products/api/products'
 import { categoriesApi, type Category } from '@/modules/categories/api/categories'
 import {
   SaveOutlined,
-  ArrowLeftOutlined,
   PlusOutlined,
   DeleteOutlined,
   EyeOutlined,
@@ -328,32 +328,25 @@ const savingsPercentage = computed(() => {
 
 <template>
   <div class="product-form-page">
-    <!-- Sticky Header -->
-    <div class="product-header">
-      <div class="header-content">
-        <div class="header-left">
-          <a-button type="text" class="back-btn" @click="router.push('/products')">
-            <ArrowLeftOutlined />
-          </a-button>
-          <div class="header-title">
-            <h1>{{ pageTitle }}</h1>
-            <div class="header-meta">
-              <span class="progress-indicator">
-                <CheckCircleOutlined v-if="formProgress === 100" class="complete-icon" />
-                <ClockCircleOutlined v-else class="pending-icon" />
-                {{ formProgress }}% Complete
-              </span>
-              <span v-if="lastSaved" class="last-saved">
-                <SaveFilled />
-                Saved {{ new Date(lastSaved).toLocaleTimeString() }}
-              </span>
-              <span v-if="autoSaving" class="auto-saving">
-                <a-spin :spinning="true" size="small" /> Auto-saving...
-              </span>
-            </div>
-          </div>
+    <CommonPageHeader :title="pageTitle" show-back @back="router.push('/products')">
+      <template #subtitle>
+        <div class="header-meta">
+          <span class="progress-indicator">
+            <CheckCircleOutlined v-if="formProgress === 100" class="complete-icon" />
+            <ClockCircleOutlined v-else class="pending-icon" />
+            {{ formProgress }}% Complete
+          </span>
+          <span v-if="lastSaved" class="last-saved">
+            <SaveFilled />
+            Saved {{ new Date(lastSaved).toLocaleTimeString() }}
+          </span>
+          <span v-if="autoSaving" class="auto-saving">
+            <a-spin :spinning="true" size="small" /> Auto-saving...
+          </span>
         </div>
-        <div class="header-actions">
+      </template>
+      <template #actions>
+        <a-space>
           <a-button @click="saveDraft" :loading="autoSaving">
             <SaveOutlined />
             Save Draft
@@ -369,13 +362,13 @@ const savingsPercentage = computed(() => {
             <ThunderboltOutlined />
             {{ formState.is_published ? 'Update & Publish' : 'Publish Now' }}
           </a-button>
-        </div>
-      </div>
+        </a-space>
+      </template>
+    </CommonPageHeader>
 
-      <!-- Progress Bar -->
-      <div class="progress-bar">
-        <div class="progress-fill" :style="{ width: `${formProgress}%` }"></div>
-      </div>
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+      <div class="progress-fill" :style="{ width: `${formProgress}%` }"></div>
     </div>
 
     <FormSkeleton v-if="loading" :field-count="8" :show-extra-section="true" />

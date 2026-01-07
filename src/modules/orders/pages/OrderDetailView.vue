@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import CommonPageHeader from '@/modules/shared/components/ui/CommonPageHeader.vue'
 import DetailViewSkeleton from '@/modules/shared/components/skeletons/DetailViewSkeleton.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ordersApi, type Order, type OrderStatus } from '@/modules/orders/api/orders'
 import {
-  ArrowLeftOutlined,
   CarOutlined,
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
@@ -139,34 +139,24 @@ const itemColumns = [
   <div class="order-detail">
     <DetailViewSkeleton v-if="loading" />
     <template v-else>
-      <!-- Page Header -->
-      <div class="page-header">
-        <div class="header-left">
-          <a-button type="text" @click="router.push('/orders')">
-            <template #icon>
-              <ArrowLeftOutlined />
-            </template>
-          </a-button>
-          <div>
-            <h1>Order {{ order?.order_number }}</h1>
-            <p>{{ order ? dayjs(order.created_at).format('MMMM D, YYYY [at] h:mm A') : '' }}</p>
-          </div>
-        </div>
-        <div class="header-right" v-if="order">
+      <CommonPageHeader :title="`Order ${order?.order_number}`"
+        :subtitle="order ? dayjs(order.created_at).format('MMMM D, YYYY [at] h:mm A') : ''" show-back
+        @back="router.push('/orders')">
+        <template #actions v-if="order">
           <a-space>
             <a-tag :color="getStatusColor(order.status)" size="large">
               {{ order.status }}
             </a-tag>
             <a-button @click="openStatusModal">Update Status</a-button>
-            <a-button @click="openTrackingModal">
+            <a-button type="primary" @click="openTrackingModal">
               <template #icon>
                 <CarOutlined />
               </template>
               Tracking
             </a-button>
           </a-space>
-        </div>
-      </div>
+        </template>
+      </CommonPageHeader>
 
       <template v-if="order">
         <a-row :gutter="24">

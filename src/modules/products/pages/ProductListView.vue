@@ -21,9 +21,10 @@ import {
 } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
 import dayjs from 'dayjs'
-import StatCardSkeleton from '@/modules/shared/components/skeletons/StatCardSkeleton.vue'
-import TableSkeleton from '@/modules/shared/components/skeletons/TableSkeleton.vue'
-import CardGridSkeleton from '@/modules/shared/components/skeletons/CardGridSkeleton.vue'
+import CommonPageHeader from '@/modules/shared/components/ui/CommonPageHeader.vue'
+import CommonTable from '@/modules/shared/components/ui/CommonTable.vue'
+import CommonStatsGrid from '@/modules/shared/components/ui/CommonStatsGrid.vue'
+import CommonCardGrid from '@/modules/shared/components/ui/CommonCardGrid.vue'
 
 const router = useRouter()
 const dayjsInstance = dayjs // Assign dayjs to a constant to use it at the top level
@@ -59,6 +60,34 @@ const statistics = computed(() => {
     totalValue,
   }
 })
+
+const statsData = computed(() => [
+  {
+    label: 'Total Products',
+    value: total.value,
+    icon: ShoppingOutlined,
+    iconStyle: { background: 'linear-gradient(135deg, oklch(0.7 0.15 210) 0%, oklch(0.65 0.18 220) 100%)' }
+  },
+  {
+    label: 'Published',
+    value: statistics.value.published,
+    icon: TagOutlined,
+    iconStyle: { background: 'linear-gradient(135deg, oklch(0.75 0.15 140) 0%, oklch(0.7 0.18 150) 100%)' }
+  },
+  {
+    label: 'Low Stock',
+    value: statistics.value.lowStock,
+    icon: InboxOutlined,
+    iconStyle: { background: 'linear-gradient(135deg, oklch(0.75 0.15 60) 0%, oklch(0.7 0.17 45) 100%)' },
+    type: 'warning'
+  },
+  {
+    label: 'Inventory Value',
+    value: formatCurrency(statistics.value.totalValue),
+    icon: DollarOutlined,
+    iconStyle: { background: 'linear-gradient(135deg, oklch(0.7 0.19 330) 0%, oklch(0.65 0.2 345) 100%)' }
+  }
+])
 
 onMounted(async () => {
   await Promise.all([fetchProducts(), fetchCategories()])
@@ -306,75 +335,18 @@ const rowSelection = computed(() => ({
 
 <template>
   <div class="product-list-page">
-    <!-- Page Header -->
-    <div class="page-header">
-      <div class="header-content">
-        <div class="header-left">
-          <h1 class="page-title">Products</h1>
-          <p class="page-subtitle">Manage your product catalog and inventory</p>
-        </div>
-        <div class="header-right">
-          <a-button type="primary" size="large" @click="handleCreate">
-            <template #icon>
-              <PlusOutlined />
-            </template>
-            Add Product
-          </a-button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="statistics-grid">
-      <template v-if="loading">
-        <StatCardSkeleton v-for="i in 4" :key="i" />
+    <CommonPageHeader title="Products" subtitle="Manage your product catalog and inventory">
+      <template #actions>
+        <a-button type="primary" size="large" @click="handleCreate">
+          <template #icon>
+            <PlusOutlined />
+          </template>
+          Add Product
+        </a-button>
       </template>
-      <template v-else>
-        <div class="stat-card">
-          <div class="stat-icon"
-            style="background: linear-gradient(135deg, oklch(0.7 0.15 195) 0%, oklch(0.65 0.18 210) 100%);">
-            <ShoppingOutlined />
-          </div>
-          <div class="stat-content">
-            <div class="stat-label">Total Products</div>
-            <div class="stat-value">{{ statistics.total }}</div>
-          </div>
-        </div>
+    </CommonPageHeader>
 
-        <div class="stat-card">
-          <div class="stat-icon"
-            style="background: linear-gradient(135deg, oklch(0.75 0.17 145) 0%, oklch(0.7 0.15 160) 100%);">
-            <TagOutlined />
-          </div>
-          <div class="stat-content">
-            <div class="stat-label">Published</div>
-            <div class="stat-value">{{ statistics.published }}</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon"
-            style="background: linear-gradient(135deg, oklch(0.75 0.15 60) 0%, oklch(0.7 0.17 45) 100%);">
-            <InboxOutlined />
-          </div>
-          <div class="stat-content">
-            <div class="stat-label">Low Stock</div>
-            <div class="stat-value">{{ statistics.lowStock }}</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon"
-            style="background: linear-gradient(135deg, oklch(0.7 0.19 330) 0%, oklch(0.65 0.2 345) 100%);">
-            <DollarOutlined />
-          </div>
-          <div class="stat-content">
-            <div class="stat-label">Inventory Value</div>
-            <div class="stat-value">{{ formatCurrency(statistics.totalValue) }}</div>
-          </div>
-        </div>
-      </template>
-    </div>
+    <CommonStatsGrid :stats="statsData" :loading="loading" />
 
     <!-- Filters & Actions Card -->
     <div class="filter-card">
@@ -457,12 +429,11 @@ const rowSelection = computed(() => ({
       </div>
     </div>
 
-    <!-- Products Table -->
+    <!-- Products Content -->
     <template v-if="viewMode === 'list'">
-      <TableSkeleton v-if="loading" :rows="pageSize" :columns="7" />
-      <div v-else class="table-card">
-        <a-table :columns="columns" :data-source="products" :loading="loading" :pagination="pagination"
-          :row-selection="rowSelection" row-key="id" :scroll="{ x: 1200 }" @change="handleTableChange">
+      <div class="table-container">
+        <CommonTable :columns="columns" :data-source="products" :loading="loading" row-key="id"
+          :row-selection="rowSelection" :pagination="pagination" :scroll="{ x: 1200 }" @change="handleTableChange">
           <template #bodyCell="{ column, record }">
             <!-- Product -->
             <template v-if="column.key === 'product'">
@@ -553,16 +524,15 @@ const rowSelection = computed(() => ({
               </a-space>
             </template>
           </template>
-        </a-table>
+        </CommonTable>
       </div>
     </template>
 
     <!-- Products Grid -->
     <template v-else>
-      <CardGridSkeleton v-if="loading" :count="pageSize" />
-      <div v-else class="products-grid">
-        <div class="grid-container">
-          <div v-for="product in products" :key="product.id" class="product-card">
+      <CommonCardGrid :data-source="products" :loading="loading" :skeleton-count="pageSize">
+        <template #item="{ item: product }">
+          <div class="product-card">
             <div class="product-image-container">
               <img v-if="product.thumbnail?.url" :src="product.thumbnail.url" :alt="product.name"
                 class="product-image" />
@@ -618,12 +588,12 @@ const rowSelection = computed(() => ({
               </div>
             </div>
           </div>
-        </div>
+        </template>
+      </CommonCardGrid>
 
-        <div class="grid-pagination">
-          <a-pagination v-model:current="currentPage" v-model:page-size="pageSize" :total="total" show-size-changer
-            show-quick-jumper :show-total="(total: number) => `Total ${total} products`" @change="handleSearch" />
-        </div>
+      <div class="grid-pagination">
+        <a-pagination v-model:current="currentPage" v-model:page-size="pageSize" :total="total" show-size-changer
+          show-quick-jumper :show-total="(total: number) => `Total ${total} products`" @change="handleSearch" />
       </div>
     </template>
   </div>

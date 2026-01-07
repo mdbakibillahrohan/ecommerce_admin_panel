@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import TableSkeleton from '@/modules/shared/components/skeletons/TableSkeleton.vue'
-import StatCardSkeleton from '@/modules/shared/components/skeletons/StatCardSkeleton.vue'
+import CommonPageHeader from '@/modules/shared/components/ui/CommonPageHeader.vue'
+import CommonTable from '@/modules/shared/components/ui/CommonTable.vue'
+import CommonStatsGrid from '@/modules/shared/components/ui/CommonStatsGrid.vue'
 import { ordersApi, type Order, type OrderQuery, type OrderStatus } from '@/modules/orders/api/orders'
 import {
   SearchOutlined,
@@ -36,13 +37,41 @@ const statusModalVisible = ref(false)
 const selectedOrder = ref<Order | null>(null)
 const newStatus = ref<OrderStatus>()
 
-// Statistics
 const statistics = ref({
   totalOrders: 0,
   totalRevenue: 0,
   pendingOrders: 0,
   completedOrders: 0,
 })
+
+const statsData = computed(() => [
+  {
+    label: 'Total Orders',
+    value: statistics.value.totalOrders,
+    icon: ShoppingCartOutlined,
+    iconStyle: { background: 'linear-gradient(135deg, oklch(0.7 0.15 210) 0%, oklch(0.65 0.18 220) 100%)' }
+  },
+  {
+    label: 'Total Revenue',
+    value: formatCurrency(statistics.value.totalRevenue),
+    icon: DollarOutlined,
+    iconStyle: { background: 'linear-gradient(135deg, oklch(0.7 0.19 330) 0%, oklch(0.65 0.2 345) 100%)' }
+  },
+  {
+    label: 'Pending Orders',
+    value: statistics.value.pendingOrders,
+    icon: ClockCircleOutlined,
+    iconStyle: { background: 'linear-gradient(135deg, oklch(0.75 0.15 35) 0%, oklch(0.7 0.18 25) 100%)' },
+    type: 'warning'
+  },
+  {
+    label: 'Delivered',
+    value: statistics.value.completedOrders,
+    icon: CheckCircleOutlined,
+    iconStyle: { background: 'linear-gradient(135deg, oklch(0.75 0.15 140) 0%, oklch(0.7 0.18 150) 100%)' },
+    type: 'success'
+  }
+])
 
 // Filters
 const searchText = ref('')
@@ -270,91 +299,40 @@ const hasSelectedRows = computed(() => selectedRowKeys.value.length > 0)
 
 <template>
   <div class="order-list-container">
-    <!-- Page Header -->
-    <div class="page-header">
-      <div class="header-content">
-        <div class="header-left">
-          <h1 class="page-title">Orders Management</h1>
-          <p class="page-subtitle">Track and manage all customer orders</p>
-        </div>
-        <div class="header-actions">
-          <a-button @click="handlePrint" class="action-btn">
+    <CommonPageHeader title="Orders" subtitle="Manage and track customer orders">
+      <template #actions>
+        <a-button @click="handlePrint" class="action-btn">
+          <template #icon>
+            <PrinterOutlined />
+          </template>
+          Print
+        </a-button>
+        <a-dropdown>
+          <a-button class="action-btn">
             <template #icon>
-              <PrinterOutlined />
+              <DownloadOutlined />
             </template>
-            Print
+            Export
           </a-button>
-          <a-dropdown>
-            <a-button class="action-btn">
-              <template #icon>
-                <DownloadOutlined />
-              </template>
-              Export
-            </a-button>
-            <template #overlay>
-              <a-menu>
-                <a-menu-item @click="handleExport('csv')">Export as CSV</a-menu-item>
-                <a-menu-item @click="handleExport('pdf')">Export as PDF</a-menu-item>
-              </a-menu>
-            </template>
-          </a-dropdown>
-          <a-button type="primary" @click="fetchOrders" :loading="loading" class="refresh-btn">
-            <template #icon>
-              <ReloadOutlined />
-            </template>
-            Refresh
-          </a-button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="statistics-grid">
-      <template v-if="loading">
-        <StatCardSkeleton v-for="i in 4" :key="i" />
+          <template #overlay>
+            <a-menu>
+              <a-menu-item @click="handleExport('csv')">Export as CSV</a-menu-item>
+              <a-menu-item @click="handleExport('pdf')">Export as PDF</a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
+        <a-button type="primary" @click="fetchOrders" :loading="loading" class="refresh-btn">
+          <template #icon>
+            <ReloadOutlined />
+          </template>
+          Refresh
+        </a-button>
       </template>
-      <template v-else>
-        <div class="stat-card stat-total">
-          <div class="stat-icon">
-            <ShoppingCartOutlined />
-          </div>
-          <div class="stat-content">
-            <p class="stat-label">Total Orders</p>
-            <h3 class="stat-value">{{ statistics.totalOrders }}</h3>
-          </div>
-        </div>
+    </CommonPageHeader>
 
-        <div class="stat-card stat-revenue">
-          <div class="stat-icon">
-            <DollarOutlined />
-          </div>
-          <div class="stat-content">
-            <p class="stat-label">Total Revenue</p>
-            <h3 class="stat-value">{{ formatCurrency(statistics.totalRevenue) }}</h3>
-          </div>
-        </div>
+    <CommonStatsGrid :stats="statsData" :loading="loading" />
 
-        <div class="stat-card stat-pending">
-          <div class="stat-icon">
-            <ClockCircleOutlined />
-          </div>
-          <div class="stat-content">
-            <p class="stat-label">Pending Orders</p>
-            <h3 class="stat-value">{{ statistics.pendingOrders }}</h3>
-          </div>
-        </div>
 
-        <div class="stat-card stat-delivered">
-          <div class="stat-icon">
-            <CheckCircleOutlined />
-          </div>
-          <div class="stat-content">
-            <p class="stat-label">Delivered</p>
-            <h3 class="stat-value">{{ statistics.completedOrders }}</h3>
-          </div>
-        </div>
-      </template>
-    </div>
 
     <!-- Filters Section -->
     <a-card :bordered="false" class="filter-card">
@@ -421,10 +399,9 @@ const hasSelectedRows = computed(() => selectedRowKeys.value.length > 0)
     </a-card>
 
     <!-- Orders Table -->
-    <a-card :bordered="false" class="table-card">
-      <TableSkeleton v-if="loading" :columns="7" :rows="10" />
-      <a-table v-else :columns="columns" :data-source="orders" :pagination="pagination" :row-selection="rowSelection"
-        row-key="id" :scroll="{ x: 1100 }" @change="handleTableChange" class="orders-table">
+    <div class="table-container">
+      <CommonTable :columns="columns" :data-source="orders" :loading="loading" :pagination="pagination"
+        :row-selection="rowSelection" row-key="id" :scroll="{ x: 1100 }" @change="handleTableChange">
         <template #bodyCell="{ column, record }">
           <!-- Order Number -->
           <template v-if="column.key === 'order_number'">
@@ -501,8 +478,8 @@ const hasSelectedRows = computed(() => selectedRowKeys.value.length > 0)
             </div>
           </template>
         </template>
-      </a-table>
-    </a-card>
+      </CommonTable>
+    </div>
 
     <!-- Order Details Drawer -->
     <a-drawer v-model:open="orderDetailVisible" title="Order Details" width="600" :body-style="{ padding: 0 }"
@@ -533,7 +510,8 @@ const hasSelectedRows = computed(() => selectedRowKeys.value.length > 0)
           <h3 class="section-title">Customer Information</h3>
           <div class="detail-row">
             <span class="detail-label">Name:</span>
-            <span class="detail-value">{{ selectedOrder.user?.first_name }} {{ selectedOrder.user?.last_name }}</span>
+            <span class="detail-value">{{ selectedOrder.user?.first_name }} {{ selectedOrder.user?.last_name
+            }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Email:</span>
