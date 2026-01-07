@@ -1,20 +1,9 @@
 import api from '@/modules/shared/config/http.config'
 
-export interface StaffMember {
-  id: number
-  email?: string
-  user?: {
-    id: number
-    first_name: string
-    last_name: string
-    email: string
-  }
-  role: string // OWNER, ADMIN, MEMBER
-  status: string // ACTIVE, INVITED, PENDING
-  invited_at?: string
-  joined_at?: string
-  created_at?: string
-}
+// Import and re-export all interfaces
+export type { StaffMember, InviteStaffDto, UpdateStaffRoleDto } from '../interfaces'
+
+import type { StaffMember } from '../interfaces'
 
 export const staffService = {
   async getStaffMembers() {

@@ -1,26 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from '@/modules/shared/config/http.config'
 
-export interface MediaFile {
-  id: number
-  original_name: string
-  filename: string
-  mime_type: string
-  size: number
-  file_path: string
-  folder_id?: number
-  created_at: string
-}
+// Import and re-export all interfaces
+export type { MediaFile, MediaFolder, MediaQueryParams } from '../interfaces'
 
-export interface MediaFolder {
-  id: number
-  name: string
-  parent_id?: number
-  files_count?: number
-}
+import type { MediaFile, MediaFolder, MediaQueryParams } from '../interfaces'
 
 export const mediaService = {
-  async getFiles(params?: any) {
+  async getFiles(params?: MediaQueryParams) {
     const response = await api.get('/media', { params })
     return response.data
   },

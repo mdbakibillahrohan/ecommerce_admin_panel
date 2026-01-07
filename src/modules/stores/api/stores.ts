@@ -1,69 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import api from '@/modules/shared/config/http.config'
 
-export interface Store {
-  id: number
-  name: string
-  slug: string
-  description?: string
-  store_category_id: number
-  store_category?: any
-  status: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'INACTIVE'
-  email?: string
-  phone?: string
-  address?: string
-  currency?: string
-  timezone?: string
-  owner_id: number
-  logo_id: number
-  favicon_id: number
-  logo: any
-  favicon: any
-  custom_domain?: string
-  tagline?: string
-  created_at: string
-  updated_at: string
-}
+// Import and re-export all interfaces
+export type {
+  Store,
+  CreateStoreDto,
+  UpdateStoreDto,
+  StoreMember,
+  AddStoreMemberDto,
+} from '../interfaces'
 
-export interface CreateStoreDto {
-  name: string
-  slug: string
-  store_category_id: number
-  description?: string
-  email?: string
-  phone?: string
-  address?: string
-  currency?: string
-  timezone?: string
-  custom_domain?: string
-  logo_id: number | undefined | null
-  favicon_id: number | undefined | null
-  tagline?: string
-}
-
-export interface UpdateStoreDto extends Partial<CreateStoreDto> {
-  status?: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'INACTIVE'
-}
-
-export interface StoreMember {
-  id: number
-  user_id: number
-  store_id: number
-  role: string
-  user: {
-    id: number
-    first_name: string
-    last_name: string
-    email: string
-    avatar?: string
-  }
-}
-
-export interface AddStoreMemberDto {
-  email: string
-  role: string
-}
+import type {
+  Store,
+  CreateStoreDto,
+  UpdateStoreDto,
+  StoreMember,
+  AddStoreMemberDto,
+} from '../interfaces'
 
 export const storesApi = {
   // Get all stores for current user

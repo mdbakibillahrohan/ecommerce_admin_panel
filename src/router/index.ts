@@ -31,13 +31,7 @@ const router = createRouter({
       children: [
         {
           path: '',
-          name: 'home',
-          component: () => import('@/modules/shared/pages/HomeView.vue'),
-        },
-        {
-          path: '/about',
-          name: 'about',
-          component: () => import('@/modules/shared/pages/AboutView.vue'),
+          redirect: '/dashboard',
         },
         ...dashboardRoutes,
         ...productRoutes,

@@ -1,45 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from '@/modules/shared/config/http.config'
 
-export interface StoreSettings {
-  store_name: string
-  contact_email: string
-  currency: string
-  timezone: string
-  logo_url?: string
-}
+// Import and re-export all interfaces
+export type {
+  StoreSettings,
+  PaymentGateway,
+  PaymentGatewayConfig,
+  ShippingZone,
+  ShippingRate,
+  TaxRate,
+} from '../interfaces'
 
-export interface PaymentGateway {
-  id: number
-  provider: string // STRIPE, PAYPAL, RAZORPAY
-  is_enabled: boolean
-  config: any
-}
-
-export interface ShippingZone {
-  id: number
-  name: string
-  countries: string[]
-  rates: ShippingRate[]
-}
-
-export interface ShippingRate {
-  id: number
-  name: string
-  type: string // FLAT, WEIGHT, PRICE
-  amount: number
-  min_value?: number
-  max_value?: number
-}
-
-export interface TaxRate {
-  id: number
-  name: string
-  country: string
-  state?: string
-  rate: number
-  is_compound: boolean
-}
+import type { StoreSettings, PaymentGatewayConfig } from '../interfaces'
 
 export const settingsService = {
   // General
@@ -59,7 +30,7 @@ export const settingsService = {
     return response.data
   },
 
-  async updatePaymentGateway(id: number, data: any) {
+  async updatePaymentGateway(id: number, data: PaymentGatewayConfig) {
     const response = await api.patch(`/settings/payments/${id}`, data)
     return response.data
   },

@@ -1,22 +1,22 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from '@/modules/shared/config/http.config'
 
-export interface Promotion {
-  id: number
-  name: string
-  code: string
-  type: string
-  discount_type: string
-  discount_value: number
-  start_date: string
-  end_date: string
-  is_active: boolean
-  usage_limit?: number
-  used_count: number
-}
+// Import and re-export all interfaces
+export type {
+  Promotion,
+  CreatePromotionDto,
+  UpdatePromotionDto,
+  PromotionQueryParams,
+} from '../interfaces'
+
+import type {
+  Promotion,
+  CreatePromotionDto,
+  UpdatePromotionDto,
+  PromotionQueryParams,
+} from '../interfaces'
 
 export const promotionService = {
-  async getPromotions(params?: any) {
+  async getPromotions(params?: PromotionQueryParams) {
     const response = await api.get('/promotions', { params })
     return response.data
   },
@@ -26,12 +26,12 @@ export const promotionService = {
     return response.data
   },
 
-  async createPromotion(data: any) {
+  async createPromotion(data: CreatePromotionDto) {
     const response = await api.post('/promotions', data)
     return response.data
   },
 
-  async updatePromotion(id: number, data: any) {
+  async updatePromotion(id: number, data: UpdatePromotionDto) {
     const response = await api.patch(`/promotions/${id}`, data)
     return response.data
   },

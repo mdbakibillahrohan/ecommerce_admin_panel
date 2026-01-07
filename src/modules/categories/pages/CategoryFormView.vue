@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -142,7 +143,7 @@ const availableParents = computed(() => {
           <div class="header-content">
             <h1>{{ isEdit ? 'Edit Category' : 'Create Category' }}</h1>
             <p>{{ isEdit ? 'Update category information and settings' : 'Add a new category to organize your products'
-              }}</p>
+            }}</p>
           </div>
         </div>
         <div class="header-right">

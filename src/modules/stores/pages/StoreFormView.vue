@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -72,8 +73,8 @@ async function fetchStore(id: number) {
   loading.value = true
   try {
     const store = await storesApi.getById(id)
-    logo.value = store.logo
-    favicon.value = store.favicon
+    logo.value = { id: store.logo.id, original_name: store.logo.filename, filename: store.logo.filename, mime_type: "", size: 0, file_path: store.logo.url, folder_id: 0, created_at: "" }
+    favicon.value = { id: store.favicon.id, original_name: store.favicon.filename, filename: store.favicon.filename, mime_type: "", size: 0, file_path: store.favicon.url, folder_id: 0, created_at: "" }
     formState.value = {
       name: store.name,
       slug: store.slug,
