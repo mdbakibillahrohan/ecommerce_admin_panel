@@ -50,10 +50,19 @@ export interface ShippingRate {
   max_value?: number
 }
 
+export interface TaxZone {
+  id: number
+  name: string
+  countries: string[]
+  states?: string[]
+  is_default?: boolean
+  rates: TaxRate[]
+}
+
 export interface TaxRate {
   id: number
   name: string
-  country: string
+  country?: string
   state?: string
   rate: number
   is_compound: boolean

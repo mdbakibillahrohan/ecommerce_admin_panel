@@ -194,7 +194,8 @@ const menuGroups: MenuGroup[] = [
           { key: 'shipping', label: 'Shipping', path: '/settings/shipping' },
           { key: 'tax', label: 'Tax', path: '/settings/tax' },
           { key: 'payments-settings', label: 'Payment Methods', path: '/settings/payments' },
-          { key: 'checkout-settings', label: 'Checkout Settings', path: '/settings/checkout' },
+          { key: 'checkout-settings', label: 'Checkout', path: '/settings/checkout' },
+          { key: 'access-control', label: 'Access Control', path: '/settings/access-control/policies' },
         ]
       }
     ],

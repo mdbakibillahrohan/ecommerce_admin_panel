@@ -19,6 +19,7 @@ import { themeRoutes } from '@/modules/themes/router'
 import { billingRoutes } from '@/modules/billing/router'
 import { paymentRoutes } from '@/modules/payments/router'
 import { settingRoutes } from '@/modules/settings/router'
+import { accessControlRoutes } from '@/modules/access-control/router'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -50,6 +51,7 @@ const router = createRouter({
         ...billingRoutes,
         ...paymentRoutes,
         ...settingRoutes,
+        ...accessControlRoutes,
       ],
     },
     {
@@ -74,3 +76,4 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
+
