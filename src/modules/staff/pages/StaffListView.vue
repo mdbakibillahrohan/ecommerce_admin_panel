@@ -409,7 +409,7 @@ const handleInvite = async () => {
   }
   inviting.value = true
   try {
-    await staffService.inviteStaff(inviteForm.email, inviteForm.role)
+    await staffService.inviteStaff({ email: inviteForm.email, role: inviteForm.role })
     message.success(`Invitation sent to ${inviteForm.email}`)
     inviteModalVisible.value = false
     fetchStaff()
