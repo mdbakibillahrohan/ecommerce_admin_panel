@@ -20,11 +20,60 @@ export type {
   AddStoreMemberDto,
 } from '../interfaces'
 
+// Extended store interface with activation info
+export interface StoreWithRole extends Store {
+  role: string
+  isActive: boolean
+}
+
+export interface MyStoresResponse {
+  stores: StoreWithRole[]
+  activeStoreIds: number[]
+}
+
 /**
  * Store Service - Handles all store-related operations
  */
 class StoreService {
   private readonly basePath = '/stores'
+
+  // ============ Store Activation ============
+
+  /**
+   * Get all stores user owns or is member of
+   */
+  async getMyStores(): Promise<MyStoresResponse> {
+    const response = await api.get<MyStoresResponse>(`${this.basePath}/my-stores`)
+    return response.data
+  }
+
+  /**
+   * Get user's currently active stores
+   */
+  async getActiveStores(): Promise<Store[]> {
+    const response = await api.get<Store[]>(`${this.basePath}/active`)
+    return response.data
+  }
+
+  /**
+   * Activate a store (add to active stores list)
+   */
+  async activateStore(storeId: number): Promise<number[]> {
+    const response = await api.post<number[]>(`${this.basePath}/${storeId}/activate`)
+    // Also update localStorage for quick access
+    this.setActiveStoreId(storeId)
+    return response.data
+  }
+
+  /**
+   * Deactivate a store (remove from active stores list)
+   */
+  async deactivateStore(storeId: number): Promise<number[]> {
+    const response = await api.post<number[]>(`${this.basePath}/${storeId}/deactivate`)
+    return response.data
+  }
+
+  // ============ Store CRUD ============
 
   /**
    * Get all stores for current user
@@ -65,6 +114,8 @@ class StoreService {
     await api.delete(`${this.basePath}/${id}`)
   }
 
+  // ============ Store Members ============
+
   /**
    * Get store members
    */
@@ -99,19 +150,29 @@ class StoreService {
     return response.data
   }
 
+  // ============ Local Storage Helpers ============
+
   /**
-   * Set active store for current user
+   * Set primary active store in localStorage
    */
-  async setActive(storeId: number): Promise<void> {
+  setActiveStoreId(storeId: number): void {
     localStorage.setItem('active_store_id', storeId.toString())
   }
 
   /**
-   * Get current active store ID
+   * Get current active store ID from localStorage
    */
   getActiveStoreId(): number | null {
     const id = localStorage.getItem('active_store_id')
     return id ? parseInt(id, 10) : null
+  }
+
+  /**
+   * Get store categories
+   */
+  async getCategories(): Promise<{ id: number; name: string }[]> {
+    const response = await api.get<{ id: number; name: string }[]>(`${this.basePath}/categories`)
+    return response.data
   }
 }
 
@@ -119,3 +180,4 @@ class StoreService {
 export const storeService = new StoreService()
 
 export default storeService
+
