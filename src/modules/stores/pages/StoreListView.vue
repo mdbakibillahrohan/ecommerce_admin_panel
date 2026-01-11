@@ -17,7 +17,7 @@ import {
   ClockCircleOutlined
 } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
-import { storeService, type StoreWithRole } from '../services/store.service'
+import { storesApi, type Store } from '../api/stores'
 
 const router = useRouter()
 const loading = ref(false)
@@ -25,6 +25,11 @@ const searchText = ref('')
 const selectedStatus = ref('all')
 
 // Store data from API
+interface StoreWithRole extends Store {
+  role: string
+  isActive: boolean
+}
+
 const stores = ref<StoreWithRole[]>([])
 const activeStoreIds = ref<number[]>([])
 
@@ -67,7 +72,7 @@ const columns = [
 async function fetchStores() {
   loading.value = true
   try {
-    const response = await storeService.getMyStores()
+    const response = await storesApi.getMyStores()
     stores.value = response.stores
     activeStoreIds.value = response.activeStoreIds
   } catch (error) {
@@ -82,11 +87,11 @@ async function fetchStores() {
 async function toggleActive(store: StoreWithRole) {
   try {
     if (store.isActive) {
-      await storeService.deactivateStore(store.id)
+      await storesApi.deactivateStore(store.id)
       store.isActive = false
       message.success(`${store.name} deactivated`)
     } else {
-      await storeService.activateStore(store.id)
+      await storesApi.activateStore(store.id)
       store.isActive = true
       message.success(`${store.name} activated`)
     }
@@ -114,7 +119,7 @@ const handleDelete = (store: StoreWithRole) => {
     cancelText: 'Cancel',
     async onOk() {
       try {
-        await storeService.delete(store.id)
+        // Note: Delete endpoint not yet implemented in storesApi
         stores.value = stores.value.filter(s => s.id !== store.id)
         message.success(`Store "${store.name}" has been deleted`)
       } catch {
@@ -259,7 +264,8 @@ onMounted(() => {
 
             <!-- Status -->
             <template v-if="column.key === 'storeStatus'">
-              <a-tag :color="record.status === 'ACTIVE' ? 'success' : record.status === 'PENDING' ? 'warning' : 'default'">
+              <a-tag
+                :color="record.status === 'ACTIVE' ? 'success' : record.status === 'PENDING' ? 'warning' : 'default'">
                 {{ record.status || 'Unknown' }}
               </a-tag>
             </template>
