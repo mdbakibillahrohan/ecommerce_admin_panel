@@ -37,4 +37,29 @@ export const mediaService = {
   async deleteFolder(id: number) {
     await api.delete(`/media/folders/${id}`)
   },
+
+  async bulkDelete(data: { file_ids?: number[]; folder_ids?: number[] }) {
+    await api.post('/media/bulk/delete', {
+      fileIds: data.file_ids,
+      folderIds: data.folder_ids
+    })
+  },
+
+  async bulkMove(data: { file_ids?: number[]; folder_ids?: number[]; target_folder_id?: number | null }) {
+    await api.post('/media/bulk/move', {
+      fileIds: data.file_ids,
+      folderIds: data.folder_ids,
+      targetFolderId: data.target_folder_id
+    })
+  },
+
+  async updateFile(id: number, data: { file_name?: string; alt?: string; title?: string; folder_id?: number | null }) {
+    const response = await api.patch(`/media/${id}`, data)
+    return response.data
+  },
+
+  async updateFolder(id: number, data: { name: string }) {
+    const response = await api.patch(`/media/folders/${id}`, data)
+    return response.data
+  },
 }

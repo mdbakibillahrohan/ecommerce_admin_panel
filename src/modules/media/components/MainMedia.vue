@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, h } from 'vue'
 import { message, Modal } from 'ant-design-vue'
 import { InboxOutlined, UploadOutlined, DeleteOutlined, CloseOutlined } from '@ant-design/icons-vue'
 import { mediaService, type MediaFile, type MediaFolder } from '@/modules/media/services/media.service'
@@ -49,6 +49,8 @@ const folderModalVisible = ref(false)
 // Selection State
 const selectedFileIds = ref<number[]>([])
 const selectedFolderIds = ref<number[]>([])
+const moveModalVisible = ref(false)
+const targetFolderId = ref<number | null>(null)
 
 const hasSelection = computed(() => selectedFileIds.value.length > 0 || selectedFolderIds.value.length > 0)
 const selectionCount = computed(() => selectedFileIds.value.length + selectedFolderIds.value.length)
@@ -184,6 +186,8 @@ const handleUseSelected = () => {
 }
 
 const handleBulkDelete = () => {
+  if (selectionCount.value === 0) return
+
   Modal.confirm({
     title: `Delete ${selectionCount.value} items?`,
     content: 'Are you sure you want to delete the selected items? This action cannot be undone.',
@@ -191,24 +195,80 @@ const handleBulkDelete = () => {
     okType: 'danger',
     async onOk() {
       try {
-        const promises = []
-        // Delete files
-        for (const id of selectedFileIds.value) {
-          promises.push(mediaService.deleteFile(id))
-        }
-        // Delete folders
-        for (const id of selectedFolderIds.value) {
-          promises.push(mediaService.deleteFolder(id))
-        }
-
-        await Promise.all(promises)
+        await mediaService.bulkDelete({
+          file_ids: selectedFileIds.value,
+          folder_ids: selectedFolderIds.value
+        })
         message.success(`Deleted ${selectionCount.value} items successfully`)
+        clearSelection()
         fetchMedia()
       } catch (error) {
         console.error(error)
         message.error('Failed to delete some items')
-        // Refresh anyway to show what remains
         fetchMedia()
+      }
+    }
+  })
+}
+
+const handleBulkMove = async () => {
+  if (selectionCount.value === 0) return
+  moveModalVisible.value = true
+}
+
+const executeBulkMove = async () => {
+  try {
+    await mediaService.bulkMove({
+      file_ids: selectedFileIds.value,
+      folder_ids: selectedFolderIds.value,
+      target_folder_id: targetFolderId.value
+    })
+    message.success(`Moved ${selectionCount.value} items successfully`)
+    moveModalVisible.value = false
+    clearSelection()
+    fetchMedia()
+  } catch (error) {
+    console.error(error)
+    message.error('Failed to move items')
+  }
+}
+
+const tempRenameValue = ref('')
+
+const handleRenameItem = async (type: 'file' | 'folder', item: MediaFile | MediaFolder) => {
+  const currentName = type === 'file'
+    ? (item as MediaFile).original_name
+    : (item as MediaFolder).name
+
+  tempRenameValue.value = currentName
+
+  Modal.confirm({
+    title: `Rename ${type}`,
+    content: () => h('div', [
+      h('p', `Enter new name for "${currentName}":`),
+      h('input', {
+        class: 'ant-input',
+        value: tempRenameValue.value,
+        onInput: (e: Event) => {
+          const target = e.target as HTMLInputElement
+          tempRenameValue.value = target.value
+        }
+      })
+    ]),
+    async onOk() {
+      if (!tempRenameValue.value) return
+
+      try {
+        if (type === 'file') {
+          await mediaService.updateFile(item.id, { file_name: tempRenameValue.value })
+        } else {
+          await mediaService.updateFolder(item.id, { name: tempRenameValue.value })
+        }
+        message.success('Renamed successfully')
+        fetchMedia()
+      } catch (error) {
+        console.error(error)
+        message.error('Failed to rename')
       }
     }
   })
@@ -271,11 +331,11 @@ onMounted(() => {
 
         <div v-else>
           <FolderList :folders="folders" :viewMode="viewMode" :selectedIds="selectedFolderIds"
-            @open-folder="handleOpenFolder" @toggle-selection="toggleFolderSelection" />
+            @open-folder="handleOpenFolder" @toggle-selection="toggleFolderSelection" @rename="(f: MediaFolder) => handleRenameItem('folder', f)" />
 
           <FileList :files="files" :viewMode="viewMode" :selectedIds="selectedFileIds" :isSelectMode="isSelectMode"
             @preview-file="() => { }" @delete-file="deleteSingleFile" @toggle-selection="toggleFileSelection"
-            @select-file="handleSelectFile" />
+            @select-file="handleSelectFile" @rename="(f: MediaFile) => handleRenameItem('file', f)" />
         </div>
       </a-spin>
     </div>
@@ -293,6 +353,11 @@ onMounted(() => {
               class="action-btn use-btn">
               <UploadOutlined />
               Use Selected
+            </a-button>
+
+            <a-button type="primary" size="large" @click="handleBulkMove" class="action-btn move-btn">
+              <ExportOutlined />
+              Move
             </a-button>
 
             <a-button type="primary" danger size="large" @click="handleBulkDelete" class="action-btn delete-btn">
@@ -313,6 +378,19 @@ onMounted(() => {
     <UploadModal v-model:open="uploadModalVisible" :confirmLoading="uploading" @upload="handleUploadFiles" />
 
     <CreateFolderModal v-model:open="folderModalVisible" @create="handleCreateFolder" />
+
+    <!-- Move Modal -->
+    <a-modal v-model:open="moveModalVisible" title="Move Items" @ok="executeBulkMove" okText="Move Here">
+      <div class="move-modal-content">
+        <p>Select destination folder:</p>
+        <a-select v-model:value="targetFolderId" style="width: 100%" placeholder="Select folder">
+          <a-select-option :value="null">Root</a-select-option>
+          <a-select-option v-for="folder in folders" :key="folder.id" :value="folder.id">
+            {{ folder.name }}
+          </a-select-option>
+        </a-select>
+      </div>
+    </a-modal>
   </div>
 </template>
 

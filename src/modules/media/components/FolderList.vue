@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { FolderFilled, FolderOutlined, RightOutlined } from '@ant-design/icons-vue'
+import { FolderFilled, FolderOutlined, RightOutlined, MoreOutlined, EditOutlined } from '@ant-design/icons-vue'
 import type { MediaFolder } from '@/modules/media/services/media.service'
 
 const props = defineProps<{
@@ -11,6 +11,7 @@ const props = defineProps<{
 const emits = defineEmits<{
   (e: 'open-folder', id: number): void
   (e: 'toggle-selection', id: number): void
+  (e: 'rename', folder: MediaFolder): void
 }>()
 
 // Helper to check if selected
@@ -37,6 +38,20 @@ const isSelected = (id: number) => props.selectedIds.includes(id)
         </div>
 
         <div v-if="viewMode === 'grid'" class="folder-card">
+          <div class="folder-actions" @click.stop>
+            <a-dropdown trigger="click">
+              <a-button type="text" shape="circle" size="small" class="action-menu-btn">
+                <MoreOutlined />
+              </a-button>
+              <template #overlay>
+                <a-menu class="action-menu">
+                  <a-menu-item key="rename" @click="emits('rename', folder)">
+                    <EditOutlined /> Rename
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </div>
           <div class="folder-icon-wrapper">
             <FolderFilled class="folder-icon" />
             <div class="folder-count">{{ folder.files_count || 0 }}</div>
@@ -49,6 +64,20 @@ const isSelected = (id: number) => props.selectedIds.includes(id)
             <FolderFilled class="folder-icon-small" />
             <span class="row-name">{{ folder.name }}</span>
             <span class="file-count">{{ folder.files_count || 0 }} items</span>
+          </div>
+          <div class="row-actions" @click.stop>
+            <a-dropdown trigger="click">
+              <a-button type="text" shape="circle" size="small" class="action-menu-btn">
+                <MoreOutlined />
+              </a-button>
+              <template #overlay>
+                <a-menu class="action-menu">
+                  <a-menu-item key="rename" @click="emits('rename', folder)">
+                    <EditOutlined /> Rename
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
           </div>
           <RightOutlined class="row-arrow" />
         </div>
@@ -142,6 +171,34 @@ const isSelected = (id: number) => props.selectedIds.includes(id)
   gap: 12px;
   position: relative;
   overflow: hidden;
+}
+
+.folder-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 20;
+}
+
+.folder-item.grid:hover .folder-actions {
+  opacity: 1;
+}
+
+.action-menu-btn {
+  background: var(--card);
+  backdrop-filter: blur(8px);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.action-menu {
+  background: var(--popover);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 .folder-item.grid .folder-card::before {
@@ -252,6 +309,16 @@ const isSelected = (id: number) => props.selectedIds.includes(id)
   cursor: pointer;
   position: relative;
   overflow: hidden;
+}
+
+.row-actions {
+  margin-right: 8px;
+  opacity: 0;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.folder-item.list:hover .row-actions {
+  opacity: 1;
 }
 
 .folder-item.list .folder-row::before {

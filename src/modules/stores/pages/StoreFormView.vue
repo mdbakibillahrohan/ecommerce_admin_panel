@@ -3,7 +3,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { storesApi, type CreateStoreDto } from '@/modules/stores/api/stores'
-import { SaveOutlined, ArrowLeftOutlined, ShopOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, GlobalOutlined, DollarOutlined, AppstoreOutlined, PictureOutlined } from '@ant-design/icons-vue'
+import { SaveOutlined, ArrowLeftOutlined, ShopOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, GlobalOutlined, DollarOutlined, AppstoreOutlined, PictureOutlined, SearchOutlined, TranslationOutlined, LinkOutlined, BgColorsOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import FormSkeleton from '@/modules/shared/components/skeletons/FormSkeleton.vue'
 import type { FormInstance } from 'ant-design-vue'
@@ -27,6 +27,7 @@ const mediaModalVisible = ref(false);
 const mediaUsingFor = ref('');
 const logo = ref<MediaFile | null | undefined>(null);
 const favicon = ref<MediaFile | null | undefined>(null);
+const bannerImage = ref<MediaFile | null | undefined>(null);
 
 const handleUseSelected = (files: { usingFor: string, files: MediaFile[] }) => {
   console.log(files)
@@ -36,6 +37,10 @@ const handleUseSelected = (files: { usingFor: string, files: MediaFile[] }) => {
   } else if (files.usingFor === 'favicon') {
     favicon.value = files.files[0]
     formState.value.favicon_id = files.files[0]?.id
+  } else if (files.usingFor === 'banner') {
+    bannerImage.value = files.files[0]
+    formState.value.banner_image_id = files.files[0]?.id
+    formState.value.banner_image_url = files.files[0]?.file_path
   }
   mediaModalVisible.value = false;
 }
@@ -52,7 +57,19 @@ const formState = ref<CreateStoreDto>({
   currency: 'BDT',
   timezone: 'Asia/Dhaka',
   logo_id: 0,
-  favicon_id: 0
+  favicon_id: 0,
+  // SEO
+  meta_title: '',
+  meta_description: '',
+  meta_keywords: '',
+  // Localization
+  default_language: 'en',
+  supported_languages: '',
+  // Extended Branding
+  primary_color: '#1890ff',
+  secondary_color: '#52c41a',
+  banner_image_id: null,
+  banner_image_url: ''
 })
 
 const rules = {
@@ -63,6 +80,10 @@ const rules = {
   ],
   store_category_id: [{ required: true, message: 'Category is required' }],
   email: [{ type: 'email', message: 'Please enter a valid email', trigger: 'blur' }],
+  meta_title: [{ max: 100, message: 'Meta title must be less than 100 characters', trigger: 'blur' }],
+  meta_description: [{ max: 500, message: 'Meta description must be less than 500 characters', trigger: 'blur' }],
+  meta_keywords: [{ max: 255, message: 'Meta keywords must be less than 255 characters', trigger: 'blur' }],
+  default_language: [{ required: true, message: 'Default language is required' }],
 }
 
 const openMediaLibrary = (usingFor: string) => {
@@ -74,8 +95,12 @@ async function fetchStore(id: number) {
   loading.value = true
   try {
     const store = await storesApi.getById(id)
-    logo.value = { id: store.logo.id, original_name: store.logo.filename, filename: store.logo.filename, mime_type: "", size: 0, file_path: store.logo.url, folder_id: 0, created_at: "" }
-    favicon.value = { id: store.favicon.id, original_name: store.favicon.filename, filename: store.favicon.filename, mime_type: "", size: 0, file_path: store.favicon.url, folder_id: 0, created_at: "" }
+    if (store.logo) {
+      logo.value = { id: store.logo.id, original_name: store.logo.filename, filename: store.logo.filename, mime_type: "", size: 0, file_path: store.logo.url, folder_id: 0, created_at: "" }
+    }
+    if (store.favicon) {
+      favicon.value = { id: store.favicon.id, original_name: store.favicon.filename, filename: store.favicon.filename, mime_type: "", size: 0, file_path: store.favicon.url, folder_id: 0, created_at: "" }
+    }
     formState.value = {
       name: store.name,
       slug: store.slug,
@@ -87,8 +112,24 @@ async function fetchStore(id: number) {
       address: store.address || '',
       currency: store.currency || 'BDT',
       timezone: store.timezone || 'Asia/Dhaka',
-      logo_id: 0,
-      favicon_id: 0
+      logo_id: store.logo_id || 0,
+      favicon_id: store.favicon_id || 0,
+      // SEO
+      meta_title: store.meta_title || '',
+      meta_description: store.meta_description || '',
+      meta_keywords: store.meta_keywords || '',
+      // Localization
+      default_language: store.default_language || 'en',
+      supported_languages: store.supported_languages || '',
+      // Extended Branding
+      primary_color: store.primary_color || '#1890ff',
+      secondary_color: store.secondary_color || '#52c41a',
+      banner_image_id: store.banner_image_id || null,
+      banner_image_url: store.banner_image_url || ''
+    }
+    // Set custom domain if exists
+    if (store.custom_domain) {
+      customDomain.value = store.custom_domain
     }
   } catch (error) {
     message.error('Failed to fetch store details')
@@ -420,6 +461,161 @@ onMounted(async () => {
                       <a-select-option value="Europe/London">Europe/London (GMT)</a-select-option>
                       <a-select-option value="Asia/Tokyo">Asia/Tokyo (JST)</a-select-option>
                     </a-select>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-card>
+
+            <!-- SEO Settings Section -->
+            <a-card :bordered="false" class="form-section">
+              <div class="section-header">
+                <div class="section-icon-wrapper">
+                  <SearchOutlined class="section-icon" />
+                </div>
+                <div>
+                  <h2 class="section-title">SEO Settings</h2>
+                  <p class="section-description">Optimize your store for search engines</p>
+                </div>
+              </div>
+
+              <a-row :gutter="[16, 0]">
+                <a-col :span="24">
+                  <a-form-item label="Meta Title" name="meta_title">
+                    <a-input v-model:value="formState.meta_title" size="large" placeholder="Store title for search engines" :maxlength="100" show-count />
+                    <div class="field-hint">Recommended: 50-60 characters for optimal display in search results</div>
+                  </a-form-item>
+                </a-col>
+
+                <a-col :span="24">
+                  <a-form-item label="Meta Description" name="meta_description">
+                    <a-textarea v-model:value="formState.meta_description" :rows="3" placeholder="Brief description of your store for search engine results" :maxlength="500" show-count />
+                    <div class="field-hint">Recommended: 150-160 characters for optimal display</div>
+                  </a-form-item>
+                </a-col>
+
+                <a-col :span="24">
+                  <a-form-item label="Meta Keywords" name="meta_keywords">
+                    <a-input v-model:value="formState.meta_keywords" size="large" placeholder="keyword1, keyword2, keyword3" :maxlength="255" />
+                    <div class="field-hint">Comma-separated keywords related to your store</div>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-card>
+
+            <!-- Localization Settings Section -->
+            <a-card :bordered="false" class="form-section">
+              <div class="section-header">
+                <div class="section-icon-wrapper">
+                  <TranslationOutlined class="section-icon" />
+                </div>
+                <div>
+                  <h2 class="section-title">Localization</h2>
+                  <p class="section-description">Configure language preferences for your store</p>
+                </div>
+              </div>
+
+              <a-row :gutter="[16, 0]">
+                <a-col :xs="24" :lg="12">
+                  <a-form-item label="Default Language" name="default_language">
+                    <a-select v-model:value="formState.default_language" size="large">
+                      <a-select-option value="en">🇺🇸 English</a-select-option>
+                      <a-select-option value="bn">🇧🇩 Bengali</a-select-option>
+                      <a-select-option value="es">🇪🇸 Spanish</a-select-option>
+                      <a-select-option value="fr">🇫🇷 French</a-select-option>
+                      <a-select-option value="de">🇩🇪 German</a-select-option>
+                      <a-select-option value="ar">🇸🇦 Arabic</a-select-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
+
+                <a-col :xs="24" :lg="12">
+                  <a-form-item label="Supported Languages" name="supported_languages">
+                    <a-input v-model:value="formState.supported_languages" size="large" placeholder="en,bn,es" />
+                    <div class="field-hint">Comma-separated language codes (e.g., en,bn,es)</div>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-card>
+
+            <!-- Extended Branding Colors Section -->
+            <a-card :bordered="false" class="form-section">
+              <div class="section-header">
+                <div class="section-icon-wrapper">
+                  <BgColorsOutlined class="section-icon" />
+                </div>
+                <div>
+                  <h2 class="section-title">Brand Colors</h2>
+                  <p class="section-description">Define your store's color scheme</p>
+                </div>
+              </div>
+
+              <a-row :gutter="[16, 16]">
+                <a-col :xs="24" :lg="12">
+                  <a-form-item label="Primary Color" name="primary_color">
+                    <div class="color-picker-wrapper">
+                      <input type="color" v-model="formState.primary_color" class="color-input" />
+                      <a-input v-model:value="formState.primary_color" size="large" placeholder="#1890ff" style="flex: 1" />
+                    </div>
+                  </a-form-item>
+                </a-col>
+
+                <a-col :xs="24" :lg="12">
+                  <a-form-item label="Secondary Color" name="secondary_color">
+                    <div class="color-picker-wrapper">
+                      <input type="color" v-model="formState.secondary_color" class="color-input" />
+                      <a-input v-model:value="formState.secondary_color" size="large" placeholder="#52c41a" style="flex: 1" />
+                    </div>
+                  </a-form-item>
+                </a-col>
+
+                <a-col :span="24">
+                  <a-form-item label="Banner Image" name="banner_image">
+                    <div class="image-upload-wrapper">
+                      <div v-if="!bannerImage" class="upload-empty" @click="openMediaLibrary('banner')">
+                        <div class="upload-icon-circle">
+                          <PictureOutlined />
+                        </div>
+                        <div class="upload-text">Click to upload banner</div>
+                        <div class="upload-hint">Recommended: 1200x400px, PNG or JPG</div>
+                      </div>
+                      <div v-else class="upload-preview banner-preview">
+                        <a-image :width="300" :height="100" :src="configuration.API_BASE_URL + bannerImage?.file_path" alt="banner" class="preview-image" style="object-fit: cover;" />
+                        <div class="preview-actions">
+                          <a-button type="primary" size="small" @click="openMediaLibrary('banner')">Change</a-button>
+                          <a-button danger size="small" @click="bannerImage = null; formState.banner_image_id = null;">Remove</a-button>
+                        </div>
+                      </div>
+                    </div>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-card>
+
+            <!-- Domain Settings Section -->
+            <a-card :bordered="false" class="form-section">
+              <div class="section-header">
+                <div class="section-icon-wrapper">
+                  <LinkOutlined class="section-icon" />
+                </div>
+                <div>
+                  <h2 class="section-title">Domain Settings</h2>
+                  <p class="section-description">Configure your custom domain</p>
+                </div>
+              </div>
+
+              <a-row :gutter="[16, 0]">
+                <a-col :span="24">
+                  <a-form-item label="Custom Domain">
+                    <a-input v-model:value="customDomain" size="large" placeholder="www.yourstore.com" :disabled="!isEdit">
+                      <template #prefix>
+                        <GlobalOutlined />
+                      </template>
+                    </a-input>
+                    <div v-if="!isEdit" class="premium-notice">
+                      <span class="premium-badge">Premium Feature</span>
+                      <span class="premium-text">Create your store first, then configure custom domain</span>
+                    </div>
+                    <div v-else class="field-hint">Enter your custom domain (DNS configuration required)</div>
                   </a-form-item>
                 </a-col>
               </a-row>
@@ -1123,5 +1319,42 @@ onMounted(async () => {
 
 :deep(.ant-spin-container) {
   min-height: 100vh;
+}
+
+/* Color Picker Styles */
+.color-picker-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.color-input {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.color-input:hover {
+  border-color: oklch(0.65 0.25 192);
+  transform: scale(1.05);
+}
+
+/* Field Hint Styles */
+.field-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+/* Banner Preview */
+.banner-preview {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 20px;
 }
 </style>

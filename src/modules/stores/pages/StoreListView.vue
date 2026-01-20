@@ -62,6 +62,7 @@ const filteredStores = computed(() => {
 const columns = [
   { title: 'SI', dataIndex: 'id', key: 'id', width: 60, align: 'center' as const },
   { title: 'Store Information', key: 'storeInfo', width: 250 },
+  { title: 'Domain', key: 'customDomain', width: 200 },
   { title: 'Role', key: 'role', width: 120 },
   { title: 'Status', key: 'storeStatus', width: 120 },
   { title: 'Active', key: 'isActive', width: 100, align: 'center' as const },
@@ -247,11 +248,26 @@ onMounted(() => {
             <!-- Store Information -->
             <template v-if="column.key === 'storeInfo'">
               <div class="store-info">
-                <div class="store-logo">{{ record.name?.charAt(0) || '🏪' }}</div>
+                <div class="store-logo">
+                  <img v-if="record.logo_url" :src="record.logo_url" alt="logo" class="logo-img" />
+                  <span v-else>{{ record.name?.charAt(0) || '🏪' }}</span>
+                </div>
                 <div class="store-details">
                   <div class="store-name">{{ record.name }}</div>
                   <div class="store-id">{{ record.slug }}</div>
                 </div>
+              </div>
+            </template>
+
+            <!-- Domain -->
+            <template v-if="column.key === 'customDomain'">
+              <div class="domain-info">
+                <span v-if="record.custom_domain" class="custom-domain">
+                  <shop-outlined /> {{ record.custom_domain }}
+                </span>
+                <span v-else class="slug-domain">
+                  {{ record.slug }}.platform.com
+                </span>
               </div>
             </template>
 
@@ -621,15 +637,38 @@ onMounted(() => {
 }
 
 .store-logo {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  background: var(--muted);
+  width: 40px;
+  height: 40px;
+  background: var(--primary-lighter);
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 18px;
+  overflow: hidden;
+}
+
+.logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.domain-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-domain {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.slug-domain {
+  color: var(--muted-foreground);
+  font-size: 12px;
 }
 
 .store-details {

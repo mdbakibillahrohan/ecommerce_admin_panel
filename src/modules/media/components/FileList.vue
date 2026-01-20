@@ -6,7 +6,6 @@ import {
   DeleteOutlined,
   EditOutlined,
 } from '@ant-design/icons-vue'
-import { Image } from 'ant-design-vue'
 import type { MediaFile } from '@/modules/media/services/media.service'
 
 const props = defineProps<{
@@ -21,7 +20,7 @@ const emits = defineEmits<{
   (e: 'delete-file', id: number): void
   (e: 'toggle-selection', id: number): void
   (e: 'select-file', file: MediaFile): void
-  (e: 'rename-file', file: MediaFile): void
+  (e: 'rename', file: MediaFile): void
 }>()
 
 const isSelected = (id: number) => props.selectedIds.includes(id)
@@ -89,6 +88,9 @@ const handleFileClick = (file: MediaFile) => {
                 </a-button>
                 <template #overlay>
                   <a-menu class="action-menu">
+                    <a-menu-item key="rename" @click="emits('rename', file)">
+                      <EditOutlined /> Rename
+                    </a-menu-item>
                     <a-menu-item key="delete" danger @click="emits('delete-file', file.id)">
                       <DeleteOutlined /> Delete
                     </a-menu-item>
@@ -125,6 +127,9 @@ const handleFileClick = (file: MediaFile) => {
             </a-button>
             <template #overlay>
               <a-menu class="action-menu">
+                <a-menu-item key="rename" @click="emits('rename', file)">
+                  <EditOutlined /> Rename
+                </a-menu-item>
                 <a-menu-item key="delete" danger @click="emits('delete-file', file.id)">
                   <DeleteOutlined /> Delete
                 </a-menu-item>
