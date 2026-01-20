@@ -10,7 +10,7 @@ export function useUserStore() {
     const error = ref<string | null>(null)
 
     async function fetchLoggedInUser() {
-      const response = await api.get<IUser>('/user/info')
+      const response = await api.get<IUser>('/auth/me')
       // console.log('Fetched logged in user:', response.data)
       currentUserInfo.value = response.data
 

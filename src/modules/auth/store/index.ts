@@ -11,7 +11,7 @@ export interface User {
 }
 
 export interface LoginCredentials {
-  username: string
+  usernameOrEmail: string
   password: string
 }
 
@@ -35,9 +35,9 @@ export function useAuthStore() {
       try {
         console.log('Logging in with credentials:', credentials)
         const response = await api.post('/auth/login', credentials)
-        localStorage.setItem('admin_token', response.data.access_token)
+        localStorage.setItem('admin_token', response.data.accessToken)
         console.log('Login response:', response.data)
-        token.value = response.data.access_token
+        token.value = response.data.accessToken
         return true
       } catch (err: any) {
         error.value = err.response?.data?.message || 'Login failed. Please try again.'

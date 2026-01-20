@@ -67,7 +67,7 @@ async function handleSubmit() {
   try {
     await formRef.value?.validate()
     const success = await authStore.login({
-      username: formState.value.email,
+      usernameOrEmail: formState.value.email,
       password: formState.value.password,
     })
 

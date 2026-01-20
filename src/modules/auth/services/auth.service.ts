@@ -6,7 +6,7 @@ import api from '@/modules/shared/config/http.config'
 
 // Types
 export interface LoginRequest {
-  username: string
+  usernameOrEmail: string
   password: string
 }
 
