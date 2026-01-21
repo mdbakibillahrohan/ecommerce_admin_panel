@@ -33,10 +33,9 @@ export function useAuthStore() {
       error.value = null
 
       try {
-        console.log('Logging in with credentials:', credentials)
         const response = await api.post('/auth/login', credentials)
         localStorage.setItem('admin_token', response.data.accessToken)
-        console.log('Login response:', response.data)
+        document.cookie = `refresh_token=${response.data.refreshToken}; path=/`
         token.value = response.data.accessToken
         return true
       } catch (err: any) {

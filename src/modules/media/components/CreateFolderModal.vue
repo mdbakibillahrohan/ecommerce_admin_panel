@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
-import { FolderOutlined, CheckCircleOutlined } from '@ant-design/icons-vue'
+import { FolderOutlined } from '@ant-design/icons-vue'
 
 const props = defineProps<{
   open: boolean
@@ -13,11 +13,14 @@ const emits = defineEmits<{
 
 const folderName = ref('')
 
-watch(() => props.open, (newVal) => {
-  if (newVal) {
-    folderName.value = ''
-  }
-})
+watch(
+  () => props.open,
+  (newVal) => {
+    if (newVal) {
+      folderName.value = ''
+    }
+  },
+)
 
 const handleOk = () => {
   if (folderName.value.trim()) {
@@ -48,9 +51,7 @@ const handleCancel = () => {
               <FolderOutlined class="input-icon" />
             </template>
           </a-input>
-          <div class="input-hint">
-            Choose a descriptive name for easy organization
-          </div>
+          <div class="input-hint">Choose a descriptive name for easy organization</div>
         </a-form-item>
       </a-form>
     </div>
@@ -62,12 +63,14 @@ const handleCancel = () => {
   background: var(--background);
   border-radius: 16px;
   border: 1px solid var(--border);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
 
 .create-folder-modal :deep(.ant-modal-header) {
-  background: linear-gradient(135deg, oklch(0.65 0.15 190) 0%, oklch(0.60 0.18 200) 100%);
+  background: linear-gradient(135deg, oklch(0.65 0.15 190) 0%, oklch(0.6 0.18 200) 100%);
   border-bottom: none;
   border-radius: 16px 16px 0 0;
   padding: 24px 28px;
@@ -121,14 +124,14 @@ const handleCancel = () => {
 }
 
 .create-folder-modal :deep(.ant-btn-primary) {
-  background: linear-gradient(135deg, oklch(0.65 0.15 190) 0%, oklch(0.60 0.18 200) 100%);
+  background: linear-gradient(135deg, oklch(0.65 0.15 190) 0%, oklch(0.6 0.18 200) 100%);
   border: none;
   color: #ffffff;
   box-shadow: 0 4px 6px -1px rgba(13, 148, 136, 0.2);
 }
 
 .create-folder-modal :deep(.ant-btn-primary:hover) {
-  background: linear-gradient(135deg, oklch(0.60 0.18 200) 0%, oklch(0.55 0.20 210) 100%);
+  background: linear-gradient(135deg, oklch(0.6 0.18 200) 0%, oklch(0.55 0.2 210) 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 12px -1px rgba(13, 148, 136, 0.3);
 }
@@ -159,7 +162,7 @@ const handleCancel = () => {
   width: 80px;
   height: 80px;
   border-radius: 20px;
-  background: linear-gradient(135deg, oklch(0.65 0.15 190) 0%, oklch(0.60 0.18 200) 100%);
+  background: linear-gradient(135deg, oklch(0.65 0.15 190) 0%, oklch(0.6 0.18 200) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -241,7 +244,7 @@ const handleCancel = () => {
 }
 
 .input-hint::before {
-  content: "💡";
+  content: '💡';
   font-size: 14px;
 }
 

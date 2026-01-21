@@ -4,13 +4,22 @@
 
 export interface MediaFile {
   id: number
-  original_name: string
-  filename: string
-  mime_type: string
-  size: number
-  file_path: string
-  folder_id?: number
-  created_at: string
+  storeId: number
+  userId: number
+  folderId: number | null
+  fileName: string
+  originalName: string
+  fileType: string // e.g. "image", "video", "document"
+  mimeType: string // e.g. "image/png"
+  fileSize: number // in bytes
+  url: string
+  thumbnailUrl: string | null
+  width: number | null
+  height: number | null
+  alt: string | null
+  title: string | null
+  createdAt: string // ISO date string
+  updatedAt: string | null
 }
 
 export interface MediaFolder {
@@ -21,8 +30,11 @@ export interface MediaFolder {
 }
 
 export interface MediaQueryParams {
-  folder_id?: number
+  page?: number // default: 1
+  pageSize?: number // default: 20
+  storeId?: number
+  userId?: number
+  folderId?: number
+  fileType?: string
   search?: string
-  mime_type?: string
-  [key: string]: unknown
 }

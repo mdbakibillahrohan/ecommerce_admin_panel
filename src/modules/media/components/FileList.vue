@@ -7,6 +7,7 @@ import {
   EditOutlined,
 } from '@ant-design/icons-vue'
 import type { MediaFile } from '@/modules/media/services/media.service'
+import { configuration } from '@/modules/shared/config/configruation'
 
 const props = defineProps<{
   files: MediaFile[]
@@ -25,12 +26,13 @@ const emits = defineEmits<{
 
 const isSelected = (id: number) => props.selectedIds.includes(id)
 
-const isImage = (mimeType: string) => mimeType.startsWith('image/')
+const isImage = (mimeType: string) => mimeType?.startsWith('image/')
 
 const getFileUrl = (path: string) => {
+  const { MEDIA_BASE_URL } = configuration
   if (path) {
-    if (path.startsWith("http")) return path
-    return `http://localhost:8000${path}`
+    if (path.startsWith('http')) return path
+    return `${MEDIA_BASE_URL}${path}`
   }
   return path
 }
@@ -44,8 +46,8 @@ const formatSize = (bytes: number) => {
 }
 
 const getFileExtension = (filename: string) => {
-  const parts = filename.split('.')
-  return parts.length > 1 ? parts[parts.length - 1] : 'file'
+  const parts = filename?.split('.')
+  return parts?.length > 1 ? parts[parts.length - 1] : 'file'
 }
 
 const handleFileClick = (file: MediaFile) => {
@@ -74,11 +76,11 @@ const handleFileClick = (file: MediaFile) => {
 
         <div v-if="viewMode === 'grid'" class="file-card">
           <div class="file-preview">
-            <a-image v-if="isImage(file.mime_type)" :src="getFileUrl(file.file_path)" class="preview-image"
+            <a-image v-if="isImage(file.mimeType)" :src="getFileUrl(file.url)" class="preview-image"
               :preview="!isSelectMode" @click="handleFileClick(file)" />
             <div v-else class="preview-placeholder" @click="handleFileClick(file)">
               <FileTextFilled class="placeholder-icon" />
-              <span class="file-ext">{{ getFileExtension(file.original_name) }}</span>
+              <span class="file-ext">{{ getFileExtension(file.originalName) }}</span>
             </div>
 
             <div class="file-actions" @click.stop>
@@ -101,22 +103,22 @@ const handleFileClick = (file: MediaFile) => {
           </div>
 
           <div class="file-info" @click="handleFileClick(file)">
-            <div class="file-name" :title="file.original_name">{{ file.original_name }}</div>
-            <div class="file-meta">{{ formatSize(file.size) }}</div>
+            <div class="file-name" :title="file.originalName">{{ file.originalName }}</div>
+            <div class="file-meta">{{ formatSize(file.fileSize) }}</div>
           </div>
         </div>
 
         <div v-else class="file-row" @click="handleFileClick(file)">
           <div class="row-left">
             <div class="file-thumb">
-              <a-image v-if="isImage(file.mime_type)" :src="getFileUrl(file.file_path)" class="thumb-image"
-                :preview="isSelectMode ? false : { src: getFileUrl(file.file_path) }" />
+              <a-image v-if="isImage(file.mimeType)" :src="getFileUrl(file.url)" class="thumb-image"
+                :preview="isSelectMode ? false : { src: getFileUrl(file.url) }" />
               <FileTextFilled v-else class="thumb-icon" />
             </div>
             <div class="row-details">
-              <div class="row-name">{{ file.original_name }}</div>
+              <div class="row-name">{{ file.originalName }}</div>
               <div class="row-meta">
-                {{ formatSize(file?.size ?? 0) }}
+                {{ formatSize(file?.fileSize ?? 0) }}
               </div>
             </div>
           </div>

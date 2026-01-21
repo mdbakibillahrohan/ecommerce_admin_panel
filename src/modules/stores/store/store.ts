@@ -10,8 +10,8 @@ export function useStoreStore() {
     const activeStore = ref<IStore | null>(null)
 
     const fetchCurrentUserStores = async () => {
-      const storeListRes = await api.get<IStore[]>('/stores')
-      stores.value = storeListRes.data
+      const storeListRes = await api.get<{ data: IStore[] }>('/stores')
+      stores.value = storeListRes.data.data
       return storeListRes
     }
 
@@ -20,7 +20,6 @@ export function useStoreStore() {
         storeCategories: IStoreCategory[]
         total: number
       }>('/store-category')
-      console.log(storeCategoryListRes.data.storeCategories)
       storeCategories.value = storeCategoryListRes.data.storeCategories
       return storeCategoryListRes
     }

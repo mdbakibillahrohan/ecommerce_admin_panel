@@ -2,7 +2,12 @@
 import { ref, onMounted, watch, computed, h } from 'vue'
 import { message, Modal } from 'ant-design-vue'
 import { InboxOutlined, UploadOutlined, DeleteOutlined, CloseOutlined } from '@ant-design/icons-vue'
-import { mediaService, type MediaFile, type MediaFolder } from '@/modules/media/services/media.service'
+import {
+  mediaService,
+  type MediaFile,
+  type MediaFolder,
+  type MediaQueryParams,
+} from '@/modules/media/services/media.service'
 import type { UploadProps } from 'ant-design-vue'
 import api from '@/modules/shared/config/http.config'
 
@@ -12,6 +17,7 @@ import FolderList from './FolderList.vue'
 import FileList from './FileList.vue'
 import UploadModal from './UploadModal.vue'
 import CreateFolderModal from './CreateFolderModal.vue'
+import { useStoreStore } from '@/modules/stores/store/store'
 
 const props = defineProps({
   isSelectMode: {
@@ -28,9 +34,7 @@ const props = defineProps({
   },
 })
 
-const emits = defineEmits([
-  'file-selected',
-])
+const emits = defineEmits(['file-selected'])
 
 // State
 const loading = ref(false)
@@ -42,6 +46,8 @@ const searchQuery = ref('')
 const viewMode = ref<'grid' | 'list'>('grid')
 const folderNameTree = ref<MediaFolder[]>([])
 
+const storeStore = useStoreStore()
+
 // Modals
 const uploadModalVisible = ref(false)
 const folderModalVisible = ref(false)
@@ -52,7 +58,9 @@ const selectedFolderIds = ref<number[]>([])
 const moveModalVisible = ref(false)
 const targetFolderId = ref<number | null>(null)
 
-const hasSelection = computed(() => selectedFileIds.value.length > 0 || selectedFolderIds.value.length > 0)
+const hasSelection = computed(
+  () => selectedFileIds.value.length > 0 || selectedFolderIds.value.length > 0,
+)
 const selectionCount = computed(() => selectedFileIds.value.length + selectedFolderIds.value.length)
 
 // Fetch Data
@@ -63,18 +71,20 @@ const fetchMedia = async () => {
   selectedFolderIds.value = []
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const params: any = { folder_id: currentFolderId.value }
-    if (searchQuery.value) params.search = searchQuery.value
+    const params: MediaQueryParams = {
+      folderId: currentFolderId.value || undefined,
+      search: searchQuery.value,
+      storeId: storeStore.activeStore?.id || 1,
+    }
 
     const [filesData, foldersData] = await Promise.all([
       mediaService.getFiles(params),
-      mediaService.getFolders()
+      mediaService.getFolders(storeStore.activeStore?.id || 1, currentFolderId.value || undefined),
     ])
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     folders.value = foldersData.filter((f: any) =>
-      currentFolderId.value ? f.parent_id === Number(currentFolderId.value) : !f.parent_id
+      currentFolderId.value ? f.parentId === Number(currentFolderId.value) : !f.parentId,
     )
 
     files.value = filesData.data
@@ -92,24 +102,28 @@ watch(currentFolderId, () => {
 
   if (!currentFolderId.value) {
     folderNameTree.value = []
-    return;
+    return
   }
 
-  const currentFolderDetails = folders.value.find((f: MediaFolder) => f.id === currentFolderId.value)
+  const currentFolderDetails = folders.value.find(
+    (f: MediaFolder) => f.id === currentFolderId.value,
+  )
 
   // Logic to build breadcrumb tree
   if (folderNameTree.value.length > 0) {
-    const folderNameTreeFolderIndex = folderNameTree.value.findIndex(f => f.id === currentFolderId.value);
+    const folderNameTreeFolderIndex = folderNameTree.value.findIndex(
+      (f) => f.id === currentFolderId.value,
+    )
     if (folderNameTreeFolderIndex == -1) {
-      folderNameTree.value.push(currentFolderDetails || { id: currentFolderId.value, name: "" })
-      return;
+      folderNameTree.value.push(currentFolderDetails || { id: currentFolderId.value, name: '' })
+      return
     }
-    const newFolderNameTree = folderNameTree.value.slice(0, folderNameTreeFolderIndex + 1);
-    folderNameTree.value = newFolderNameTree;
-    return;
+    const newFolderNameTree = folderNameTree.value.slice(0, folderNameTreeFolderIndex + 1)
+    folderNameTree.value = newFolderNameTree
+    return
   }
 
-  folderNameTree.value.push(currentFolderDetails || { id: currentFolderId.value, name: "" })
+  folderNameTree.value.push(currentFolderDetails || { id: currentFolderId.value, name: '' })
 })
 
 // Navigation
@@ -131,6 +145,7 @@ const handleUploadFiles = async (fileList: UploadProps['fileList']) => {
   uploading.value = true
   try {
     const formData = new FormData()
+    formData.append('storeId', storeStore?.activeStore?.id.toString() || '1')
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fileList.forEach((file: any) => {
@@ -138,11 +153,11 @@ const handleUploadFiles = async (fileList: UploadProps['fileList']) => {
     })
 
     if (currentFolderId.value) {
-      formData.append('folder_id', currentFolderId.value.toString())
+      formData.append('folderId', currentFolderId.value.toString())
     }
 
-    await api.post('/media/upload/bulk', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+    await api.post('/media/upload/multiple', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     })
 
     message.success('Files uploaded successfully')
@@ -158,7 +173,15 @@ const handleUploadFiles = async (fileList: UploadProps['fileList']) => {
 
 const handleCreateFolder = async (name: string) => {
   try {
-    await mediaService.createFolder(name, currentFolderId.value || undefined)
+    if (!storeStore.activeStore) {
+      message.error('No store found')
+      return
+    }
+    await mediaService.createFolder(
+      storeStore.activeStore?.id,
+      name,
+      currentFolderId.value || undefined,
+    )
     message.success('Folder created successfully')
     folderModalVisible.value = false
     fetchMedia()
@@ -181,7 +204,7 @@ const deleteSingleFile = async (id: number) => {
 }
 
 const handleUseSelected = () => {
-  const filesToReturn = files.value.filter(file => selectedFileIds.value.includes(file.id))
+  const filesToReturn = files.value.filter((file) => selectedFileIds.value.includes(file.id))
   emits('file-selected', { usingFor: props.usingFor, files: filesToReturn })
 }
 
@@ -197,7 +220,7 @@ const handleBulkDelete = () => {
       try {
         await mediaService.bulkDelete({
           file_ids: selectedFileIds.value,
-          folder_ids: selectedFolderIds.value
+          folder_ids: selectedFolderIds.value,
         })
         message.success(`Deleted ${selectionCount.value} items successfully`)
         clearSelection()
@@ -207,7 +230,7 @@ const handleBulkDelete = () => {
         message.error('Failed to delete some items')
         fetchMedia()
       }
-    }
+    },
   })
 }
 
@@ -221,7 +244,7 @@ const executeBulkMove = async () => {
     await mediaService.bulkMove({
       file_ids: selectedFileIds.value,
       folder_ids: selectedFolderIds.value,
-      target_folder_id: targetFolderId.value
+      target_folder_id: targetFolderId.value,
     })
     message.success(`Moved ${selectionCount.value} items successfully`)
     moveModalVisible.value = false
@@ -236,25 +259,25 @@ const executeBulkMove = async () => {
 const tempRenameValue = ref('')
 
 const handleRenameItem = async (type: 'file' | 'folder', item: MediaFile | MediaFolder) => {
-  const currentName = type === 'file'
-    ? (item as MediaFile).original_name
-    : (item as MediaFolder).name
+  const currentName =
+    type === 'file' ? (item as MediaFile).originalName : (item as MediaFolder).name
 
   tempRenameValue.value = currentName
 
   Modal.confirm({
     title: `Rename ${type}`,
-    content: () => h('div', [
-      h('p', `Enter new name for "${currentName}":`),
-      h('input', {
-        class: 'ant-input',
-        value: tempRenameValue.value,
-        onInput: (e: Event) => {
-          const target = e.target as HTMLInputElement
-          tempRenameValue.value = target.value
-        }
-      })
-    ]),
+    content: () =>
+      h('div', [
+        h('p', `Enter new name for "${currentName}":`),
+        h('input', {
+          class: 'ant-input',
+          value: tempRenameValue.value,
+          onInput: (e: Event) => {
+            const target = e.target as HTMLInputElement
+            tempRenameValue.value = target.value
+          },
+        }),
+      ]),
     async onOk() {
       if (!tempRenameValue.value) return
 
@@ -270,14 +293,14 @@ const handleRenameItem = async (type: 'file' | 'folder', item: MediaFile | Media
         console.error(error)
         message.error('Failed to rename')
       }
-    }
+    },
   })
 }
 
 // Selection Logic
 const toggleFileSelection = (id: number) => {
   if (selectedFileIds.value.includes(id)) {
-    selectedFileIds.value = selectedFileIds.value.filter(i => i !== id)
+    selectedFileIds.value = selectedFileIds.value.filter((i) => i !== id)
   } else {
     selectedFileIds.value = [...selectedFileIds.value, id]
   }
@@ -285,7 +308,7 @@ const toggleFileSelection = (id: number) => {
 
 const toggleFolderSelection = (id: number) => {
   if (selectedFolderIds.value.includes(id)) {
-    selectedFolderIds.value = selectedFolderIds.value.filter(i => i !== id)
+    selectedFolderIds.value = selectedFolderIds.value.filter((i) => i !== id)
   } else {
     selectedFolderIds.value = [...selectedFolderIds.value, id]
   }
@@ -331,7 +354,8 @@ onMounted(() => {
 
         <div v-else>
           <FolderList :folders="folders" :viewMode="viewMode" :selectedIds="selectedFolderIds"
-            @open-folder="handleOpenFolder" @toggle-selection="toggleFolderSelection" @rename="(f: MediaFolder) => handleRenameItem('folder', f)" />
+            @open-folder="handleOpenFolder" @toggle-selection="toggleFolderSelection"
+            @rename="(f: MediaFolder) => handleRenameItem('folder', f)" />
 
           <FileList :files="files" :viewMode="viewMode" :selectedIds="selectedFileIds" :isSelectMode="isSelectMode"
             @preview-file="() => { }" @delete-file="deleteSingleFile" @toggle-selection="toggleFileSelection"
@@ -402,7 +426,9 @@ onMounted(() => {
   color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
   position: relative;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .main-content {

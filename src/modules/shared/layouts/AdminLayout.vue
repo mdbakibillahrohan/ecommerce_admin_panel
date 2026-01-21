@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue'
 import AppSidebar from '../components/layout/AppSidebar.vue'

@@ -18,8 +18,8 @@ const authStore = useAuthStore()
 
 const formRef = ref<FormInstance>()
 const formState = ref({
-  email: '',
-  password: '',
+  email: 'mdmarufur1252@gmail.com',
+  password: 'Noman@123',
   remember: true,
 })
 
@@ -102,8 +102,8 @@ async function handleSubmit() {
           <div class="hero-section">
             <h1 class="hero-title">Manage Your Store with Confidence</h1>
             <p class="hero-description">
-              Powerful tools to grow your e-commerce business. Track orders, manage inventory,
-              and analyze performance all in one place.
+              Powerful tools to grow your e-commerce business. Track orders, manage inventory, and
+              analyze performance all in one place.
             </p>
           </div>
 
@@ -197,9 +197,7 @@ async function handleSubmit() {
 
           <!-- Footer -->
           <div class="form-footer">
-            <p class="footer-text">
-              Protected by enterprise-grade encryption
-            </p>
+            <p class="footer-text">Protected by enterprise-grade encryption</p>
           </div>
         </div>
       </div>
@@ -223,7 +221,7 @@ async function handleSubmit() {
   flex: 1;
   background: linear-gradient(135deg,
       oklch(0.55 0.18 192) 0%,
-      oklch(0.50 0.20 192) 50%,
+      oklch(0.5 0.2 192) 50%,
       oklch(0.45 0.22 192) 100%);
   padding: 48px;
   display: flex;
@@ -530,9 +528,7 @@ async function handleSubmit() {
 }
 
 .mobile-logo .logo-icon {
-  background: linear-gradient(135deg,
-      oklch(0.55 0.18 192) 0%,
-      oklch(0.45 0.22 192) 100%);
+  background: linear-gradient(135deg, oklch(0.55 0.18 192) 0%, oklch(0.45 0.22 192) 100%);
 }
 
 .mobile-logo .logo-name {
@@ -627,7 +623,7 @@ async function handleSubmit() {
 }
 
 .forgot-link:hover {
-  color: oklch(0.50 0.20 192);
+  color: oklch(0.5 0.2 192);
   text-decoration: underline;
 }
 
@@ -636,18 +632,14 @@ async function handleSubmit() {
   border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
-  background: linear-gradient(135deg,
-      oklch(0.55 0.18 192) 0%,
-      oklch(0.45 0.22 192) 100%);
+  background: linear-gradient(135deg, oklch(0.55 0.18 192) 0%, oklch(0.45 0.22 192) 100%);
   border: none;
   box-shadow: 0 4px 14px oklch(0.55 0.18 192 / 0.35);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .login-button:not(:disabled):hover {
-  background: linear-gradient(135deg,
-      oklch(0.50 0.20 192) 0%,
-      oklch(0.40 0.24 192) 100%);
+  background: linear-gradient(135deg, oklch(0.5 0.2 192) 0%, oklch(0.4 0.24 192) 100%);
   box-shadow: 0 6px 20px oklch(0.55 0.18 192 / 0.45);
   transform: translateY(-2px);
 }

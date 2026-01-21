@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/modules/auth/store'
 import { AppstoreOutlined, PlusOutlined, CheckCircleFilled } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
@@ -46,6 +46,10 @@ function getStoreColor(index: number): string {
   ]
   return colors[index % colors.length] || ''
 }
+
+onMounted(() => {
+  console.log(storeStore.stores)
+})
 </script>
 
 <template>
@@ -115,7 +119,7 @@ function getStoreColor(index: number): string {
 .store-header {
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
-  background: linear-gradient(135deg, oklch(0.55 0.15 180) 0%, oklch(0.50 0.15 180) 100%);
+  background: linear-gradient(135deg, oklch(0.55 0.15 180) 0%, oklch(0.5 0.15 180) 100%);
 }
 
 .store-header h3 {
@@ -187,7 +191,7 @@ function getStoreColor(index: number): string {
 }
 
 .add-store:hover .add-icon {
-  background: linear-gradient(135deg, oklch(0.55 0.15 180), oklch(0.60 0.15 180)) !important;
+  background: linear-gradient(135deg, oklch(0.55 0.15 180), oklch(0.6 0.15 180)) !important;
   color: #ffffff !important;
 }
 
@@ -228,6 +232,6 @@ function getStoreColor(index: number): string {
 }
 
 .store-grid::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.50 0.15 180);
+  background: oklch(0.5 0.15 180);
 }
 </style>
