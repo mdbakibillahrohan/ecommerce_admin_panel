@@ -258,7 +258,7 @@ onMounted(async () => {
                         <div class="upload-hint">Recommended: 200x200px, PNG or JPG</div>
                       </div>
                       <div v-else class="upload-preview">
-                        <a-image :width="120" :height="120" :src="configuration.API_BASE_URL + logo?.file_path"
+                        <a-image :width="120" :height="120" :src="configuration.MEDIA_BASE_URL+logo?.url"
                           alt="logo" class="preview-image" />
                         <div class="preview-actions">
                           <a-button type="primary" size="small" @click="openMediaLibrary('logo')">
@@ -284,7 +284,7 @@ onMounted(async () => {
                         <div class="upload-hint">Recommended: 32x32px, ICO or PNG</div>
                       </div>
                       <div v-else class="upload-preview">
-                        <a-image :width="120" :height="120" :src="configuration.API_BASE_URL + favicon?.file_path"
+                        <a-image :width="120" :height="120" :src="configuration.MEDIA_BASE_URL + favicon?.url"
                           alt="favicon" class="preview-image" />
                         <div class="preview-actions">
                           <a-button type="primary" size="small" @click="openMediaLibrary('favicon')">
