@@ -57,10 +57,10 @@
             <div v-for="file in filteredFiles" :key="'file-' + file.id" class="grid-item file-item"
               :class="{ selected: isSelected(file.id) }" @click="toggleSelection(file)">
               <div class="file-preview">
-                <img v-if="isImage(file)" :src="getFileUrl(file)" :alt="file.original_name" />
+                <img v-if="isImage(file)" :src="getFileUrl(file)" :alt="file.originalName" />
                 <file-image-outlined v-else class="file-icon" />
               </div>
-              <div class="item-name">{{ file.original_name }}</div>
+              <div class="item-name">{{ file.originalName }}</div>
               <check-circle-filled v-if="isSelected(file.id)" class="selected-icon" />
             </div>
           </div>
@@ -75,7 +75,7 @@
                   <folder-outlined v-if="record.type === 'folder'" class="icon" />
                   <file-image-outlined v-else class="icon" />
                   <span @dblclick="record.type === 'folder' ? navigateToFolder(record.id) : null">
-                    {{ record.type === 'folder' ? record.name : record.original_name }}
+                    {{ record.type === 'folder' ? record.name : record.originalName }}
                   </span>
                 </div>
               </template>
@@ -123,6 +123,7 @@ import {
 } from '@ant-design/icons-vue'
 import { mediaService } from '../services/media.service'
 import type { MediaFile, MediaFolder } from '../interfaces'
+import { useStoreStore } from '@/modules/stores/store/store'
 
 interface Props {
   open: boolean
@@ -152,6 +153,8 @@ const files = ref<MediaFile[]>([])
 const folders = ref<MediaFolder[]>([])
 const selectedFiles = ref<MediaFile[]>([])
 
+const storeStore = useStoreStore();
+
 // Computed
 const isOpen = computed({
   get: () => props.open,
@@ -171,14 +174,14 @@ const filteredFiles = computed(() => {
   // Filter by search
   if (searchQuery.value) {
     result = result.filter(f =>
-      f.original_name.toLowerCase().includes(searchQuery.value.toLowerCase())
+      f.originalName.toLowerCase().includes(searchQuery.value.toLowerCase())
     )
   }
 
   // Filter by accept type
   if (props.accept) {
     const acceptType = props.accept.split('/')[0] // e.g., 'image' from 'image/*'
-    result = result.filter(f => f.mime_type.startsWith(acceptType || ""))
+    result = result.filter(f => f.mimeType.startsWith(acceptType || ""))
   }
 
   return result
@@ -196,8 +199,8 @@ async function fetchMedia() {
   loading.value = true
   try {
     const [filesResponse, foldersResponse] = await Promise.all([
-      mediaService.getFiles({ folder_id: currentFolderId.value || 0 }),
-      mediaService.getFolders()
+      mediaService.getFiles({ folderId: currentFolderId.value || 0 }),
+      mediaService.getFolders(storeStore.activeStore?.id || 0)
     ])
 
     files.value = filesResponse.data || []
@@ -227,11 +230,11 @@ function navigateToFolder(folderId: number | null) {
 }
 
 function isImage(file: MediaFile): boolean {
-  return file.mime_type.startsWith('image/')
+  return file.mimeType.startsWith('image/')
 }
 
 function getFileUrl(file: MediaFile): string {
-  return file.file_path || ''
+  return file.url || ''
 }
 
 function isSelected(fileId: number): boolean {
