@@ -175,11 +175,13 @@ function generateSlug() {
 }
 
 const getCategoryStore = async () => {
-  await storeStore.fetStoreCategories()
+  await storeStore.getStoreCategories()
+
 }
 
 onMounted(async () => {
   await getCategoryStore()
+  console.log(`getCategoryStore: ${getCategoryStore}`)
   if (isEdit.value && storeId.value) {
     await fetchStore(storeId.value)
   }
@@ -634,7 +636,7 @@ onMounted(async () => {
 
             <div class="store-preview">
               <div class="preview-logo">
-                <img v-if="logo" :src="configuration.API_BASE_URL + logo?.file_path" alt="Store Logo" />
+                <img v-if="logo" :src="configuration.MEDIA_BASE_URL + logo?.url" alt="Store Logo" />
                 <div v-else class="preview-logo-placeholder">
                   <ShopOutlined />
                 </div>

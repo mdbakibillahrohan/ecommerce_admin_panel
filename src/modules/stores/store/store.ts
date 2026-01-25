@@ -15,7 +15,7 @@ export function useStoreStore() {
       return storeListRes
     }
 
-    const fetStoreCategories = async () => {
+    const getStoreCategories = async () => {
       const storeCategoryListRes = await api.get<{
         storeCategories: IStoreCategory[]
         total: number
@@ -33,7 +33,7 @@ export function useStoreStore() {
       storeCategories,
       activeStore,
       fetchCurrentUserStores,
-      fetStoreCategories,
+      getStoreCategories,
       setActiveStore,
     }
   })()
