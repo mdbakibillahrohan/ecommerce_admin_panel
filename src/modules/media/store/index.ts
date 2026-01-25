@@ -1,7 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { mediaService, type MediaFile, type MediaFolder } from '@/modules/media/services/media.service'
+import {
+  mediaService,
+  type MediaFile,
+  type MediaFolder,
+} from '@/modules/media/services/media.service'
 import { message } from 'ant-design-vue'
+import { useStoreStore } from '@/modules/stores/store/store'
 
 export const useMediaStore = defineStore('media', () => {
   // State
@@ -13,13 +19,15 @@ export const useMediaStore = defineStore('media', () => {
   const uploading = ref(false)
   const error = ref<string | null>(null)
 
+  const storeStore = useStoreStore()
+
   // Actions
   async function fetchFiles(folderId?: number) {
     loading.value = true
     error.value = null
 
     try {
-      const response = await mediaService.getFiles({ folder_id: folderId })
+      const response = await mediaService.getFiles({ folderId: folderId })
       files.value = response.data
       currentFolder.value = folderId || null
     } catch (err: any) {
@@ -36,7 +44,7 @@ export const useMediaStore = defineStore('media', () => {
     error.value = null
 
     try {
-      folders.value = await mediaService.getFolders()
+      folders.value = await mediaService.getFolders(storeStore.activeStore?.id || 0)
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Failed to fetch folders'
       message.error(error.value)
@@ -70,7 +78,7 @@ export const useMediaStore = defineStore('media', () => {
     error.value = null
 
     try {
-      await mediaService.createFolder(name, parentId)
+      await mediaService.createFolder(storeStore.activeStore?.id || 0, name, parentId)
       message.success('Folder created successfully')
       await fetchFolders()
       return true

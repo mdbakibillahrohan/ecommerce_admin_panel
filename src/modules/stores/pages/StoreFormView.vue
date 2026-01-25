@@ -40,7 +40,7 @@ const handleUseSelected = (files: { usingFor: string, files: MediaFile[] }) => {
   } else if (files.usingFor === 'banner') {
     bannerImage.value = files.files[0]
     formState.value.banner_image_id = files.files[0]?.id
-    formState.value.banner_image_url = files.files[0]?.file_path
+    formState.value.banner_image_url = files.files[0]?.url
   }
   mediaModalVisible.value = false;
 }
@@ -96,10 +96,10 @@ async function fetchStore(id: number) {
   try {
     const store = await storesApi.getById(id)
     if (store.logo) {
-      logo.value = { id: store.logo.id, original_name: store.logo.filename, filename: store.logo.filename, mime_type: "", size: 0, file_path: store.logo.url, folder_id: 0, created_at: "" }
+      logo.value = { id: store.logo.id, originalName: store.logo.filename, fileName: store.logo.filename, mimeType: "", fileSize: 0, url: store.logo.url, folderId: 0, createdAt: "", updatedAt: "", alt: "", fileType: "", title: "", width: 0, height: 0, thumbnailUrl: "", storeId: 0, userId: 0 }
     }
     if (store.favicon) {
-      favicon.value = { id: store.favicon.id, original_name: store.favicon.filename, filename: store.favicon.filename, mime_type: "", size: 0, file_path: store.favicon.url, folder_id: 0, created_at: "" }
+      favicon.value = { id: store.favicon.id, originalName: store.favicon.filename, fileName: store.favicon.filename, mimeType: "", fileSize: 0, url: store.favicon.url, folderId: 0, createdAt: "", updatedAt: "", alt: "", fileType: "", title: "", width: 0, height: 0, thumbnailUrl: "", storeId: 0, userId: 0 }
     }
     formState.value = {
       name: store.name,
@@ -483,21 +483,25 @@ onMounted(async () => {
               <a-row :gutter="[16, 0]">
                 <a-col :span="24">
                   <a-form-item label="Meta Title" name="meta_title">
-                    <a-input v-model:value="formState.meta_title" size="large" placeholder="Store title for search engines" :maxlength="100" show-count />
+                    <a-input v-model:value="formState.meta_title" size="large"
+                      placeholder="Store title for search engines" :maxlength="100" show-count />
                     <div class="field-hint">Recommended: 50-60 characters for optimal display in search results</div>
                   </a-form-item>
                 </a-col>
 
                 <a-col :span="24">
                   <a-form-item label="Meta Description" name="meta_description">
-                    <a-textarea v-model:value="formState.meta_description" :rows="3" placeholder="Brief description of your store for search engine results" :maxlength="500" show-count />
+                    <a-textarea v-model:value="formState.meta_description" :rows="3"
+                      placeholder="Brief description of your store for search engine results" :maxlength="500"
+                      show-count />
                     <div class="field-hint">Recommended: 150-160 characters for optimal display</div>
                   </a-form-item>
                 </a-col>
 
                 <a-col :span="24">
                   <a-form-item label="Meta Keywords" name="meta_keywords">
-                    <a-input v-model:value="formState.meta_keywords" size="large" placeholder="keyword1, keyword2, keyword3" :maxlength="255" />
+                    <a-input v-model:value="formState.meta_keywords" size="large"
+                      placeholder="keyword1, keyword2, keyword3" :maxlength="255" />
                     <div class="field-hint">Comma-separated keywords related to your store</div>
                   </a-form-item>
                 </a-col>
@@ -556,7 +560,8 @@ onMounted(async () => {
                   <a-form-item label="Primary Color" name="primary_color">
                     <div class="color-picker-wrapper">
                       <input type="color" v-model="formState.primary_color" class="color-input" />
-                      <a-input v-model:value="formState.primary_color" size="large" placeholder="#1890ff" style="flex: 1" />
+                      <a-input v-model:value="formState.primary_color" size="large" placeholder="#1890ff"
+                        style="flex: 1" />
                     </div>
                   </a-form-item>
                 </a-col>
@@ -565,7 +570,8 @@ onMounted(async () => {
                   <a-form-item label="Secondary Color" name="secondary_color">
                     <div class="color-picker-wrapper">
                       <input type="color" v-model="formState.secondary_color" class="color-input" />
-                      <a-input v-model:value="formState.secondary_color" size="large" placeholder="#52c41a" style="flex: 1" />
+                      <a-input v-model:value="formState.secondary_color" size="large" placeholder="#52c41a"
+                        style="flex: 1" />
                     </div>
                   </a-form-item>
                 </a-col>
@@ -581,10 +587,12 @@ onMounted(async () => {
                         <div class="upload-hint">Recommended: 1200x400px, PNG or JPG</div>
                       </div>
                       <div v-else class="upload-preview banner-preview">
-                        <a-image :width="300" :height="100" :src="configuration.API_BASE_URL + bannerImage?.file_path" alt="banner" class="preview-image" style="object-fit: cover;" />
+                        <a-image :width="300" :height="100" :src="configuration.API_BASE_URL + bannerImage?.url"
+                          alt="banner" class="preview-image" style="object-fit: cover;" />
                         <div class="preview-actions">
                           <a-button type="primary" size="small" @click="openMediaLibrary('banner')">Change</a-button>
-                          <a-button danger size="small" @click="bannerImage = null; formState.banner_image_id = null;">Remove</a-button>
+                          <a-button danger size="small"
+                            @click="bannerImage = null; formState.banner_image_id = null;">Remove</a-button>
                         </div>
                       </div>
                     </div>
@@ -608,7 +616,8 @@ onMounted(async () => {
               <a-row :gutter="[16, 0]">
                 <a-col :span="24">
                   <a-form-item label="Custom Domain">
-                    <a-input v-model:value="customDomain" size="large" placeholder="www.yourstore.com" :disabled="!isEdit">
+                    <a-input v-model:value="customDomain" size="large" placeholder="www.yourstore.com"
+                      :disabled="!isEdit">
                       <template #prefix>
                         <GlobalOutlined />
                       </template>
