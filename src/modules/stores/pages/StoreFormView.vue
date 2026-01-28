@@ -181,7 +181,6 @@ const getCategoryStore = async () => {
 
 onMounted(async () => {
   await getCategoryStore()
-  console.log(`getCategoryStore: ${getCategoryStore}`)
   if (isEdit.value && storeId.value) {
     await fetchStore(storeId.value)
   }
@@ -587,7 +586,7 @@ onMounted(async () => {
                         <div class="upload-hint">Recommended: 1200x400px, PNG or JPG</div>
                       </div>
                       <div v-else class="upload-preview banner-preview">
-                        <a-image :width="300" :height="100" :src="configuration.API_BASE_URL + bannerImage?.url"
+                        <a-image :width="300" :height="100" :src="configuration.MEDIA_BASE_URL + bannerImage?.url"
                           alt="banner" class="preview-image" style="object-fit: cover;" />
                         <div class="preview-actions">
                           <a-button type="primary" size="small" @click="openMediaLibrary('banner')">Change</a-button>
@@ -637,7 +636,7 @@ onMounted(async () => {
 
         <!-- New sidebar with store preview and quick summary -->
         <div class="form-sidebar">
-          <a-card :bordered="false" class="sidebar-card sticky-card">
+          <a-card :bordered="false" class="sidebar-card ">
             <div class="card-header">
               <ShopOutlined class="card-icon" />
               <h3 class="card-title">Store Preview</h3>
@@ -680,7 +679,7 @@ onMounted(async () => {
             </div>
           </a-card>
 
-          <a-card :bordered="false" class="sidebar-card">
+          <a-card :bordered="false" class="sidebar-card ">
             <div class="card-header">
               <AppstoreOutlined class="card-icon" />
               <h3 class="card-title">Quick Tips</h3>

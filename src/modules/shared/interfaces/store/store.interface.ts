@@ -33,9 +33,10 @@ export interface IStore {
   updatedAt: string | null
 }
 
-export interface IStoreCategory {
+export interface BusinessCategory {
   id: number
   name: string
-  slug: string
-  description: string
+  categoryDescription: string
+  mediaFileId: number
+  medialFileUrl: string
 }

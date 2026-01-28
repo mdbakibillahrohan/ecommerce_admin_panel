@@ -34,7 +34,7 @@ export const storesApi = {
 
   // Get all stores user owns or is member of
   async getMyStores() {
-    const res = await api.get<MyStoresResponse>('/stores/my-stores')
+    const res = await api.get<MyStoresResponse>('/storess')
     return res.data
   },
 

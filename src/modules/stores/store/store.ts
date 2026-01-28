@@ -1,12 +1,13 @@
-import type { IStore, IStoreCategory } from '@/modules/shared/interfaces/store/store.interface'
+import type { BusinessCategory, IStore } from '@/modules/shared/interfaces/store/store.interface'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import api from '@/modules/shared/config/http.config'
+import type { PaginatedResponse } from '@/modules/products/interfaces'
 
 export function useStoreStore() {
   return defineStore('store', () => {
     const stores = ref<IStore[]>([])
-    const storeCategories = ref<IStoreCategory[]>([])
+    const storeCategories = ref<BusinessCategory[]>([])
     const activeStore = ref<IStore | null>(null)
 
     const fetchCurrentUserStores = async () => {
@@ -16,11 +17,8 @@ export function useStoreStore() {
     }
 
     const getStoreCategories = async () => {
-      const storeCategoryListRes = await api.get<{
-        storeCategories: IStoreCategory[]
-        total: number
-      }>('/store-category')
-      storeCategories.value = storeCategoryListRes.data.storeCategories
+      const storeCategoryListRes = await api.get<PaginatedResponse<BusinessCategory>>('/business-categories')
+      storeCategories.value = storeCategoryListRes.data.data
       return storeCategoryListRes
     }
 
