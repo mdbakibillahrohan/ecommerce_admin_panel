@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import api from '@/modules/shared/config/http.config'
 import type { PaginatedResponse } from '@/modules/products/interfaces'
+import type { IResponseDto } from '@/modules/shared/interfaces/common/IResponseDto.interface'
 
 export function useStoreStore() {
   return defineStore('store', () => {
@@ -11,7 +12,7 @@ export function useStoreStore() {
     const activeStore = ref<IStore | null>(null)
 
     const fetchCurrentUserStores = async () => {
-      const storeListRes = await api.get<{ data: IStore[] }>('/stores')
+      const storeListRes = await api.get<IResponseDto<IStore[]>>('/stores')
       stores.value = storeListRes.data.data
       return storeListRes
     }

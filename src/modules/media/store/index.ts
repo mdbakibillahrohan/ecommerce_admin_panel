@@ -27,8 +27,7 @@ export const useMediaStore = defineStore('media', () => {
     error.value = null
 
     try {
-      const response = await mediaService.getFiles({ folderId: folderId })
-      files.value = response.data
+      files.value = (await mediaService.getFiles({ folderId: folderId })).data
       currentFolder.value = folderId || null
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Failed to fetch media files'
@@ -44,7 +43,7 @@ export const useMediaStore = defineStore('media', () => {
     error.value = null
 
     try {
-      folders.value = await mediaService.getFolders(storeStore.activeStore?.id || 0)
+      folders.value = (await mediaService.getFolders(storeStore.activeStore?.id || 0)).data
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Failed to fetch folders'
       message.error(error.value)

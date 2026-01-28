@@ -3,21 +3,22 @@ import api from '@/modules/shared/config/http.config'
 // Import and re-export all interfaces
 export type { MediaFile, MediaFolder, MediaQueryParams } from '../interfaces'
 
-import type { MediaQueryParams } from '../interfaces'
+import type { MediaFile, MediaFolder, MediaQueryParams } from '../interfaces'
+import type { IResponseDto } from '@/modules/shared/interfaces/common/IResponseDto.interface'
 
 export const mediaService = {
   async getFiles(params?: MediaQueryParams) {
-    const response = await api.get('/media/files', { params })
+    const response = await api.get<IResponseDto<MediaFile[]>>('/media/files', { params })
     return response.data
   },
 
   async getFolders(storeId: number, parentId?: number) {
-    const response = await api.get('/media/folders', { params: { storeId, parentId } })
+    const response = await api.get<IResponseDto<MediaFolder[]>>('/media/folders', { params: { storeId, parentId } })
     return response.data
   },
 
   async uploadFile(formData: FormData) {
-    const response = await api.post('/media/upload', formData, {
+    const response = await api.post<IResponseDto<MediaFile>>('/media/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -26,7 +27,7 @@ export const mediaService = {
   },
 
   async createFolder(storeId: number, name: string, parentId?: number) {
-    const response = await api.post('/media/folders', { storeId, name, parentId })
+    const response = await api.post<IResponseDto<MediaFolder>>('/media/folders', { storeId, name, parentId })
     return response.data
   },
 
@@ -39,7 +40,7 @@ export const mediaService = {
   },
 
   async bulkDelete(data: { file_ids?: number[]; folder_ids?: number[] }) {
-    await api.post('/media/bulk/delete', {
+    await api.post<IResponseDto<void>>('/media/bulk/delete', {
       fileIds: data.file_ids,
       folderIds: data.folder_ids,
     })
@@ -50,7 +51,7 @@ export const mediaService = {
     folder_ids?: number[]
     target_folder_id?: number | null
   }) {
-    await api.post('/media/bulk/move', {
+    await api.post<IResponseDto<void>>('/media/bulk/move', {
       fileIds: data.file_ids,
       folderIds: data.folder_ids,
       targetFolderId: data.target_folder_id,
@@ -61,12 +62,12 @@ export const mediaService = {
     id: number,
     data: { file_name?: string; alt?: string; title?: string; folder_id?: number | null },
   ) {
-    const response = await api.patch(`/media/${id}`, data)
+    const response = await api.patch<IResponseDto<MediaFile>>(`/media/${id}`, data)
     return response.data
   },
 
   async updateFolder(id: number, data: { name: string }) {
-    const response = await api.patch(`/media/folders/${id}`, data)
+    const response = await api.patch<IResponseDto<MediaFolder>>(`/media/folders/${id}`, data)
     return response.data
   },
 }

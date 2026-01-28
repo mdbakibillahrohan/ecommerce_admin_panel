@@ -78,8 +78,8 @@ const fetchMedia = async () => {
     }
 
     const [filesData, foldersData] = await Promise.all([
-      mediaService.getFiles(params),
-      mediaService.getFolders(storeStore.activeStore?.id || 1, currentFolderId.value || undefined),
+      (await mediaService.getFiles(params)).data,
+      (await mediaService.getFolders(storeStore.activeStore?.id || 1, currentFolderId.value || undefined)).data,
     ])
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -87,7 +87,7 @@ const fetchMedia = async () => {
       currentFolderId.value ? f.parentId === Number(currentFolderId.value) : !f.parentId,
     )
 
-    files.value = filesData.data
+    files.value = filesData
   } catch (error) {
     console.error(error)
     message.error('Failed to load media')

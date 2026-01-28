@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosError } from 'axios'
+import type { IResponseDto } from '../interfaces/common/IResponseDto.interface'
 
 // API Base URL with version prefix
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001/api/v1'
@@ -41,8 +43,8 @@ api.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          const response = await api.post('/auth/refresh', { refreshToken })
-          const { accessToken, refreshToken: newRefreshToken } = response.data
+          const response = await api.post<IResponseDto<any>>('/auth/refresh', { refreshToken })
+          const { accessToken, refreshToken: newRefreshToken } = response.data.data
           localStorage.setItem('admin_token', accessToken)
           document.cookie = `refresh_token=${newRefreshToken}; path=/`
 

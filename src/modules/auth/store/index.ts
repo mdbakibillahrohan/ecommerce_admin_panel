@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import api from '@/modules/shared/config/http.config'
+import type { IResponseDto } from '@/modules/shared/interfaces/common/IResponseDto.interface'
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
@@ -33,10 +34,10 @@ export function useAuthStore() {
       error.value = null
 
       try {
-        const response = await api.post('/auth/login', credentials)
-        localStorage.setItem('admin_token', response.data.accessToken)
-        document.cookie = `refresh_token=${response.data.refreshToken}; path=/`
-        token.value = response.data.accessToken
+        const response = await api.post<IResponseDto<any>>('/auth/login', credentials)
+        localStorage.setItem('admin_token', response.data.data.accessToken)
+        document.cookie = `refresh_token=${response.data.data.refreshToken}; path=/`
+        token.value = response.data.data.accessToken
         return true
       } catch (err: any) {
         error.value = err.response?.data?.message || 'Login failed. Please try again.'
