@@ -6,20 +6,14 @@ import { SaveOutlined, ArrowLeftOutlined, ShopOutlined } from '@ant-design/icons
 
 const router = useRouter();
 
-defineProps({
-    isEdit: {
-        type: Boolean,
-        default: false
-    },
-    saving: {
-        type: Boolean,
-        default: false
-    },
-    handleSubmit: {
-        type: Function,
-        default: () => {}
-    }
-})
+defineProps<{
+  isEdit: boolean;
+  saving: boolean;
+}>();
+
+const emit = defineEmits<{
+  submit: [];
+}>();
 </script>
 <template>
 
@@ -48,7 +42,7 @@ defineProps({
             <a-button size="large" @click="router.push('/stores')">
               <span>Cancel</span>
             </a-button>
-            <a-button type="primary" size="large" :loading="saving" @click="handleSubmit">
+            <a-button type="primary" size="large" :loading="saving" @click="emit('submit')">
               <template #icon>
                 <SaveOutlined />
               </template>
@@ -58,6 +52,7 @@ defineProps({
         </div>
       </div>
 </template>
+
 
 <style scoped>
 /* Header Styles */
