@@ -5,6 +5,10 @@ import FormSkeleton from '@/modules/shared/components/skeletons/FormSkeleton.vue
 import { useRouter, useRoute } from 'vue-router'
 import { productsApi, type CreateProductDto } from '@/modules/products/api/products'
 import { categoriesApi, type Category } from '@/modules/categories/api/categories'
+import type { VariantMedia } from '@/modules/products/interfaces'
+import MainMedia from '@/modules/media/components/MainMedia.vue'
+import VariantMediaManager from '@/modules/products/components/VariantMediaManager.vue'
+import type { MediaFile } from '@/modules/media/interfaces'
 import {
   SaveOutlined,
   PlusOutlined,
@@ -24,7 +28,7 @@ import {
   ThunderboltOutlined,
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
-import type { FormInstance, UploadProps } from 'ant-design-vue'
+import type { FormInstance } from 'ant-design-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -43,9 +47,9 @@ const activeTab = ref('basic')
 const previewVisible = ref(false)
 const lastSaved = ref<Date | null>(null)
 
-// Images
-const imageList = ref<UploadProps['fileList']>([])
-const uploadedImages = ref<string[]>([])
+// Product-level media
+const productMedia = ref<VariantMedia[]>([])
+const productMediaModalOpen = ref(false)
 
 // Variants
 const variants = ref<Array<{
@@ -60,6 +64,7 @@ const variantCombinations = ref<Array<{
   sku: string
   price: number
   stock: number
+  media: VariantMedia[]
 }>>([])
 
 // Specifications
@@ -118,7 +123,7 @@ const formProgress = computed(() => {
   if (formState.base_price > 0) completed++
   if (formState.category_id) completed++
   if (formState.sku) completed++
-  if (uploadedImages.value.length > 0) completed++
+  if (productMedia.value.length > 0) completed++
   if (formState.meta_title) completed++
   if (formState.short_description) completed++
 
@@ -252,15 +257,42 @@ function generateSKU() {
   }
 }
 
-// Image upload
-const handleImageUpload: UploadProps['onChange'] = (info) => {
-  imageList.value = info.fileList
-  if (info.file.status === 'done') {
-    uploadedImages.value.push((info.file.response as { url?: string })?.url || '')
-    message.success(`${info.file.name} uploaded successfully`)
-  } else if (info.file.status === 'error') {
-    message.error(`${info.file.name} upload failed`)
+// Product-level media from MainMedia
+function handleProductFileSelected(payload: { usingFor: string; files: MediaFile[] }) {
+  for (const file of payload.files) {
+    addProductMedia(file)
   }
+  productMediaModalOpen.value = false
+}
+
+function addProductMedia(file: MediaFile) {
+  if (productMedia.value.some(m => m.mediaFileId === file.id)) return
+  const isVideo = file.mimeType.startsWith('video/')
+  productMedia.value.push({
+    id: `pm-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    mediaFileId: file.id,
+    url: file.url,
+    name: file.originalName,
+    type: isVideo ? 'video' : 'image',
+    isPrimary: productMedia.value.length === 0,
+  })
+}
+
+function removeProductMedia(id: string) {
+  const removed = productMedia.value.find(m => m.id === id)
+  const wasPrimary = removed?.isPrimary ?? false
+  productMedia.value = productMedia.value.filter(m => m.id !== id)
+  if (wasPrimary && productMedia.value.length > 0) {
+    const first = productMedia.value[0]
+    if (first) first.isPrimary = true
+  }
+}
+
+function setProductMediaPrimary(id: string) {
+  productMedia.value = productMedia.value.map(m => ({
+    ...m,
+    isPrimary: m.id === id,
+  }))
 }
 
 // Variants
@@ -278,9 +310,66 @@ function removeVariant(id: string) {
 }
 
 function generateVariantCombinations() {
-  // Generate all possible combinations of variants
-  // This is a simplified version
-  variantCombinations.value = []
+  const validVariants = variants.value.filter(v => v.name && v.values.length > 0)
+
+  if (validVariants.length === 0) {
+    variantCombinations.value = []
+    return
+  }
+
+  // Cartesian product of all variant values
+  const cartesian = (arrays: string[][]): string[][] => {
+    if (arrays.length === 0) return [[]]
+    const [first, ...rest] = arrays
+    const restCombinations = cartesian(rest)
+    const result: string[][] = []
+    for (const val of first!) {
+      for (const combo of restCombinations) {
+        result.push([val, ...combo])
+      }
+    }
+    return result
+  }
+
+  const valueArrays = validVariants.map(v => v.values)
+  const combos = cartesian(valueArrays)
+
+  // Preserve existing data for matching combinations
+  const existingMap = new Map(
+    variantCombinations.value.map(c => [c.combination, c]),
+  )
+
+  variantCombinations.value = combos.map(combo => {
+    const combinationName = combo.join(' / ')
+    const existing = existingMap.get(combinationName)
+    return {
+      id: existing?.id || `combo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      combination: combinationName,
+      sku: existing?.sku || '',
+      price: existing?.price || 0,
+      stock: existing?.stock || 0,
+      media: existing?.media || [],
+    }
+  })
+}
+
+// Auto-generate combinations when variants change
+watch(variants, () => {
+  generateVariantCombinations()
+}, { deep: true })
+
+// Auto-generate SKU for a variant combination
+function generateVariantSKU(combo: { sku: string; combination: string }) {
+  const prefix = (formState.name || 'PRD')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 3)
+  const variantPart = combo.combination
+    .split(' / ')
+    .map(v => v.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 3))
+    .join('-')
+  const suffix = Math.random().toString(36).slice(2, 5).toUpperCase()
+  combo.sku = `${prefix}-${variantPart}-${suffix}`
 }
 
 // Specifications
@@ -576,6 +665,46 @@ const savingsPercentage = computed(() => {
                         <PlusOutlined />
                         Add Variant
                       </a-button>
+
+                      <!-- Variant Combinations -->
+                      <div v-if="variantCombinations.length > 0" class="variant-combinations">
+                        <a-divider>Variant Combinations</a-divider>
+                        <div v-for="combo in variantCombinations" :key="combo.id" class="variant-combo-card">
+                          <div class="combo-header">
+                            <a-tag color="blue" class="combo-tag">{{ combo.combination }}</a-tag>
+                          </div>
+                          <div class="combo-fields">
+                            <div class="combo-field">
+                              <label>SKU</label>
+                              <a-input v-model:value="combo.sku" placeholder="SKU" size="small">
+                                <template #suffix>
+                                  <a-tooltip title="Auto-generate SKU">
+                                    <a-button type="link" size="small" @click="generateVariantSKU(combo)"
+                                      style="padding: 0; height: auto;">
+                                      <SettingOutlined />
+                                    </a-button>
+                                  </a-tooltip>
+                                </template>
+                              </a-input>
+                            </div>
+                            <div class="combo-field">
+                              <label>Price</label>
+                              <a-input-number v-model:value="combo.price" :min="0" :precision="2" placeholder="0.00"
+                                size="small" style="width: 100%">
+                                <template #addonBefore>৳</template>
+                              </a-input-number>
+                            </div>
+                            <div class="combo-field">
+                              <label>Stock</label>
+                              <a-input-number v-model:value="combo.stock" :min="0" placeholder="0" size="small"
+                                style="width: 100%" />
+                            </div>
+                          </div>
+
+                          <!-- Variant Media -->
+                          <VariantMediaManager v-model:media="combo.media" />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </a-tab-pane>
@@ -695,21 +824,67 @@ const savingsPercentage = computed(() => {
 
                   <div class="form-card">
                     <div class="card-header">
-                      <h3>Product Images</h3>
-                      <p>Upload high-quality images (recommended: 1200x1200px)</p>
+                      <div class="card-header-row">
+                        <div>
+                          <h3>Product Media</h3>
+                          <p>Upload images and videos for your product</p>
+                        </div>
+                        <div class="media-header-actions">
+                          <a-button type="primary" @click="productMediaModalOpen = true">
+                            <CloudUploadOutlined />
+                            Manage Media
+                          </a-button>
+                        </div>
+                      </div>
                     </div>
                     <div class="card-body">
-                      <a-upload v-model:file-list="imageList" list-type="picture-card" :multiple="true" :max-count="10"
-                        action="#" @change="handleImageUpload" class="product-upload">
-                        <div class="upload-trigger">
-                          <PlusOutlined />
-                          <div class="upload-text">Upload Image</div>
+                      <!-- Media Grid -->
+                      <div v-if="productMedia.length > 0" class="product-media-grid">
+                        <div v-for="item in productMedia" :key="item.id" class="product-media-item"
+                          :class="{ primary: item.isPrimary }">
+                          <div class="media-item-preview">
+                            <img v-if="item.type === 'image'" :src="item.url" :alt="item.name" />
+                            <div v-else class="media-item-video">
+                              <PictureOutlined />
+                              <span>Video</span>
+                            </div>
+                          </div>
+                          <div class="media-item-info">
+                            <span class="media-item-name">{{ item.name }}</span>
+                            <div class="media-item-actions">
+                              <a-tooltip :title="item.isPrimary ? 'Primary Image' : 'Set as Primary'">
+                                <a-button type="text" size="small" @click="setProductMediaPrimary(item.id)">
+                                  <CheckCircleOutlined v-if="item.isPrimary" style="color: oklch(0.65 0.19 164)" />
+                                  <CheckCircleOutlined v-else style="opacity: 0.3" />
+                                </a-button>
+                              </a-tooltip>
+                              <a-button type="text" size="small" danger @click="removeProductMedia(item.id)">
+                                <DeleteOutlined />
+                              </a-button>
+                            </div>
+                          </div>
+                          <div v-if="item.isPrimary" class="product-media-primary-badge">
+                            Featured
+                          </div>
                         </div>
-                      </a-upload>
+                      </div>
+
+                      <!-- Empty State -->
+                      <div v-else class="media-empty-state">
+                        <CloudUploadOutlined class="empty-icon" />
+                        <h4>No media uploaded yet</h4>
+                        <p>Upload images and videos to showcase your product</p>
+                        <div class="empty-actions">
+                          <a-button type="primary" @click="productMediaModalOpen = true">
+                            <CloudUploadOutlined />
+                            Manage Media
+                          </a-button>
+                        </div>
+                      </div>
+
                       <div class="upload-hints">
                         <p>• First image will be the featured image</p>
-                        <p>• Maximum 10 images</p>
-                        <p>• Supported formats: JPG, PNG, WebP</p>
+                        <p>• Supported formats: JPG, PNG, WebP, MP4</p>
                         <p>• Recommended size: 1200x1200px for best quality</p>
                       </div>
                     </div>
@@ -909,6 +1084,12 @@ const savingsPercentage = computed(() => {
           {{ formState.description }}
         </div>
       </div>
+    </a-modal>
+
+    <!-- Product Media Modal (MainMedia) -->
+    <a-modal v-model:open="productMediaModalOpen" title="Media Library" :width="1100" :footer="null" destroy-on-close>
+      <MainMedia :is-select-mode="true" :multiple="true" using-for="product-media"
+        @file-selected="handleProductFileSelected" />
     </a-modal>
   </div>
 </template>
@@ -1474,5 +1655,187 @@ const savingsPercentage = computed(() => {
   .form-content {
     padding: 16px;
   }
+}
+
+/* Variant Combinations */
+.variant-combinations {
+  margin-top: 16px;
+}
+
+.variant-combo-card {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+
+.variant-combo-card:hover {
+  border-color: oklch(0.65 0.19 164);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.combo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.combo-basic-fields {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Card Header Row (for media tab) */
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.media-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Product Media Grid */
+.product-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.product-media-item {
+  position: relative;
+  background: var(--background);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.product-media-item:hover {
+  border-color: oklch(0.65 0.19 164);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.product-media-item.primary {
+  border-color: oklch(0.7 0.18 85);
+  box-shadow: 0 0 0 2px oklch(0.7 0.18 85 / 0.2);
+}
+
+.media-item-preview {
+  width: 100%;
+  height: 140px;
+  overflow: hidden;
+}
+
+.media-item-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.product-media-item:hover .media-item-preview img {
+  transform: scale(1.05);
+}
+
+.media-item-video {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: linear-gradient(135deg, oklch(0.25 0.02 260), oklch(0.18 0.02 260));
+  color: white;
+  font-size: 28px;
+}
+
+.media-item-video span {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.media-item-info {
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+
+.media-item-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.media-item-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.product-media-primary-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: oklch(0.7 0.18 85);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Media Empty State */
+.media-empty-state {
+  text-align: center;
+  padding: 48px 20px;
+}
+
+.media-empty-state .empty-icon {
+  font-size: 64px;
+  background: linear-gradient(135deg, oklch(0.7 0.15 190) 0%, oklch(0.65 0.15 200) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+
+.media-empty-state h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0 0 8px 0;
+}
+
+.media-empty-state p {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  margin: 0 0 20px 0;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
 }
 </style>

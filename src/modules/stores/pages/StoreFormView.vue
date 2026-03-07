@@ -124,7 +124,8 @@ const handleRemoveFavicon = () => {
 async function fetchStore(id: number) {
   loading.value = true
   try {
-    const store = await storesApi.getById(id)
+    const storeRes = await storesApi.getById(id);
+    const store = storeRes.data;
     if (store.logo) {
       logo.value = { id: store.logo.id, originalName: store.logo.filename, fileName: store.logo.filename, mimeType: "", fileSize: 0, url: store.logo.url, folderId: 0, createdAt: "", updatedAt: "", alt: "", fileType: "", title: "", width: 0, height: 0, thumbnailUrl: "", storeId: 0, userId: 0 }
     }
@@ -235,25 +236,13 @@ onMounted(async () => {
         <div class="form-main">
           <a-form ref="formRef" :model="formState" :rules="rules" layout="vertical">
 
-            <StoreBrandingSection
-              :logo="logo"
-              :favicon="favicon"
-              @openMediaLibrary="openMediaLibrary"
-              @removeLogo="handleRemoveLogo"
-              @removeFavicon="handleRemoveFavicon"
-            />
+            <StoreBrandingSection :logo="logo" :favicon="favicon" @openMediaLibrary="openMediaLibrary"
+              @removeLogo="handleRemoveLogo" @removeFavicon="handleRemoveFavicon" />
 
-            <StoreBasicInfoSection
-              v-model:formState="formState"
-              :storeCategories="storeStore.storeCategories"
-              :isEdit="isEdit"
-              @generateSlug="generateSlug"
-            />
+            <StoreBasicInfoSection v-model:formState="formState" :storeCategories="storeStore.storeCategories"
+              :isEdit="isEdit" @generateSlug="generateSlug" />
 
-            <StoreUrlSection
-              v-model:formState="formState"
-              :customDomain="customDomain"
-            />
+            <StoreUrlSection v-model:formState="formState" :customDomain="customDomain" />
 
             <StoreContactSection v-model:formState="formState" />
 
@@ -263,28 +252,17 @@ onMounted(async () => {
 
             <StoreLocalizationSection v-model:formState="formState" />
 
-            <StoreBrandColorsSection
-              v-model:formState="formState"
-              :bannerImage="bannerImage"
-              @openMediaLibrary="openMediaLibrary"
-              @removeBanner="handleRemoveBanner"
-            />
+            <StoreBrandColorsSection v-model:formState="formState" :bannerImage="bannerImage"
+              @openMediaLibrary="openMediaLibrary" @removeBanner="handleRemoveBanner" />
 
-            <StoreDomainSection
-              v-model:customDomain="customDomain"
-              :isEdit="isEdit"
-            />
+            <StoreDomainSection v-model:customDomain="customDomain" :isEdit="isEdit" />
 
           </a-form>
         </div>
 
         <!-- New sidebar with store preview and quick summary -->
         <div class="form-sidebar">
-          <StorePreviewCard
-            :logo="logo"
-            :formState="formState"
-            :storeCategories="storeStore.storeCategories"
-          />
+          <StorePreviewCard :logo="logo" :formState="formState" :storeCategories="storeStore.storeCategories" />
           <StoreQuickTipsCard />
         </div>
       </div>

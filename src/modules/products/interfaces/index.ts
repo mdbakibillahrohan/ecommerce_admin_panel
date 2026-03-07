@@ -134,3 +134,20 @@ export interface AddProductImageDto {
   sort_order?: number
   is_primary?: boolean
 }
+
+export interface VariantMedia {
+  id: string
+  mediaFileId?: number
+  url: string
+  name: string
+  type: 'image' | 'video'
+  isPrimary: boolean
+}
+
+export interface VariantPrice {
+  id: string
+  label: string
+  price: number
+  minQuantity?: number
+  currency: string
+}

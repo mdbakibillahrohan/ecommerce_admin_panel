@@ -16,6 +16,7 @@ import type {
   StoreMember,
   AddStoreMemberDto,
 } from '../interfaces'
+import { type IResponseDto } from '@/modules/shared/interfaces/common/IResponseDto.interface'
 
 export interface StoreCategory {
   id: number
@@ -40,13 +41,13 @@ export const storesApi = {
 
   // Get user's currently active stores
   async getActiveStores() {
-    const res = await api.get<Store[]>('/stores/active')
+    const res = await api.get<IResponseDto<Store[]>>('/stores/active')
     return res.data
   },
 
   // Get all store categories
   async getCategories() {
-    const res = await api.get<StoreCategory[]>('/stores/categories')
+    const res = await api.get<IResponseDto<StoreCategory[]>>('/stores/categories')
     return res.data
   },
 
@@ -72,8 +73,8 @@ export const storesApi = {
 
   // Get single store
   async getById(id: number) {
-    const res = await api.get<Store>(`/stores/${id}`)
-    return res.data
+    const res = await api.get<IResponseDto<Store>>(`/stores/${id}`)
+    return res.data;
   },
 
   // Create new store
