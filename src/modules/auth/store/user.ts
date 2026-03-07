@@ -1,4 +1,5 @@
 import api from '@/modules/shared/config/http.config'
+import type { IResponseDto } from '@/modules/shared/interfaces/common/IResponseDto.interface'
 import type { IUser } from '@/modules/shared/interfaces/users/user.interfaces'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -10,11 +11,11 @@ export function useUserStore() {
     const error = ref<string | null>(null)
 
     async function fetchLoggedInUser() {
-      const response = await api.get<IUser>('/auth/me')
+      const response = await api.get<IResponseDto<IUser>>('/auth/me')
       // console.log('Fetched logged in user:', response.data)
-      currentUserInfo.value = response.data
+      currentUserInfo.value = response.data.data
 
-      return response.data
+      return response.data.data
     }
     return {
       currentUserInfo,

@@ -44,7 +44,7 @@ defineProps<{
         <div class="detail-item">
           <span class="detail-label">Category</span>
           <span class="detail-value">
-            {{ storeCategories.find(c => c.id === formState.store_category_id)?.name || 'Not selected' }}
+            {{ storeCategories.find(c => c.id === formState.businessCategoryId)?.name || 'Not selected' }}
           </span>
         </div>
         <div class="detail-item">

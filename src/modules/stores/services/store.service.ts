@@ -10,6 +10,7 @@ import type {
   StoreMember,
   AddStoreMemberDto,
 } from '../interfaces'
+import type { IPaginatedResponseDto } from '@/modules/shared/interfaces/common/IPaginatedResponseDto.interface'
 
 // Re-export types for convenience
 export type {
@@ -68,8 +69,8 @@ class StoreService {
   /**
    * Deactivate a store (remove from active stores list)
    */
-  async deactivateStore(storeId: number): Promise<number[]> {
-    const response = await api.post<number[]>(`${this.basePath}/${storeId}/deactivate`)
+  async toggleStoreStatus(storeId: number): Promise<number[]> {
+    const response = await api.patch<number[]>(`${this.basePath}/${storeId}/toggle-status`)
     return response.data
   }
 
@@ -78,8 +79,17 @@ class StoreService {
   /**
    * Get all stores for current user
    */
-  async getAll(): Promise<Store[]> {
-    const response = await api.get<Store[]>(this.basePath)
+
+  async getAll({search, page, pageSize, isActive, ownerId}: {search?: string, page?: number, pageSize?: number, isActive?: boolean, ownerId?: number}): Promise<IPaginatedResponseDto<Store>> {
+    const response = await api.get<IPaginatedResponseDto<Store>>(this.basePath, {
+      params: {
+        search,
+        page,
+        pageSize,
+        isActive,
+        ownerId
+      }
+    })
     return response.data
   }
 

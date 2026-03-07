@@ -30,11 +30,11 @@ const emit = defineEmits<{
 
     <a-row :gutter="[16, 16]">
       <a-col :xs="24" :lg="12">
-        <a-form-item label="Primary Color" name="primary_color">
+        <a-form-item label="Primary Color" name="primaryColor">
           <div class="color-picker-wrapper">
-            <input type="color" v-model="formState.primary_color" class="color-input" />
+            <input type="color" v-model="formState.primaryColor" class="color-input" />
             <a-input
-              v-model:value="formState.primary_color"
+              v-model:value="formState.primaryColor"
               size="large"
               placeholder="#1890ff"
               style="flex: 1"
@@ -44,11 +44,11 @@ const emit = defineEmits<{
       </a-col>
 
       <a-col :xs="24" :lg="12">
-        <a-form-item label="Secondary Color" name="secondary_color">
+        <a-form-item label="Secondary Color" name="secondaryColor">
           <div class="color-picker-wrapper">
-            <input type="color" v-model="formState.secondary_color" class="color-input" />
+            <input type="color" v-model="formState.secondaryColor" class="color-input" />
             <a-input
-              v-model:value="formState.secondary_color"
+              v-model:value="formState.secondaryColor"
               size="large"
               placeholder="#52c41a"
               style="flex: 1"
@@ -58,7 +58,7 @@ const emit = defineEmits<{
       </a-col>
 
       <a-col :span="24">
-        <a-form-item label="Banner Image" name="banner_image">
+        <a-form-item label="Banner Image" name="bannerImageId">
           <div class="image-upload-wrapper">
             <div v-if="!bannerImage" class="upload-empty" @click="emit('openMediaLibrary', 'banner')">
               <div class="upload-icon-circle">

@@ -19,8 +19,8 @@ const formState = defineModel<CreateStoreDto>('formState', { required: true });
 
     <a-row :gutter="[16, 0]">
       <a-col :xs="24" :lg="12">
-        <a-form-item label="Default Language" name="default_language">
-          <a-select v-model:value="formState.default_language" size="large">
+        <a-form-item label="Default Language" name="defaultLanguage">
+          <a-select v-model:value="formState.defaultLanguage" size="large">
             <a-select-option value="en">🇺🇸 English</a-select-option>
             <a-select-option value="bn">🇧🇩 Bengali</a-select-option>
             <a-select-option value="es">🇪🇸 Spanish</a-select-option>
@@ -32,9 +32,9 @@ const formState = defineModel<CreateStoreDto>('formState', { required: true });
       </a-col>
 
       <a-col :xs="24" :lg="12">
-        <a-form-item label="Supported Languages" name="supported_languages">
+        <a-form-item label="Supported Languages" name="supportedLanguages">
           <a-input
-            v-model:value="formState.supported_languages"
+            v-model:value="formState.supportedLanguages"
             size="large"
             placeholder="en,bn,es"
           />

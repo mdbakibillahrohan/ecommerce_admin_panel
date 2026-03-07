@@ -44,8 +44,8 @@ const emit = defineEmits<{
       </a-col>
 
       <a-col :xs="24" :lg="12">
-        <a-form-item label="Store Category" name="store_category_id">
-          <a-select v-model:value="formState.store_category_id" size="large" placeholder="Select a category">
+        <a-form-item label="Business Category" name="businessCategoryId">
+          <a-select v-model:value="formState.businessCategoryId" size="large" placeholder="Select a category">
             <a-select-option
               v-for="storeCategory in props.storeCategories"
               :key="storeCategory.id"

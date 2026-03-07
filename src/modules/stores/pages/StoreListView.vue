@@ -17,7 +17,10 @@ import {
   ClockCircleOutlined
 } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
-import { storesApi, type Store } from '../api/stores'
+import { type Store } from '../api/stores'
+import StatCardComponent from '../components/store-list/StatCardComponent.vue'
+import storeService from '../services/store.service'
+import { configuration } from '@/modules/shared/config/configruation'
 
 const router = useRouter()
 const loading = ref(false)
@@ -30,13 +33,15 @@ interface StoreWithRole extends Store {
   isActive: boolean
 }
 
-const stores = ref<StoreWithRole[]>([])
+const stores = ref<Store[]>([])
+const totalStores = ref(0);
+const storeCurrentPageNumber = ref(1);
+const storePageSize = ref(10);
 const activeStoreIds = ref<number[]>([])
 
 // Statistics
-const totalStores = computed(() => stores.value.length)
-const activeStores = computed(() => stores.value.filter(s => s.isActive).length)
-const inactiveStores = computed(() => stores.value.filter(s => !s.isActive).length)
+const activeStores = computed(() => stores.value.filter(s => s.id).length)
+const inactiveStores = computed(() => stores.value.filter(s => !s.id).length)
 const newlyJoinedStores = computed(() => {
   const oneWeekAgo = new Date()
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
@@ -51,8 +56,8 @@ const filteredStores = computed(() => {
       store.slug.toLowerCase().includes(searchText.value.toLowerCase())
 
     const matchesStatus = selectedStatus.value === 'all' ||
-      (selectedStatus.value === 'active' && store.isActive) ||
-      (selectedStatus.value === 'inactive' && !store.isActive)
+      (selectedStatus.value === 'active' && store.id) ||
+      (selectedStatus.value === 'inactive' && !store.id)
 
     return matchesSearch && matchesStatus
   })
@@ -63,7 +68,6 @@ const columns = [
   { title: 'SI', dataIndex: 'id', key: 'id', width: 60, align: 'center' as const },
   { title: 'Store Information', key: 'storeInfo', width: 250 },
   { title: 'Domain', key: 'customDomain', width: 200 },
-  { title: 'Role', key: 'role', width: 120 },
   { title: 'Status', key: 'storeStatus', width: 120 },
   { title: 'Active', key: 'isActive', width: 100, align: 'center' as const },
   { title: 'Action', key: 'action', width: 150, align: 'center' as const, fixed: 'right' as const }
@@ -73,9 +77,15 @@ const columns = [
 async function fetchStores() {
   loading.value = true
   try {
-    const response = await storesApi.getMyStores()
-    stores.value = response.stores
-    activeStoreIds.value = response.activeStoreIds
+    const response = await storeService.getAll({
+      search: searchText.value,
+      page: storeCurrentPageNumber.value,
+      pageSize: storePageSize.value,
+      isActive: selectedStatus.value === 'all' ? undefined : selectedStatus.value === 'active',
+    });
+    stores.value = response.data;
+    totalStores.value = response.total;
+    activeStoreIds.value = response.data.map(s => s.id);
   } catch (error) {
     message.error('Failed to load stores')
     console.error(error)
@@ -84,18 +94,24 @@ async function fetchStores() {
   }
 }
 
+async function handlePageChange(page: number, pageSize: number) {
+  storeCurrentPageNumber.value = page;
+  storePageSize.value = pageSize;
+  fetchStores();
+}
+
+async function handlePageSizeChange(page: number, pageSize: number) {
+  storeCurrentPageNumber.value = page;
+  storePageSize.value = pageSize;
+  fetchStores();
+}
+
 // Toggle store activation
 async function toggleActive(store: StoreWithRole) {
   try {
-    if (store.isActive) {
-      await storesApi.deactivateStore(store.id)
-      store.isActive = false
-      message.success(`${store.name} deactivated`)
-    } else {
-      await storesApi.activateStore(store.id)
-      store.isActive = true
-      message.success(`${store.name} activated`)
-    }
+    await storeService.toggleStoreStatus(store.id)
+    store.isActive = !store.isActive
+    message.success(`${store.name} ${store.isActive ? 'activated' : 'deactivated'}`)
   } catch (err: unknown) {
     const error = err as { response?: { data?: { message?: string } } }
     message.error(error.response?.data?.message || 'Failed to update store')
@@ -170,45 +186,13 @@ onMounted(() => {
         <StatCardSkeleton v-for="i in 4" :key="i" />
       </template>
       <template v-else>
-        <div class="stat-card total">
-          <div class="stat-icon">
-            <shopping-outlined />
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ totalStores }}</div>
-            <div class="stat-label">Total stores</div>
-          </div>
-        </div>
-
-        <div class="stat-card active">
-          <div class="stat-icon">
-            <check-circle-outlined />
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ activeStores }}</div>
-            <div class="stat-label">Active stores</div>
-          </div>
-        </div>
-
-        <div class="stat-card inactive">
-          <div class="stat-icon">
-            <close-circle-outlined />
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ inactiveStores }}</div>
-            <div class="stat-label">Inactive stores</div>
-          </div>
-        </div>
-
-        <div class="stat-card new">
-          <div class="stat-icon">
-            <clock-circle-outlined />
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ newlyJoinedStores }}</div>
-            <div class="stat-label">Newly joined stores</div>
-          </div>
-        </div>
+        <StatCardComponent type="total" :totalStores="totalStores" :icon="ShoppingOutlined" label="Total stores" />
+        <StatCardComponent type="active" :totalStores="activeStores" :icon="CheckCircleOutlined"
+          label="Active stores" />
+        <StatCardComponent type="inactive" :totalStores="inactiveStores" :icon="CloseCircleOutlined"
+          label="Inactive stores" />
+        <StatCardComponent type="new" :totalStores="newlyJoinedStores" :icon="ClockCircleOutlined"
+          label="Newly joined stores" />
       </template>
     </div>
 
@@ -241,15 +225,15 @@ onMounted(() => {
       <!-- Table -->
       <div class="table-container">
         <TableSkeleton v-if="loading" :rows="5" :columns="6" />
-        <a-table v-else :columns="columns" :data-source="filteredStores"
-          :pagination="{ pageSize: 10, showSizeChanger: true, showTotal: (total: number) => `Total ${total} stores` }"
-          :loading="loading" row-key="id" :scroll="{ x: 1000 }">
+        <a-table v-else :columns="columns" :data-source="filteredStores" :loading="loading" row-key="id"
+          :scroll="{ x: 1000 }">
           <template #bodyCell="{ column, record }">
             <!-- Store Information -->
             <template v-if="column.key === 'storeInfo'">
               <div class="store-info">
                 <div class="store-logo">
-                  <img v-if="record.logo_url" :src="record.logo_url" alt="logo" class="logo-img" />
+                  <img v-if="record.logoUrl" :src="configuration.MEDIA_BASE_URL + record.logoUrl" alt="logo"
+                    class="logo-img" />
                   <span v-else>{{ record.name?.charAt(0) || '🏪' }}</span>
                 </div>
                 <div class="store-details">
@@ -269,13 +253,6 @@ onMounted(() => {
                   {{ record.slug }}.platform.com
                 </span>
               </div>
-            </template>
-
-            <!-- Role -->
-            <template v-if="column.key === 'role'">
-              <a-tag :color="record.role === 'OWNER' ? 'gold' : 'blue'">
-                {{ record.role?.replace('_', ' ') || 'Member' }}
-              </a-tag>
             </template>
 
             <!-- Status -->
@@ -313,6 +290,11 @@ onMounted(() => {
                 </a-tooltip>
               </div>
             </template>
+          </template>
+          <template #pagination>
+            <a-pagination v-model:current="storeCurrentPageNumber" v-model:pageSize="storePageSize" :total="totalStores"
+              :show-total="(total: number) => `Total ${total} stores`" :show-quick-jumper="true"
+              @change="handlePageChange" @showSizeChange="handlePageSizeChange" />
           </template>
         </a-table>
       </div>
@@ -412,107 +394,6 @@ onMounted(() => {
   margin-bottom: 24px;
 }
 
-.stat-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, oklch(0.65 0.2 190) 0%, oklch(0.6 0.18 195) 100%);
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  border-color: oklch(0.65 0.2 190);
-}
-
-.stat-card.total::before {
-  background: linear-gradient(90deg, oklch(0.65 0.2 230) 0%, oklch(0.65 0.2 250) 100%);
-}
-
-.stat-card.active::before {
-  background: linear-gradient(90deg, oklch(0.7 0.18 145) 0%, oklch(0.72 0.16 165) 100%);
-}
-
-.stat-card.inactive::before {
-  background: linear-gradient(90deg, oklch(0.7 0.15 45) 0%, oklch(0.72 0.13 60) 100%);
-}
-
-.stat-card.new::before {
-  background: linear-gradient(90deg, oklch(0.65 0.2 190) 0%, oklch(0.6 0.18 195) 100%);
-}
-
-.stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  background: var(--muted);
-  color: var(--muted-foreground);
-  transition: all 0.3s ease;
-}
-
-.stat-card.total .stat-icon {
-  background: oklch(0.65 0.2 230 / 0.15);
-  color: oklch(0.65 0.2 230);
-}
-
-.stat-card.active .stat-icon {
-  background: oklch(0.7 0.18 145 / 0.15);
-  color: oklch(0.7 0.18 145);
-}
-
-.stat-card.inactive .stat-icon {
-  background: oklch(0.7 0.15 45 / 0.15);
-  color: oklch(0.7 0.15 45);
-}
-
-.stat-card.new .stat-icon {
-  background: oklch(0.65 0.2 190 / 0.15);
-  color: oklch(0.65 0.2 190);
-}
-
-.stat-card:hover .stat-icon {
-  transform: scale(1.1) rotate(5deg);
-}
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--foreground);
-  line-height: 1;
-  margin-bottom: 8px;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: var(--muted-foreground);
-  font-weight: 500;
-}
-
 /* Financial Summary */
 .financial-summary {
   background: var(--card);
@@ -602,7 +483,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-wrap: wrap;
 }
 
 .zone-filter {

@@ -19,9 +19,9 @@ const formState = defineModel<CreateStoreDto>('formState', { required: true });
 
     <a-row :gutter="[16, 0]">
       <a-col :span="24">
-        <a-form-item label="Meta Title" name="meta_title">
+        <a-form-item label="Meta Title" name="metaTitle">
           <a-input
-            v-model:value="formState.meta_title"
+            v-model:value="formState.metaTitle"
             size="large"
             placeholder="Store title for search engines"
             :maxlength="100"
@@ -32,9 +32,9 @@ const formState = defineModel<CreateStoreDto>('formState', { required: true });
       </a-col>
 
       <a-col :span="24">
-        <a-form-item label="Meta Description" name="meta_description">
+        <a-form-item label="Meta Description" name="metaDescription">
           <a-textarea
-            v-model:value="formState.meta_description"
+            v-model:value="formState.metaDescription"
             :rows="3"
             placeholder="Brief description of your store for search engine results"
             :maxlength="500"
@@ -45,9 +45,9 @@ const formState = defineModel<CreateStoreDto>('formState', { required: true });
       </a-col>
 
       <a-col :span="24">
-        <a-form-item label="Meta Keywords" name="meta_keywords">
+        <a-form-item label="Meta Keywords" name="metaKeywords">
           <a-input
-            v-model:value="formState.meta_keywords"
+            v-model:value="formState.metaKeywords"
             size="large"
             placeholder="keyword1, keyword2, keyword3"
             :maxlength="255"

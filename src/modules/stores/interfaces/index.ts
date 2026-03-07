@@ -70,8 +70,9 @@ export interface StoreFavicon {
 export interface CreateStoreDto {
   name: string
   slug: string
-  store_category_id: number
   description?: string
+  domain?: string
+  logoId?: number | null
   email?: string
   phone?: string
   address?: string
@@ -79,26 +80,17 @@ export interface CreateStoreDto {
   country?: string
   currency?: string
   timezone?: string
-  custom_domain?: string
-  logo_id?: number | null
+  metaTitle?: string
+  metaDescription?: string
+  metaKeywords?: string
+  defaultLanguage?: string
+  supportedLanguages?: string
+  faviconId?: number | null
+  primaryColor?: string
+  secondaryColor?: string
+  bannerImageId?: number | null
   tagline?: string
-
-  // SEO
-  meta_title?: string
-  meta_description?: string
-  meta_keywords?: string
-
-  // Localization
-  default_language?: string
-  supported_languages?: string
-
-  // Extended Branding
-  favicon_id?: number | null
-  favicon_url?: string
-  primary_color?: string
-  secondary_color?: string
-  banner_image_id?: number | null
-  banner_image_url?: string
+  businessCategoryId?: number
 }
 
 export interface UpdateStoreDto extends Partial<CreateStoreDto> {

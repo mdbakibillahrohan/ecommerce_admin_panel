@@ -48,14 +48,13 @@ const handleUseSelected = (files: { usingFor: string, files: MediaFile[] }) => {
   console.log(files)
   if (files.usingFor === 'logo') {
     logo.value = files.files[0]
-    formState.value.logo_id = files.files[0]?.id
+    formState.value.logoId = files.files[0]?.id
   } else if (files.usingFor === 'favicon') {
     favicon.value = files.files[0]
-    formState.value.favicon_id = files.files[0]?.id
+    formState.value.faviconId = files.files[0]?.id
   } else if (files.usingFor === 'banner') {
     bannerImage.value = files.files[0]
-    formState.value.banner_image_id = files.files[0]?.id
-    formState.value.banner_image_url = files.files[0]?.url
+    formState.value.bannerImageId = files.files[0]?.id
   }
   mediaModalVisible.value = false;
 }
@@ -63,28 +62,29 @@ const handleUseSelected = (files: { usingFor: string, files: MediaFile[] }) => {
 const formState = ref<CreateStoreDto>({
   name: '',
   slug: '',
-  store_category_id: 1,
+  businessCategoryId: 1,
   description: '',
   tagline: '',
   email: '',
   phone: '',
   address: '',
+  city: '',
+  country: '',
   currency: 'BDT',
   timezone: 'Asia/Dhaka',
-  logo_id: 0,
-  favicon_id: 0,
+  logoId: 0,
+  faviconId: 0,
   // SEO
-  meta_title: '',
-  meta_description: '',
-  meta_keywords: '',
+  metaTitle: '',
+  metaDescription: '',
+  metaKeywords: '',
   // Localization
-  default_language: 'en',
-  supported_languages: '',
-  // Extended Branding
-  primary_color: '#1890ff',
-  secondary_color: '#52c41a',
-  banner_image_id: null,
-  banner_image_url: ''
+  defaultLanguage: 'en',
+  supportedLanguages: '',
+  // Branding
+  primaryColor: '#1890ff',
+  secondaryColor: '#52c41a',
+  bannerImageId: null,
 })
 
 const rules = {
@@ -93,12 +93,12 @@ const rules = {
     { required: true, message: 'Slug is required', trigger: 'blur' },
     { pattern: /^[a-z0-9-]+$/, message: 'Slug must be lowercase alphanumeric with hyphens', trigger: 'blur' }
   ],
-  store_category_id: [{ required: true, message: 'Category is required' }],
+  businessCategoryId: [{ required: true, message: 'Category is required' }],
   email: [{ type: 'email', message: 'Please enter a valid email', trigger: 'blur' }],
-  meta_title: [{ max: 100, message: 'Meta title must be less than 100 characters', trigger: 'blur' }],
-  meta_description: [{ max: 500, message: 'Meta description must be less than 500 characters', trigger: 'blur' }],
-  meta_keywords: [{ max: 255, message: 'Meta keywords must be less than 255 characters', trigger: 'blur' }],
-  default_language: [{ required: true, message: 'Default language is required' }],
+  metaTitle: [{ max: 100, message: 'Meta title must be less than 100 characters', trigger: 'blur' }],
+  metaDescription: [{ max: 500, message: 'Meta description must be less than 500 characters', trigger: 'blur' }],
+  metaKeywords: [{ max: 255, message: 'Meta keywords must be less than 255 characters', trigger: 'blur' }],
+  defaultLanguage: [{ required: true, message: 'Default language is required' }],
 }
 
 const openMediaLibrary = (usingFor: string) => {
@@ -108,17 +108,17 @@ const openMediaLibrary = (usingFor: string) => {
 
 const handleRemoveBanner = () => {
   bannerImage.value = null;
-  formState.value.banner_image_id = null;
+  formState.value.bannerImageId = null;
 }
 
 const handleRemoveLogo = () => {
   logo.value = null;
-  formState.value.logo_id = 0;
+  formState.value.logoId = 0;
 }
 
 const handleRemoveFavicon = () => {
   favicon.value = null;
-  formState.value.favicon_id = 0;
+  formState.value.faviconId = 0;
 }
 
 async function fetchStore(id: number) {
@@ -134,28 +134,30 @@ async function fetchStore(id: number) {
     formState.value = {
       name: store.name,
       slug: store.slug,
-      store_category_id: store.store_category_id,
+      businessCategoryId: store.store_category_id,
       description: store.description || '',
       tagline: store.tagline || '',
       email: store.email || '',
       phone: store.phone || '',
       address: store.address || '',
+      city: store.city || '',
+      country: store.country || '',
       currency: store.currency || 'BDT',
       timezone: store.timezone || 'Asia/Dhaka',
-      logo_id: store.logo_id || 0,
-      favicon_id: store.favicon_id || 0,
+      logoId: store.logo_id || 0,
+      faviconId: store.favicon_id || 0,
       // SEO
-      meta_title: store.meta_title || '',
-      meta_description: store.meta_description || '',
-      meta_keywords: store.meta_keywords || '',
+      metaTitle: store.meta_title || '',
+      metaDescription: store.meta_description || '',
+      metaKeywords: store.meta_keywords || '',
       // Localization
-      default_language: store.default_language || 'en',
-      supported_languages: store.supported_languages || '',
-      // Extended Branding
-      primary_color: store.primary_color || '#1890ff',
-      secondary_color: store.secondary_color || '#52c41a',
-      banner_image_id: store.banner_image_id || null,
-      banner_image_url: store.banner_image_url || ''
+      defaultLanguage: store.default_language || 'en',
+      supportedLanguages: store.supported_languages || '',
+      // Branding
+      primaryColor: store.primary_color || '#1890ff',
+      secondaryColor: store.secondary_color || '#52c41a',
+      bannerImageId: store.banner_image_id || null,
+      domain: store.custom_domain || ''
     }
     // Set custom domain if exists
     if (store.custom_domain) {
